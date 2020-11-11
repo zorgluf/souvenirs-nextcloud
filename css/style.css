@@ -1,0 +1,12 @@
+
+.v-helper {
+	vertical-align: middle;
+    display: inline-block;
+	height: 100%;
+}
+
+#album-parent-frame {
+	position: relative;
+	width: 100%;
+}
+

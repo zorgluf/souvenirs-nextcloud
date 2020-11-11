@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg5495"
+   sodipodi:docname="spiral-notebook.svg"
+   viewBox="0 0 64.704109 37.213501"
+   version="1.1"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   width="64.704109"
+   height="37.213501">
+  <defs
+     id="defs947" />
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     inkscape:window-y="27"
+     pagecolor="#ffffff"
+     inkscape:window-height="1385"
+     inkscape:window-maximized="1"
+     inkscape:zoom="1.354386"
+     inkscape:window-x="67"
+     showgrid="false"
+     borderopacity="1.0"
+     inkscape:current-layer="layer1"
+     inkscape:cx="200.38188"
+     inkscape:cy="-348.15005"
+     inkscape:window-width="3373"
+     inkscape:pageopacity="0.0"
+     inkscape:document-units="px"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     transform="translate(-0.20125,-228.05825)">
+    <path
+       inkscape:tile-y0="286.73838"
+       inkscape:tile-cy="297.7325"
+       inkscape:tile-cx="-186.24835"
+       inkscape:tile-h="21.988252"
+       inkscape:connector-curvature="0"
+       inkscape:tile-w="40.20004"
+       d="m 32.23,230.8 c -16.179,0 -29.287,7.1041 -29.287,15.865 0,8.7607 13.108,15.865 29.287,15.865 14.178,0 26.014,-5.4532 28.723,-12.698 h -6.0252 c -2.602,5.4757 -11.777,9.5319 -22.698,9.5319 -12.943,0 -23.427,-5.6898 -23.427,-12.698 0,-7.0086 10.484,-12.682 23.427,-12.682 0.09293,0 0.18241,-5.2e-4 0.27513,0 v -3.1827 c -0.0925,-4.7e-4 -0.18236,0 -0.27513,0 z"
+       style="fill:#000000;stroke:#000000;stroke-width:5.4835;stroke-linecap:round"
+       inkscape:tile-x0="-206.34837"
+       id="path6559" />
+  </g>
+  <metadata
+     id="metadata944">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>spiral notebook 2</dc:title>
+        <dc:date>2010-09-18T00:15:35</dc:date>
+        <dc:description>A spiral notebook</dc:description>
+        <dc:source>https://openclipart.org/detail/85273/spiral-notebook-2-by-snifty</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>snifty</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>notebook</rdf:li>
+            <rdf:li>office</rdf:li>
+            <rdf:li>writing</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

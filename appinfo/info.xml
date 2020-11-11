@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>souvenir</id>
+    <name>Souvenir</name>
+    <summary>Display albums in nextcloud web interface</summary>
+    <description><![CDATA[Display albums in nextcloud web interface]]></description>
+    <version>0.2.6</version>
+    <licence>agpl</licence>
+    <author mail="zorgluf@gmail.com" >Zorgluf</author>
+    <namespace>Souvenir</namespace>
+    <category>multimedia</category>
+    <bugs>http://none.fr</bugs>
+    <dependencies>
+        <nextcloud min-version="14"/>
+    </dependencies>
+    <navigations>
+        <navigation>
+            <name>Souvenir</name>
+            <route>souvenir.page.index</route>
+        </navigation>
+    </navigations>
+</info>
