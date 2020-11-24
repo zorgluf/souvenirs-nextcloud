@@ -27,7 +27,7 @@ class Element {
     public function toArray() {
         $elementArray = $this->contentArray;
         foreach ($elementArray as $key => $value) {
-			if (is_null($value)) {
+			if ((is_null($value)) && (substr($key,0,1) != "_")) {
 				unset($elementArray[$key]);
 			}
         }

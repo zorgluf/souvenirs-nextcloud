@@ -5,9 +5,9 @@
     <name>Souvenir</name>
     <summary>Display albums in nextcloud web interface</summary>
     <description><![CDATA[Display albums in nextcloud web interface]]></description>
-    <version>0.2.6</version>
+    <version>0.3.0</version>
     <licence>agpl</licence>
-    <author mail="zorgluf@gmail.com" >Zorgluf</author>
+    <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenir</namespace>
     <category>multimedia</category>
     <bugs>http://none.fr</bugs>

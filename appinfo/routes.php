@@ -14,6 +14,7 @@ return [
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
 
+    //API v1
     ['name' => 'api#list_albums', 'url' => '/api/album', 'verb' => 'GET' ],
     ['name' => 'api#create_album', 'url' => '/api/album/{id}', 'verb' => 'PUT' ],
     ['name' => 'api#get_album', 'url' => '/api/album/{id}', 'verb' => 'GET' ],
@@ -31,7 +32,29 @@ return [
     ['name' => 'api#get_share_by_user', 'url' => '/api/share', 'verb' => 'GET'],
     ['name' => 'api#create_share', 'url' => '/api/share', 'verb' => 'POST','requirements' => array('albumId' => '.+')],
     ['name' => 'api#delete_share', 'url' => '/api/share/{token}', 'verb' => 'DELETE'],
+
+    //API v2
+    ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET' ],
+    ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
+    ['name' => 'api2#get_album_full', 'url' => '/apiv2/album/{id}/full', 'verb' => 'GET' ],
+    ['name' => 'api2#create_album', 'url' => '/apiv2/album/{id}', 'verb' => 'PUT' ],
+    ['name' => 'api2#post_album', 'url' => '/apiv2/album/{id}', 'verb' => 'POST' ],
+
+    ['name' => 'api2#asset_exists_in_album', 'url' => '/apiv2/album/{id}/assetprobe/{asset_path}', 'verb' => 'GET', 'requirements' => array('asset_path' => '.+')],
+    ['name' => 'api2#clean_assets', 'url' => '/apiv2/album/{id}/clean', 'verb' => 'GET' ],
+
+    ['name' => 'api2#create_page', 'url' => '/apiv2/album/{album_id}/page/{page_pos}', 'verb' => 'PUT' ],
+    ['name' => 'api2#post_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}', 'verb' => 'POST' ],
+    ['name' => 'api2#delete_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}', 'verb' => 'DELETE' ],
+    ['name' => 'api2#move_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}/pos/{page_pos}', 'verb' => 'POST' ],
+    
+    ['name' => 'api2#create_share', 'url' => '/apiv2/share', 'verb' => 'POST','requirements' => array('albumId' => '.+')],
+    ['name' => 'api2#delete_share', 'url' => '/apiv2/share/{token}', 'verb' => 'DELETE'],
+    ['name' => 'api2#get_share_by_user', 'url' => '/apiv2/share', 'verb' => 'GET'],
+
+    //public API
     ['name' => 'public#show', 'url' => '/public/{token}', 'verb' => 'GET'],
     ['name' => 'preview#get_public_preview', 'url' => '/public/{token}/preview', 'verb' => 'GET','requirements' => array('file' => '.+')],
+    
     ]
 ];
