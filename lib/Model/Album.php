@@ -46,6 +46,15 @@ class Album {
         }
     }
 
+    public function delete() {
+        try {
+            $this->albumNode->delete();
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
+    }
+
     public function setContent($name,$value) {
         $this->contentArray[$name] = $value;
     }

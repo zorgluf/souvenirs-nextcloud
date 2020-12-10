@@ -56,7 +56,6 @@ class PageController extends Controller {
 							}
 							setlocale(LC_TIME,$this->il10n->getLocaleCode().".UTF8");
 							$albumDate = $albumJson->date;
-							//$albumDate = strftime("%e %B %G",date_create_from_format("YmdHis",$albumJson->date)->getTimestamp());
 							$albumArray[] = array("name" => $albumJson->name, "path" => ALBUM_DIR."/".basename($node->getPath()), 
 								"date" => $albumDate, "image" => $albumImage, "id" => $albumJson->id);
 						}

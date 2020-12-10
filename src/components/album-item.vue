@@ -3,8 +3,8 @@
     <div class="s-box"> 
         <div class="s-spiral"></div>
         <div class="s-square">
-        <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath+"&width=256&height=256"'
-        />
+            <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath+"&width=256&height=256"'
+            />
         </div>
         <div class="s-oneline s-title">
             {{name}}
@@ -12,11 +12,15 @@
         <div class="s-subtitle s-oneline">
             {{dateString}}
         </div>
-        <div class="bottom right icon icon-shared" v-bind:class='(isShared) ? "icon-activated" : ""'
-        v-on:click="toggleShare">
-        <input type="text"  style="display: none" v-bind:value="shareUrl"/>
-        <textarea style="visibility: hidden" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
+        <div class="right s-action-menu">
+            <div class="icon icon-share" v-bind:class='(isShared) ? "icon-activated" : ""'
+            v-on:click="toggleShare">
+            </div>
+            <div class="icon icon-activated icon-delete" v-on:click="deleteAlbum">
+            </div>
         </div>
+        <input type="text"  style="display: none" v-bind:value="shareUrl"/>
+        <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
     </div>
 </a>
 </template>
@@ -49,6 +53,17 @@ export default {
         }
     },
     methods: {
+        'deleteAlbum': function() {
+            $.ajax({
+                    url: "apiv2/album/"+this.albumId,
+                    type: "DELETE",
+                    success: data => {
+                        //TODO
+                        this.$emit('refresh-albums');
+                    }
+                });
+            event.preventDefault();
+        },
         'detectAlbumInShare': function() {
             return (this.shares.find(share => {
                     return share['albumId'] == this.albumId
@@ -162,31 +177,27 @@ var copyToClipboard = function(texte) {
 	left: 0px;
 }
 
+.s-action-menu {
+    display: inline;
+}
+
 .icon:hover {
     opacity: 0.7;
 }
 
 .icon {
-    size : 16px 16px;
+    size : 20px 20px;
     background-size: 16px 16px;
+    margin: 5px;
     opacity: 0.3;
-}
-
-.icon-shared {
-    background-image: var(--icon-share-000);
+    float: left;
 }
 
 .icon-activated {
     opacity: 1;
 }
 
-.bottom {
-    position: absolute;
-    bottom: 5px;
-}
-
 .right {
-    position: absolute;
-    right: 5px;
+    float: right;
 }
 </style>

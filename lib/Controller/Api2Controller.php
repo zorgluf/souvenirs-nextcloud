@@ -125,6 +125,24 @@ class Api2Controller extends Controller {
 	}
 
 	/**
+	 * delete album
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function deleteAlbum($id) {
+		$albumList = AlbumList::getInstance($this->userFolder);
+		$album = $albumList->getAlbum($id);
+		if (is_null($album)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
+		if ($album->delete()) {
+			return new JSONResponse("OK");
+		} else {
+			return new JSONResponse(array(),Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
 	 * get asset status infos
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
