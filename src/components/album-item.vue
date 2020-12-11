@@ -1,31 +1,43 @@
 <template>
-<a v-bind:href='"show?apath="+encodeURIComponent(aPath)' style="display:inline-block;">
-    <div class="s-box"> 
-        <div class="s-spiral"></div>
+
+<div class="s-box"> 
+    <div class="s-spiral"></div>
+    <a v-bind:href='"show?apath="+encodeURIComponent(aPath)'>
         <div class="s-square">
             <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath+"&width=256&height=256"'
             />
         </div>
-        <div class="s-oneline s-title">
-            {{name}}
-        </div>
-        <div class="s-subtitle s-oneline">
-            {{dateString}}
-        </div>
-        <div class="right s-action-menu">
-            <div class="icon icon-share" v-bind:class='(isShared) ? "icon-activated" : ""'
-            v-on:click="toggleShare">
-            </div>
-            <div class="icon icon-activated icon-delete" v-on:click="deleteAlbum">
-            </div>
-        </div>
-        <input type="text"  style="display: none" v-bind:value="shareUrl"/>
-        <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
+    </a>
+    <div class="s-oneline s-title">
+        {{name}}
     </div>
-</a>
+    <div class="s-subtitle s-oneline">
+        {{dateString}}
+    </div>
+    <div class="right s-action-menu">
+        <div class="icon icon-share" v-bind:class='(isShared) ? "icon-activated" : ""'
+        v-on:click="toggleShare">
+        </div>
+        <Popover style="float: left">
+            <div slot="trigger" class="icon icon-activated icon-delete">
+            </div>
+            <template>
+                Do you really want to delete this album ?
+                <button v-on:click="deleteAlbum">
+                    Confirm
+                </button>
+            </template>
+        </Popover>
+    </div>
+    <input type="text"  style="display: none" v-bind:value="shareUrl"/>
+    <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
+</div>
+
 </template>
 
 <script>
+
+import Popover from '@nextcloud/vue/dist/Components/Popover'
 
 export default {
     props: {
@@ -35,6 +47,9 @@ export default {
         'name': String,
         'date': String,
         'albumId': String,
+    },
+    components: {
+        Popover
     },
     data: function() {
         return {
@@ -186,8 +201,6 @@ var copyToClipboard = function(texte) {
 }
 
 .icon {
-    size : 20px 20px;
-    background-size: 16px 16px;
     margin: 5px;
     opacity: 0.3;
     float: left;
