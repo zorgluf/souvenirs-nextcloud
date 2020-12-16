@@ -4,6 +4,10 @@
         v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' v-on:refresh-shares="refreshShares"
         v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
         </album-item>
+        <div v-if="albumList.length == 0" class="center">
+            <div class="icon-folder"></div>
+            <h2>No album</h2>
+        </div>
         <div id="snackbar">{{snackbarText}}
         </div>
     </div>
@@ -72,6 +76,12 @@ export default {
 #snackbar.show {
   visibility: visible;
   animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+.center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
 }
 
 @keyframes fadein {
