@@ -1,7 +1,9 @@
 <template>
     <div v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
-		<img v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : 'fill' ]" v-if="sImage != '' && sClass == 'ImageElement'" v-bind:src="sImageSrc" v-on:click="openImgFull" />
+		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : 'fill' ]"
+        v-if="sImage != '' && sClass == 'ImageElement'" 
+        v-bind:src="sImageSrc" v-on:click="openImgFull" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : 'fill' ]" v-if="sImage != '' && sClass == 'PaintElement'" v-bind:src="sImageSrc"/>
     </div>
 </template>
@@ -10,6 +12,7 @@
 
 const IMG_FILL = 0;
 const IMG_CENTERCROP = 1;
+const IMG_ZOOMOFFSET = 2;
 
 export default {
     props: {
@@ -21,6 +24,9 @@ export default {
       "sText": String,
       "sImage": String,
       "sTransformType": Number,
+      "sZoom": Number,
+      "sOffsetX": Number,
+      "sOffsetY": Number,
       "sClass": String,
       "albumPath": String,
       "preload": Boolean,
@@ -49,14 +55,29 @@ export default {
     computed: {
         'sWidth': function() {
             var ew = $("#album-parent-frame").width();
+            if (this.sTransformType == IMG_ZOOMOFFSET) {
+                ew = ew*this.sZoom/100;
+            }
             return Math.floor(ew*(this.sRight-this.sLeft)/100);
         },
         'sHeight': function() {
             var eh = $("#album-parent-frame").height();
+            if (this.sTransformType == IMG_ZOOMOFFSET) {
+                eh = eh*this.sZoom/100;
+            }
             return Math.floor(eh*(this.sBottom-this.sTop)/100);
         },
         'isImgCenterCrop': function() {
-            return (this.sTransformType == IMG_CENTERCROP);
+            return (this.sTransformType == IMG_CENTERCROP) || (this.sTransformType == IMG_ZOOMOFFSET);
+        },
+        'imageStyle': function() {
+            if ((this.sClass == 'ImageElement') && (this.sTransformType == IMG_ZOOMOFFSET)) {
+                return {
+                    "transform": 'translate('+this.sOffsetX+'%,'+this.sOffsetY+'%) scale('+this.sZoom/100+','+this.sZoom/100+')',
+                    "transform-origin": (-this.sOffsetX)+"% "+(-this.sOffsetY)+"%",
+                };
+            }
+            return {};
         },
     },
     methods: {
@@ -100,6 +121,7 @@ export default {
 	align-items: center;
 	justify-content: center;
     pointer-events: none;
+    overflow: hidden;
 }
 
 .s-element-text {

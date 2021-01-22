@@ -3,6 +3,7 @@
 	<selement v-for="(element, index) in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
+        v-bind:s-offset-x="element.offsetX" v-bind:s-offset-y="element.offsetY" v-bind:s-zoom="element.zoom"
 				v-bind:s-image="('image' in element) ? element.image.replace(/.*\//, '') : ''" v-bind:key="element.id"
                 v-bind:album-path="albumPath" v-bind:token="token"
                 v-bind:preload="pagePreload" v-bind:s-transform-type="element.transformType"
