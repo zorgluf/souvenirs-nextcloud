@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>souvenir</id>
-    <name>Souvenir</name>
+    <id>souvenirs</id>
+    <name>Souvenirs</name>
     <summary>Display albums in nextcloud web interface</summary>
     <description><![CDATA[Display albums in nextcloud web interface]]></description>
     <version>0.5.0</version>
