@@ -1,5 +1,5 @@
 <?php
-script('souvenir', 'vue-index-list');
+script('souvenirs', 'vue-index-list');
 emit_script_tag('','var albumList = '.json_encode($_['albumArray']));
 ?>
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\Souvenir\Migration;
+namespace OCA\Souvenirs\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;

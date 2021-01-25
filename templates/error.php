@@ -1,6 +1,6 @@
 <?php
-script('souvenir', 'script');
-style('souvenir', 'style');
+script('souvenirs', 'script');
+style('souvenirs', 'style');
 ?>
 
 <div id="app">

@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Controller;
+namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -61,16 +61,16 @@ class PageController extends Controller {
 						}
 					}
 				}
-				return new TemplateResponse('souvenir','index',array("albumArray" => $albumArray));
+				return new TemplateResponse('souvenirs','index',array("albumArray" => $albumArray));
 			} else {
-				return new TemplateResponse('souvenir','error',array('msg' => 'Wrong album path {ALBUM_DIR}'));
+				return new TemplateResponse('souvenirs','error',array('msg' => 'Wrong album path {ALBUM_DIR}'));
 			}
 		} catch(\OCP\Files\NotFoundException $e) {
 			$this->userFolder->newFolder(ALBUM_DIR);
 			if ($this->userFolder->get(ALBUM_DIR) instanceof \OCP\Files\Folder) {
-				return new TemplateResponse('souvenir','index',array("albumArray" => null));
+				return new TemplateResponse('souvenirs','index',array("albumArray" => null));
 			} else {
-				return new TemplateResponse('souvenir','error',array('msg' => '{ALBUM_DIR} does not exist'));
+				return new TemplateResponse('souvenirs','error',array('msg' => '{ALBUM_DIR} does not exist'));
 			}
 		}
 	}
@@ -87,12 +87,12 @@ class PageController extends Controller {
 			$file = $this->userFolder->get($apath."/".ALBUM_CONF_FILENAME);
 			if($file instanceof \OCP\Files\File) {
 				$jsonAlbum = $file->getContent();
-				return new TemplateResponse('souvenir','show',array('album_json' => json_decode($jsonAlbum), 'apath' => $apath));
+				return new TemplateResponse('souvenirs','show',array('album_json' => json_decode($jsonAlbum), 'apath' => $apath));
 			} else {
-				return new TemplateResponse('souvenir','error',array('msg' => 'Can not read file'));
+				return new TemplateResponse('souvenirs','error',array('msg' => 'Can not read file'));
 			}
 		} catch(\OCP\Files\NotFoundException $e) {
-			return new TemplateResponse('souvenir','error',array('msg' => 'File does not exist'));
+			return new TemplateResponse('souvenirs','error',array('msg' => 'File does not exist'));
 		}
 	}
 

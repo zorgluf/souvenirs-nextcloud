@@ -1,8 +1,8 @@
 <?php
-namespace OCA\Souvenir\Model;
+namespace OCA\Souvenirs\Model;
 
 use OCP\Files\Folder;
-use OCA\Souvenir\Model\Page;
+use OCA\Souvenirs\Model\Page;
 
 define("ALBUM_CONF_FILENAME","album.json");
 define("DATA_DIR","data");

@@ -1,8 +1,8 @@
 <?php
-style('souvenir', 'style');
+style('souvenirs', 'style');
 emit_script_tag('','var albumData = '.json_encode($_['album_json']));
 emit_script_tag('','albumData.path = "'.$_['apath'].'";');
-script('souvenir', 'vue-index');
+script('souvenirs', 'vue-index');
 ?>
 
 <div id="album-parent-frame">

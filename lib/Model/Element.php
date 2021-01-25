@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Model;
+namespace OCA\Souvenirs\Model;
 
 class Element {
 

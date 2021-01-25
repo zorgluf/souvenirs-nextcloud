@@ -10,7 +10,7 @@
  * @copyright Olivier Paroz 2017
  */
 
-namespace OCA\Souvenir\Http;
+namespace OCA\Souvenirs\Http;
 
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http;

@@ -1,12 +1,12 @@
 <?php
 // db/sharemapper.php
 
-namespace OCA\Souvenir\Db;
+namespace OCA\Souvenirs\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
-use OCA\Souvenir\Db\Share;
+use OCA\Souvenirs\Db\Share;
 
 define("SHARE_TABLE", 'souvenir_shares');
 

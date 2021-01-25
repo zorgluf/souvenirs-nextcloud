@@ -1,7 +1,7 @@
 <?php
 // db/share.php
 
-namespace OCA\Souvenir\Db;
+namespace OCA\Souvenirs\Db;
 
 use OCP\AppFramework\Db\Entity;
 

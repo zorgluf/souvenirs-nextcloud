@@ -1,9 +1,9 @@
 <?php
-namespace OCA\Souvenir\Model;
+namespace OCA\Souvenirs\Model;
 
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
-use OCA\Souvenir\Model\Album;
+use OCA\Souvenirs\Model\Album;
 
 define("ALBUM_DIR","/album");
 

@@ -1,6 +1,7 @@
 <?php
-namespace OCA\Souvenir\Model;
-use OCA\Souvenir\Model\Element;
+namespace OCA\Souvenirs\Model;
+
+use OCA\Souvenirs\Model\Element;
 
 class Page {
 

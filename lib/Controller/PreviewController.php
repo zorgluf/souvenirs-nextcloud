@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Controller;
+namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http;
@@ -11,9 +11,9 @@ use OCP\Files\IRootFolder;
 use OCP\IPreview;
 use \OCP\ILogger;
 
-use OCA\Souvenir\Http\ImageResponse;
-use OCA\Souvenir\Db\ShareMapper;
-use OCA\Souvenir\Model\AlbumList;
+use OCA\Souvenirs\Http\ImageResponse;
+use OCA\Souvenirs\Db\ShareMapper;
+use OCA\Souvenirs\Model\AlbumList;
 
 define("DATA_DIR","data");
 

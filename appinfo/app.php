@@ -1,6 +1,6 @@
 <?php
 
-namespace OCA\souvenir\AppInfo;
+namespace OCA\Souvenirs\AppInfo;
 
 use OC\Files\Type\Detection;
 use OCP\AppFramework\App;
@@ -11,6 +11,6 @@ $eventDispatcher = \OC::$server->getEventDispatcher();
 $eventDispatcher->addListener(
 	'OCA\Files::loadAdditionalScripts',
 	function() {
-		\OCP\Util::addScript('souvenir', 'fileaction');
+		\OCP\Util::addScript('souvenirs', 'fileaction');
 	}
 );

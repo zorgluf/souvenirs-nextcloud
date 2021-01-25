@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Controller;
+namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
@@ -8,9 +8,9 @@ use OCP\Files\IRootFolder;
 use OCP\IL10N;
 use OCP\AppFramework\Http;
 use OCP\IURLGenerator;
-use OCA\Souvenir\Db\ShareMapper;
-use OCA\Souvenir\Model\AlbumList;
-use OCA\Souvenir\Model\Page;
+use OCA\Souvenirs\Db\ShareMapper;
+use OCA\Souvenirs\Model\AlbumList;
+use OCA\Souvenirs\Model\Page;
 
 
 class Api2Controller extends Controller {
@@ -293,7 +293,7 @@ class Api2Controller extends Controller {
 		
 		$results = $this->shareMapper->createShare($this->userId,$albumId);
 		//get shareUrl
-		$shareUrl = $this->urlGen->linkToRouteAbsolute('souvenir.public.show',array('token' => $results['share']['token']));
+		$shareUrl = $this->urlGen->linkToRouteAbsolute('souvenirs.public.show',array('token' => $results['share']['token']));
 
 		return new JSONResponse($shareUrl);
 	}

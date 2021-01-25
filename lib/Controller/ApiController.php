@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Controller;
+namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\JSONResponse;
@@ -7,9 +7,9 @@ use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
 use OCP\IURLGenerator;
-use OCA\Souvenir\Db\ShareMapper;
-use OCA\Souvenir\Model\AlbumList;
-use OCA\Souvenir\Model\Page;
+use OCA\Souvenirs\Db\ShareMapper;
+use OCA\Souvenirs\Model\AlbumList;
+use OCA\Souvenirs\Model\Page;
 
 
 class ApiController extends Controller {

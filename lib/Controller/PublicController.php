@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Souvenir\Controller;
+namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -9,8 +9,8 @@ use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
 
-use OCA\Souvenir\Db\ShareMapper;
-use OCA\Souvenir\Model\AlbumList;
+use OCA\Souvenirs\Db\ShareMapper;
+use OCA\Souvenirs\Model\AlbumList;
 
 define("ALBUM_CONF_FILENAME","album.json");
 define("ALBUM_DIR","/album");

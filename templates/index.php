@@ -1,5 +1,5 @@
 <?php
-style('souvenir', 'style');
+style('souvenirs', 'style');
 ?>
 
 <div id="app">
