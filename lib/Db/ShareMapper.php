@@ -8,12 +8,12 @@ use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 use OCA\Souvenirs\Db\Share;
 
-define("SHARE_TABLE", 'souvenir_shares');
+define("SHARE_TABLE", 'souvenirs_shares');
 
 class ShareMapper extends QBMapper {
 
     public function __construct(IDBConnection $db) {
-        parent::__construct($db, 'souvenir_shares');
+        parent::__construct($db, SHARE_TABLE);
     }
 
 

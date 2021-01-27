@@ -12,7 +12,7 @@ use OCP\Migration\IOutput;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version0000Date20200102200208 extends SimpleMigrationStep {
+class Version0001Date20200102200208 extends SimpleMigrationStep {
 
 	/**
 	 * @param IOutput $output
@@ -32,7 +32,7 @@ class Version0000Date20200102200208 extends SimpleMigrationStep {
 		/** @var Schema $schema */
 		$schema = $schemaClosure();
 
-		$table = $schema->createTable('souvenir_shares');
+		$table = $schema->createTable('souvenirs_shares');
 
 		$table->addColumn('token', 'string', [
 			'notnull' => true,
