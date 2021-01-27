@@ -14,7 +14,8 @@
     "vue": "^2.5.22",
     "webpack-merge": "^4.2.1",
     "moment": "2.24.0",
-    "@nextcloud/vue": "2.6.5"
+    "@nextcloud/vue": "2.6.5",
+    "@nextcloud/router": "1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",

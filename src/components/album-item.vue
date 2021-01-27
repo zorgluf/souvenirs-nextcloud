@@ -15,19 +15,14 @@
         {{dateString}}
     </div>
     <div class="right s-action-menu">
-        <div class="icon icon-share" v-bind:class='(isShared) ? "icon-activated" : ""'
-        v-on:click="toggleShare">
-        </div>
-        <Popover style="float: left">
-            <div slot="trigger" class="icon icon-activated icon-delete">
-            </div>
-            <template>
-                Do you really want to delete this album ?
-                <button v-on:click="deleteAlbum">
-                    Confirm
-                </button>
-            </template>
-        </Popover>
+        <Actions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
+            <ActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</ActionButton>
+            <ActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</ActionLink>
+            <ActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</ActionButton>
+        </Actions>
+        <Actions default-icon="icon-delete" :force-menu="true">
+            <ActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</ActionButton>
+        </Actions>
     </div>
     <input type="text"  style="display: none" v-bind:value="shareUrl"/>
     <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
@@ -37,7 +32,10 @@
 
 <script>
 
-import Popover from '@nextcloud/vue/dist/Components/Popover'
+import Actions from '@nextcloud/vue/dist/Components/Actions'
+import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
+import ActionLink from '@nextcloud/vue/dist/Components/ActionLink'
+import { generateUrl } from '@nextcloud/router'
 
 export default {
     props: {
@@ -49,12 +47,9 @@ export default {
         'albumId': String,
     },
     components: {
-        Popover
-    },
-    data: function() {
-        return {
-            "shareUrl" : ""
-        }
+        Actions,
+        ActionButton,
+        ActionLink
     },
     computed: {
         "isShared": function() {
@@ -65,6 +60,20 @@ export default {
         "dateString": function() {
             moment.locale(window.navigator.language);
             return moment(this.date, "YYYYMMDDhhmmss").format("LL");
+        },
+        "shareToken": function() {
+            if (this.isShared) {
+                return this.shares.find(share => {
+                    return share['albumId'] == this.albumId
+                }).token;
+            }
+            return "";
+        },
+        "shareUrl": function() {
+            if (this.shareToken != "") {
+                return window.location.protocol + '//' + window.location.host + generateUrl('/apps/souvenirs/public/'+this.shareToken);
+            }
+            return "";
         }
     },
     methods: {
@@ -73,16 +82,11 @@ export default {
                     url: "apiv2/album/"+this.albumId,
                     type: "DELETE",
                     success: data => {
-                        //TODO
+                        this.$emit("snackbar","Album deleted.");
                         this.$emit('refresh-albums');
                     }
                 });
             event.preventDefault();
-        },
-        'detectAlbumInShare': function() {
-            return (this.shares.find(share => {
-                    return share['albumId'] == this.albumId
-                }) != undefined);
         },
         'toggleShare': function(event) {
             if (this.isShared) {
@@ -98,10 +102,11 @@ export default {
                     return share['albumId'] == this.albumId
                 }).token;
                 $.ajax({
-                    url: "api/share/"+token,
+                    url: "apiv2/share/"+token,
                     type: "DELETE",
                     success: data => {
                         this.$emit('refresh-shares');
+                        this.$emit("snackbar","Album share removed.");
                     }
                 });
             }
@@ -109,29 +114,27 @@ export default {
         'createShare': function() {
             if (!this.isShared) {
                 $.ajax({
-                    url: "api/share",
+                    url: "apiv2/share",
                     data: {'albumId': this.albumId},
                     type: "POST",
                     success: data => {
-                        //copy to clipboard
-                        copyToClipboard(data.shareUrl);
+                        
                         this.$emit('refresh-shares');
-                        this.$emit("snackbar","Album shared. Public URL copied to clipboard.");
+                        
                     }
                 });
             }
+        },
+        'copyShareUrlToClipboard': function() {
+            navigator.clipboard.writeText(this.shareUrl).then(function() {
+                this.$emit("snackbar","Album shared. Public URL copied to clipboard.");
+            }, function() {
+                this.$emit("snackbar","Clipboard error!");
+            });
         }
     },
 }
 
-var copyToClipboard = function(texte) {
-    var textarea = document.createElement("textarea");
-    textarea.innerText = texte;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    textarea.remove();
-}
 
 </script>
 
@@ -194,20 +197,6 @@ var copyToClipboard = function(texte) {
 
 .s-action-menu {
     display: inline;
-}
-
-.icon:hover {
-    opacity: 0.7;
-}
-
-.icon {
-    margin: 5px;
-    opacity: 0.3;
-    float: left;
-}
-
-.icon-activated {
-    opacity: 1;
 }
 
 .right {
