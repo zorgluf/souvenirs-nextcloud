@@ -1,12 +1,15 @@
 <template>
     <div>
-        <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]' v-bind:image-path='album["image"]'
+        <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]' v-bind:image-path='album["albumImage"]'
         v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' v-on:refresh-shares="refreshShares"
         v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
         </album-item>
-        <div v-if="albumList.length == 0" class="center">
+        <div v-if="!loading && (albumList.length == 0)" class="center">
             <div class="icon-folder"></div>
             <h2>No album</h2>
+        </div>
+        <div v-if="loading" class="center">
+            <img src="./img/loading.gif"/>
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
@@ -19,23 +22,25 @@ import AlbumItem from './album-item';
 
 export default {
     props: {
-      "albumList": Array,
     },
     data: function() {
         return {
             shares: [],
-            snackbarText: ""
+            snackbarText: "",
+            albumList: [],
+            loading: true,
         }
     },
     components: {
         'album-item': AlbumItem,
     },
     created: function() {
+        this.refreshAlbums();
         this.refreshShares();
     },
     methods: {
         refreshShares: function() {
-            $.get("api/share", data => {
+            $.get("apiv2/share", data => {
                 this.shares.splice(0);
                 for (var d in data) {
                     this.shares.push(data[d]);
@@ -43,8 +48,19 @@ export default {
             });
         },
         refreshAlbums: function() {
-            //TODO make call to albumlist
-            document.location.reload();
+            this.loading = true;
+            $.get("apiv2/album", data => {
+                this.albumList.splice(0);
+                data.forEach(albumId => {
+                    $.get("apiv2/album/"+albumId, album => {
+                        this.albumList.push(album);
+                        this.albumList.sort(function(a,b) {
+                            return b["date"].localeCompare(a["date"]);
+                        });
+                    });
+                });
+                this.loading = false;
+            });
         },
         activateSnackbar: function(texte) {
             var x = document.getElementById("snackbar");

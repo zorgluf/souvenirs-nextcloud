@@ -8,12 +8,12 @@ __webpack_public_path__ = OC.linkTo('souvenirs', 'js/')
 // boot up vue album
 new Vue({
   el: 'album',
-  render: h => h(Album, {
-    props: {
-      "sName": albumData.name,
-      "pages": albumData.pages,
-      "path": albumData.path,
-      "token": (typeof token === 'undefined') ? "": token,
-    }
-  }),
+  render(h) {
+    return h(Album, {
+      props: {
+        path: this.$el.attributes.path.value,
+        token: ("token" in this.$el.attributes) ? this.$el.attributes.token.value : "",
+      }
+    })
+  },
 });

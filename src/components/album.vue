@@ -14,6 +14,9 @@
         <div class="fullscreen" v-on:click="fullscreen"></div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
+        <div v-if="loading" class="center">
+            <img src="./img/loading.gif"/>
+        </div>
     </div>
 </template>
 
@@ -21,12 +24,9 @@
 
 import Page from './page'
 import Imagefull from './imagefull'
-import fitText from './page'
 
 export default {
     props: {
-      "sName": String,
-      "pages": Array,
       "path": String,
       "token": String,
     },
@@ -35,7 +35,13 @@ export default {
             "displayedPage": 0,
             "imageFullOn": false,
             "imageFullUrl": "",
+            "sName": "",
+            "pages": [],
+            "loading": true,
         }
+    },
+    mounted: function() {
+        this.refreshAlbum();
     },
     computed: {
         'aLeftVisible': function() {
@@ -75,7 +81,23 @@ export default {
             $(".s-album").each(function() {
                 this.requestFullscreen();
             });
-        }
+        },
+        refreshAlbum: function() {
+            this.loading = true;
+            if (this.token != "") {
+                $.get(this.token+"/album", album => {
+                this.sName = album.name;
+                this.pages = album.pages;
+                this.loading = false;
+                });
+            } else {
+                $.get("apiv2/album/unknown/full?apath="+this.path, album => {
+                this.sName = album.name;
+                this.pages = album.pages;
+                this.loading = false;
+                });
+            }
+        },
     },
     components: {
         page: Page,
@@ -176,4 +198,11 @@ export default {
 :fullscreen .fullscreen {
     visibility: hidden;
 }
+
+.center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+}
+
 </style>

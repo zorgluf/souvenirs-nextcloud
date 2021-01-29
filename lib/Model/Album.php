@@ -197,6 +197,10 @@ class Album {
         return true;
     }
 
+    public function getPath() {
+        return $this->albumNode->getPath();
+    }
+
     /**
      * save album conf file to disk
      */

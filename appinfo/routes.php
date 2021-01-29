@@ -55,6 +55,7 @@ return [
 
     //public API
     ['name' => 'public#show', 'url' => '/public/{token}', 'verb' => 'GET'],
+    ['name' => 'public#get_album_full', 'url' => '/public/{token}/album', 'verb' => 'GET'],
     ['name' => 'preview#get_public_preview', 'url' => '/public/{token}/preview', 'verb' => 'GET','requirements' => array('file' => '.+')],
     
     ]

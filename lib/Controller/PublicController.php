@@ -8,6 +8,7 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
+use OCP\AppFramework\Http\JSONResponse;
 
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
@@ -52,15 +53,47 @@ class PublicController extends Controller {
 			if (is_null($album)) {
 				return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 			}
-			$param = array('album_json' => $album->toArrayFull(), 'apath' => $album->getAlbumPath(), "token" => $token);
+			$param = array('apath' => $album->getAlbumPath(), "token" => $token);
 		} catch(\OCP\Files\NotFoundException $e) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'File does not exist'));
 		}
 		//create public template
 		$template = new PublicTemplateResponse($this->appName, 'publicshow', $param);
         $template->setHeaderTitle('Public albums');
-        $template->setHeaderDetails($param['album_json']['name']);
+        $template->setHeaderDetails($album->getName());
         return $template;
+	}
+
+	/**
+	 * get album full
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 * @BruteForceProtection(action=reset)
+	 */
+	public function getAlbumFull($token) {
+		// check token and get album path
+		$share = $this->shareMapper->findByToken($token);
+		if (is_null($share)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
+		try {
+			$userFolder = $this->rootFolder->getUserFolder($share->getUser());
+			$albumList = AlbumList::getInstance($userFolder);
+			$album = $albumList->getAlbum($share->getAlbumId());
+			if (is_null($album)) {
+				return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+			}
+			$albumArray = $album->toArrayFull();
+			foreach ($albumArray as $key => $value) {
+				if (is_null($value)) {
+					unset($albumArray[$key]);
+				}
+			}
+			return new JSONResponse($albumArray);
+		} catch(\OCP\Files\NotFoundException $e) {
+			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'File does not exist'));
+		}
 	}
 
 }

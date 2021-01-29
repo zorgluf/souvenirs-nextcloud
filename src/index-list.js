@@ -15,9 +15,6 @@ new Vue({
   el: 'album-item-list',
   render: h => h(AlbumItemList, {
     props: {
-        'albumList': albumList.sort(function(a,b) {
-          return b["date"].localeCompare(a["date"]);
-        }),
     },
   }),
 });

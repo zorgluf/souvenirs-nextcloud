@@ -33,42 +33,14 @@ class PageController extends Controller {
 		try {
 			$file = $this->userFolder->get(ALBUM_DIR);
 			if($file instanceof \OCP\Files\Folder) {
-				$nodes = $file->getDirectoryListing();
-				$albumArray = array();
-				foreach ($nodes as $node) {
-					if($node instanceof \OCP\Files\Folder) {
-						if ($node->nodeExists(ALBUM_CONF_FILENAME)) {
-							//get album conf
-							$jsonAlbum = $node->get(ALBUM_CONF_FILENAME)->getContent();
-							$albumJson = json_decode($jsonAlbum);
-							//get album image
-							$albumImage = basename($albumJson->albumImage);
-							//if none, get last image
-							if ($albumImage=="") {
-								foreach ($albumJson->pages as $page) {
-									foreach ($page->elements as $element) {
-										if (array_key_exists("image",$element)) {
-											$albumImage = basename($element->image);
-											break;
-										}
-									}
-								}
-							}
-							setlocale(LC_TIME,$this->il10n->getLocaleCode().".UTF8");
-							$albumDate = $albumJson->date;
-							$albumArray[] = array("name" => $albumJson->name, "path" => ALBUM_DIR."/".basename($node->getPath()), 
-								"date" => $albumDate, "image" => $albumImage, "id" => $albumJson->id);
-						}
-					}
-				}
-				return new TemplateResponse('souvenirs','index',array("albumArray" => $albumArray));
+				return new TemplateResponse('souvenirs','index');
 			} else {
 				return new TemplateResponse('souvenirs','error',array('msg' => 'Wrong album path {ALBUM_DIR}'));
 			}
 		} catch(\OCP\Files\NotFoundException $e) {
 			$this->userFolder->newFolder(ALBUM_DIR);
 			if ($this->userFolder->get(ALBUM_DIR) instanceof \OCP\Files\Folder) {
-				return new TemplateResponse('souvenirs','index',array("albumArray" => null));
+				return new TemplateResponse('souvenirs','index');
 			} else {
 				return new TemplateResponse('souvenirs','error',array('msg' => '{ALBUM_DIR} does not exist'));
 			}
@@ -86,13 +58,12 @@ class PageController extends Controller {
 		try {
 			$file = $this->userFolder->get($apath."/".ALBUM_CONF_FILENAME);
 			if($file instanceof \OCP\Files\File) {
-				$jsonAlbum = $file->getContent();
-				return new TemplateResponse('souvenirs','show',array('album_json' => json_decode($jsonAlbum), 'apath' => $apath));
+				return new TemplateResponse('souvenirs','show',array('apath' => $apath));
 			} else {
-				return new TemplateResponse('souvenirs','error',array('msg' => 'Can not read file'));
+				return new TemplateResponse('souvenirs','error',array('msg' => 'Can not read album file'));
 			}
 		} catch(\OCP\Files\NotFoundException $e) {
-			return new TemplateResponse('souvenirs','error',array('msg' => 'File does not exist'));
+			return new TemplateResponse('souvenirs','error',array('msg' => 'Album file does not exist'));
 		}
 	}
 

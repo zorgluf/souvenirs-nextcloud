@@ -4,7 +4,7 @@
     <div class="s-spiral"></div>
     <a v-bind:href='"show?apath="+encodeURIComponent(aPath)'>
         <div class="s-square">
-            <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath+"&width=256&height=256"'
+            <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath.replace(/.*\//,"")+"&width=256&height=256"'
             />
         </div>
     </a>

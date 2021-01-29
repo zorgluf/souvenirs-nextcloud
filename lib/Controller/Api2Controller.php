@@ -10,6 +10,7 @@ use OCP\AppFramework\Http;
 use OCP\IURLGenerator;
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
+use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
 
 
@@ -70,14 +71,20 @@ class Api2Controller extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function getAlbum($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
-		$album = $albumList->getAlbum($id);
+	public function getAlbum($id,$apath) {
+		if ($apath != null) {
+			$album = Album::withFolder($this->userFolder->get($apath));
+		} else {
+			$albumList = AlbumList::getInstance($this->userFolder);
+			$album = $albumList->getAlbum($id);
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
 		$albumArray = $album->toArray();
-		//add share 
+		//add path of album
+		$albumArray["path"] = $this->userFolder->getRelativePath($album->getPath());
+		//add share
 		$share = $this->shareMapper->findByAlbumId($this->userId,$id);
 		if (!is_null($share)) {
 			$albumArray["isShared"] = true;
@@ -91,9 +98,13 @@ class Api2Controller extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function getAlbumFull($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
-		$album = $albumList->getAlbum($id);
+	public function getAlbumFull($id,$apath) {
+		if ($apath != null) {
+			$album = Album::withFolder($this->userFolder->get($apath));
+		} else {
+			$albumList = AlbumList::getInstance($this->userFolder);
+			$album = $albumList->getAlbum($id);
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
