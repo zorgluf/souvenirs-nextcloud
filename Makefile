@@ -162,6 +162,7 @@ appstore:
 	--exclude="$(CURDIR)/src" \
 	--exclude="$(CURDIR)/publish.*" \
 	--exclude="$(CURDIR)/Jenkinsfile" \
+	--exclude="$(CURDIR)/package-lock.json" \
 	--transform="flags=r;s|$(CURDIR:/%=%)|$(app_name)|" \
 	-czf $(appstore_package_name).tar.gz $(CURDIR)
 
