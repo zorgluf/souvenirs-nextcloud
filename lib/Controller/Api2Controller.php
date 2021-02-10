@@ -114,6 +114,14 @@ class Api2Controller extends Controller {
 				unset($albumArray[$key]);
 			}
 		}
+		if ($apath == null) {
+			//add share
+			$share = $this->shareMapper->findByAlbumId($this->userId,$id);
+			if (!is_null($share)) {
+				$albumArray["isShared"] = true;
+				$albumArray["shareToken"] = $share->getToken();
+			}
+		}
 		return new JSONResponse($albumArray);
 	}
 
