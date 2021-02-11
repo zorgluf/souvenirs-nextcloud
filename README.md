@@ -2,6 +2,16 @@
 
 View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
 
+## Changelog
+
+v1.0.0:
+*  app_id change (souvenir to souvenirs) : disruptive, need android application v2+
+*  Improve GUI on share actions and link display
+*  Rewrite of album list page to integrate api call on front
+*  bug fix :
+  *  Fix app svg on firefox
+
+
 ## Building the app
 
 The app can be built by using the provided Makefile by running:
