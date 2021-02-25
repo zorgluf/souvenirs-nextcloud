@@ -1,10 +1,10 @@
 <template>
-    <div v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
+    <div ref="eldiv" v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
-		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : 'fill' ]"
+		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
         v-if="sImage != '' && sClass == 'ImageElement'" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
-        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : 'fill' ]" v-if="sImage != '' && sClass == 'PaintElement'" v-bind:src="sImageSrc"/>
+        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass == 'PaintElement'" v-bind:src="sImageSrc"/>
     </div>
 </template>
 
@@ -36,6 +36,7 @@ export default {
         return {
             "sImageSrc": require('./img/loading.gif'),
             "loadingImage": null,
+            "imageStyle": {},
         }
     },
     watch: {
@@ -68,16 +69,10 @@ export default {
             return Math.floor(eh*(this.sBottom-this.sTop)/100);
         },
         'isImgCenterCrop': function() {
-            return (this.sTransformType == IMG_CENTERCROP) || (this.sTransformType == IMG_ZOOMOFFSET);
+            return (this.sTransformType == IMG_CENTERCROP);
         },
-        'imageStyle': function() {
-            if ((this.sClass == 'ImageElement') && (this.sTransformType == IMG_ZOOMOFFSET)) {
-                return {
-                    "transform": 'translate('+this.sOffsetX+'%,'+this.sOffsetY+'%) scale('+this.sZoom/100+','+this.sZoom/100+')',
-                    "transform-origin": (-this.sOffsetX)+"% "+(-this.sOffsetY)+"%",
-                };
-            }
-            return {};
+        'isImgFill': function() {
+            return (this.sTransformType == IMG_FILL);
         },
     },
     methods: {
@@ -90,6 +85,9 @@ export default {
         },
         onLoadedImage: function() {
             this.sImageSrc = this.loadingImage.src;
+            if ((this.sClass == 'ImageElement') && (this.sTransformType == IMG_ZOOMOFFSET)) {
+                this.imageStyle = getImageZoomOffsetStyle(this.sZoom,this.sOffsetX,this.sOffsetY,this.$refs.eldiv.clientWidth,this.$refs.eldiv.clientHeight,this.loadingImage.width,this.loadingImage.height);
+            }
         },
         imageUrl: function(full = false) {
             if (full) {
@@ -109,6 +107,30 @@ export default {
             this.$emit("imagefull",this.imageUrl(true));
         }
     }
+}
+
+function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, imgWidth, imgHeight) {
+    var style = {
+        "position" : 'absolute',
+        "top" : '50%',
+        "left" : '50%',
+        };
+    var widthScale = destWidth / imgWidth;
+    var heightScale = destHeight / imgHeight;
+    var scale = Math.max(widthScale, heightScale);
+    if (widthScale > heightScale) {
+        style["width"]="100%";
+        style["height"]="auto";
+    } else {
+        style["width"]="auto";
+        style["height"]="100%";
+    }
+    style["transform"] = "translate(-50%,-50%) translate("+offsetX*destWidth/100+"px,"+offsetY*destHeight/100+"px) scale("+zoom/100+")";
+    var originX = -((destWidth - imgWidth * scale) / 2 + offsetX*destWidth/100);
+    var originY = -((destHeight - imgHeight * scale) / 2 + offsetY*destHeight/100);
+    style["transform-origin"] = originX+"px "+originY+"px";
+            
+    return style;
 }
 </script>
 
