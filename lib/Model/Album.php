@@ -232,7 +232,7 @@ class Album {
     public function setValues($valuesArray) {
         if (is_array($valuesArray)) {
             foreach ($valuesArray as $key => $value) {
-                if ((!is_null($value)) && (substr($key,0,1) != "_")) {
+                if ((!is_null($value)) && (substr($key,0,1) !== "_")) {
                     $this->setContent($key,$value);
                 }
             }

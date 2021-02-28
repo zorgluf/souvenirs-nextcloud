@@ -3,16 +3,20 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>souvenirs</id>
     <name>Souvenirs</name>
-    <summary>Display albums in nextcloud web interface</summary>
-    <description><![CDATA[Display albums in nextcloud web interface]]></description>
+    <summary>Display "souvenir" albums in nextcloud web interface</summary>
+    <description><![CDATA[View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)]]></description>
     <version>1.0.0</version>
     <licence>agpl</licence>
     <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenirs</namespace>
     <category>multimedia</category>
+    <website>https://github.com/zorgluf/souvenirs-nextcloud</website>
     <bugs>https://github.com/zorgluf/souvenirs-nextcloud/issues</bugs>
+    <repository>https://github.com/zorgluf/souvenirs-nextcloud</repository>
+    <screenshot small-thumbnail="https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/1-small.png">https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/1.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/2.png</screenshot>
     <dependencies>
-        <nextcloud min-version="14"/>
+        <nextcloud min-version="16" max-version="20"/>
     </dependencies>
     <navigations>
         <navigation>

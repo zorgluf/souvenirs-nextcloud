@@ -72,7 +72,7 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function getAlbum($id,$apath) {
-		if ($apath != null) {
+		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
 			$albumList = AlbumList::getInstance($this->userFolder);
@@ -99,7 +99,7 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function getAlbumFull($id,$apath) {
-		if ($apath != null) {
+		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
 			$albumList = AlbumList::getInstance($this->userFolder);
@@ -114,7 +114,7 @@ class Api2Controller extends Controller {
 				unset($albumArray[$key]);
 			}
 		}
-		if ($apath == null) {
+		if ($apath === null) {
 			//add share
 			$share = $this->shareMapper->findByAlbumId($this->userId,$id);
 			if (!is_null($share)) {
@@ -335,7 +335,7 @@ class Api2Controller extends Controller {
 		}
 		$results = $this->shareMapper->deleteShare($this->userId,$albumId);
 		
-		if ($results["action"] == "success") {
+		if ($results["action"] === "success") {
 			return new JSONResponse("OK");
 		}
 		return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);

@@ -25,7 +25,7 @@ class PreviewController extends Controller {
 	private $rootFolder;
 	private $logger;
 
-    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, 	IPreview $preview, ShareMapper $shareMapper){
+    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, IPreview $preview, ShareMapper $shareMapper){
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->rootFolder = $rootFolder;
@@ -119,10 +119,8 @@ class PreviewController extends Controller {
 			if (substr($mimeType, 0, 5) !== "image") { //force image mimetype if no extension to image
 				$mimeType = "image/jpeg";
 			}
-			//$previewFile = $this->preview->getPreview($fileObj, $width, $height, false, \OCP\IPreview::MODE_FILL, "image/jpeg");
 			$previewFile = $this->preview->getPreview($fileObj, $width, $height, false, \OCP\IPreview::MODE_FILL, $mimeType);
-			$previewImg = new \OC_Image();
-			$previewImg->loadFromData($previewFile->getContent());
+			$previewImg = $previewFile->getContent();
 
 		} catch (\Exception $exception) {
 			return new JSONResponse(
