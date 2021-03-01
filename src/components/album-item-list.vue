@@ -27,7 +27,7 @@ export default {
         return {
             shares: [],
             snackbarText: "",
-            albumList: [],
+            unsortedAlbumList: [],
             loading: true,
         }
     },
@@ -37,6 +37,13 @@ export default {
     created: function() {
         this.refreshAlbums();
         this.refreshShares();
+    },
+    computed: {
+        "albumList": function() {
+            return this.unsortedAlbumList.sort(function(a,b) {
+                return b["date"].localeCompare(a["date"]);
+            });
+        }
     },
     methods: {
         refreshShares: function() {
@@ -50,13 +57,10 @@ export default {
         refreshAlbums: function() {
             this.loading = true;
             $.get("apiv2/album", data => {
-                this.albumList.splice(0);
+                this.unsortedAlbumList.splice(0);
                 data.forEach(albumId => {
                     $.get("apiv2/album/"+albumId, album => {
-                        this.albumList.push(album);
-                        this.albumList.sort(function(a,b) {
-                            return b["date"].localeCompare(a["date"]);
-                        });
+                        this.unsortedAlbumList.push(album);
                     });
                 });
                 this.loading = false;
