@@ -1,6 +1,7 @@
 <template>
     <div>
-        <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]' v-bind:image-path='album["albumImage"]'
+        <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]'
+        v-bind:album-image-path='("albumImage" in album) ? album["albumImage"] : ""'
         v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' v-on:refresh-shares="refreshShares"
         v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
         </album-item>

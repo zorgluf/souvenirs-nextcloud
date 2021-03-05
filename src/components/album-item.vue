@@ -4,7 +4,7 @@
     <div class="s-spiral"></div>
     <a v-bind:href='"show?apath="+encodeURIComponent(aPath)'>
         <div class="s-square">
-            <img class="s-album-image" v-bind:src='imagePath == "" ? "" : "preview?apath="+encodeURIComponent(aPath)+"&file="+imagePath.replace(/.*\//,"")+"&width=256&height=256"'
+            <img class="s-album-image" v-bind:src='albumImageUrl'
             />
         </div>
     </a>
@@ -35,13 +35,13 @@
 import Actions from '@nextcloud/vue/dist/Components/Actions'
 import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import ActionLink from '@nextcloud/vue/dist/Components/ActionLink'
-import { generateUrl } from '@nextcloud/router'
+import { generateUrl, imagePath } from '@nextcloud/router'
 
 export default {
     props: {
         'shares': Array,
         'aPath': String,
-        'imagePath': String,
+        'albumImagePath': String,
         'name': String,
         'date': String,
         'albumId': String,
@@ -74,6 +74,13 @@ export default {
                 return window.location.protocol + '//' + window.location.host + generateUrl('/apps/souvenirs/public/'+this.shareToken);
             }
             return "";
+        },
+        "albumImageUrl": function() {
+            if (this.albumImagePath == "") {
+                return imagePath("souvenirs","album_image.png");
+            } else {
+                return "preview?apath="+encodeURIComponent(this.aPath)+"&file="+this.albumImagePath.replace(/.*\//,"")+"&width=256&height=256";
+            }
         }
     },
     methods: {
