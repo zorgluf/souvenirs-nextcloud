@@ -173,8 +173,10 @@ class Api2Controller extends Controller {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
 		if ($album->hasAsset($asset_path)) {
+			$asset_relative_path = $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path));
 			return new JSONResponse(array("status" => "ok",
-										"path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path))));
+										"path" => $asset_relative_path,
+									"size" => $this->userFolder->get($asset_relative_path)->getSize() ));
 		} else {
 			return new JSONResponse(array("path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path)),
 				"status" => "missing"));
