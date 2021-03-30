@@ -21,6 +21,9 @@ class AlbumList {
 			$file = $this->userFolder->get(ALBUM_DIR);
 			if($file instanceof \OCP\Files\Folder) {
 				$nodes = $file->getDirectoryListing();
+				usort($nodes,function($a,$b) {
+					return strcmp($b->getName(),$a->getName());
+				});
 				$albumArray = array();
 				foreach ($nodes as $node) {
 					if ($node instanceof \OCP\Files\Folder) {

@@ -57,14 +57,21 @@ export default {
         },
         refreshAlbums: function() {
             this.loading = true;
-            $.get("apiv2/album", data => {
-                this.unsortedAlbumList.splice(0);
-                data.forEach(albumId => {
-                    $.get("apiv2/album/"+albumId, album => {
-                        this.unsortedAlbumList.push(album);
+            this.unsortedAlbumList.splice(0);
+            this.refreshAlbumsPage(1);
+        },
+        refreshAlbumsPage: function(page) {
+            $.get("apiv2/album?page="+page, data => {
+                if (data.length > 0) {
+                    data.forEach(albumId => {
+                        $.get("apiv2/album/"+albumId, album => {
+                            this.unsortedAlbumList.push(album);
+                        });
                     });
-                });
-                this.loading = false;
+                    this.refreshAlbumsPage(page+1);
+                } else {
+                    this.loading = false;
+                }
             });
         },
         activateSnackbar: function(texte) {

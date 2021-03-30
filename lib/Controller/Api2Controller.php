@@ -13,6 +13,8 @@ use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
 
+define("ALBUM_LIST_PAGE_SIZE",10);
+
 
 class Api2Controller extends Controller {
 	private $userId;
@@ -36,7 +38,7 @@ class Api2Controller extends Controller {
 	* @NoAdminRequired
 	* @NoCSRFRequired
 	*/
-	public function listAlbums() {
+	public function listAlbums($page = 1) {
 		$albumList = AlbumList::getInstance($this->userFolder);
 		$arrayAlbum = $albumList->getList();
 		if (is_null($arrayAlbum)) {
@@ -44,8 +46,8 @@ class Api2Controller extends Controller {
 		}
 		//return only ids
 		$ret_list = array();
-		foreach ($arrayAlbum as $album) {
-			$ret_list[] = $album["id"];
+		for ($i = (ALBUM_LIST_PAGE_SIZE*($page-1)); $i < min(ALBUM_LIST_PAGE_SIZE*$page,count($arrayAlbum)) ; $i++) {
+			$ret_list[] = $arrayAlbum[$i]["id"];
 		}
 		return new JSONResponse($ret_list);
 	}

@@ -34,7 +34,7 @@ return [
     ['name' => 'api#delete_share', 'url' => '/api/share/{token}', 'verb' => 'DELETE'],
 
     //API v2
-    ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET' ],
+    ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET', 'requirements' => array('page' => '[0-9]+') ],
     ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
     ['name' => 'api2#get_album_full', 'url' => '/apiv2/album/{id}/full', 'verb' => 'GET' ],
     ['name' => 'api2#create_album', 'url' => '/apiv2/album/{id}', 'verb' => 'PUT' ],
