@@ -14,25 +14,6 @@ return [
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
 
-    //API v1 deprecated
-    ['name' => 'api#list_albums', 'url' => '/api/album', 'verb' => 'GET' ],
-    ['name' => 'api#create_album', 'url' => '/api/album/{id}', 'verb' => 'PUT' ],
-    ['name' => 'api#get_album', 'url' => '/api/album/{id}', 'verb' => 'GET' ],
-    ['name' => 'api#get_album_full', 'url' => '/api/album/{id}/full', 'verb' => 'GET' ],
-    ['name' => 'api#post_album', 'url' => '/api/album/{id}', 'verb' => 'POST','requirements' => array('infos' => '.+') ],
-
-    ['name' => 'api#asset_exists_in_album', 'url' => '/api/album/{id}/assetprobe/{asset_path}', 'verb' => 'GET', 'requirements' => array('asset_path' => '.+')],
-    ['name' => 'api#clean_assets', 'url' => '/api/album/{id}/cleanassets', 'verb' => 'GET' ],
-
-    ['name' => 'api#create_page', 'url' => '/api/album/{id}/page/{page_pos}', 'verb' => 'PUT','requirements' => array('infos' => '.+') ],
-    ['name' => 'api#post_page', 'url' => '/api/album/{id}/page/{page_id}', 'verb' => 'POST','requirements' => array('infos' => '.+') ],
-    ['name' => 'api#delete_page', 'url' => '/api/album/{id}/page/{page_id}', 'verb' => 'DELETE','requirements' => array('infos' => '.+') ],
-    ['name' => 'api#move_page', 'url' => '/api/album/{id}/page/{page_id}/pos/{page_pos}', 'verb' => 'POST' ],
-
-    ['name' => 'api#get_share_by_user', 'url' => '/api/share', 'verb' => 'GET'],
-    ['name' => 'api#create_share', 'url' => '/api/share', 'verb' => 'POST','requirements' => array('albumId' => '.+')],
-    ['name' => 'api#delete_share', 'url' => '/api/share/{token}', 'verb' => 'DELETE'],
-
     //API v2
     ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET', 'requirements' => array('page' => '[0-9]+') ],
     ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
