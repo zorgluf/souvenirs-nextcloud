@@ -4,9 +4,14 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.1.0:
+*  Removed old v1 api
+*  Added pagination on album list
+* bug fix :
+  *  Display of album without album image
 v1.0.0:
 *  app_id change (souvenir to souvenirs) : disruptive, need android application v2+
-*  Improve GUI on share actions and link display
+*  Improved GUI on share actions and link display
 *  Rewrite of album list page to integrate api call on front
 *  bug fix :
   *  Fix app svg on firefox
