@@ -8,8 +8,5 @@
             "name": "Zorgluf"
         }
     ],
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^5.4"
-    }
+    "require": {}
 }
