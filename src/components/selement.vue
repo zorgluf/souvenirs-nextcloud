@@ -2,9 +2,9 @@
     <div ref="eldiv" v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
 		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
-        v-if="sImage != '' && sClass == 'ImageElement'" 
+        v-if="sImage != '' && sClass.endsWith('ImageElement')" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
-        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass == 'PaintElement'" v-bind:src="sImageSrc"/>
+        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
     </div>
 </template>
 
