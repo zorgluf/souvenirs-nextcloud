@@ -139,6 +139,10 @@ class Api2Controller extends Controller {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
 		$albumValues = $this->request->params;
+		//remove conflicting values
+		unset($albumValues["isShared"]);
+		unset($albumValues["shareToken"]);
+		//set values to model
 		$album->setValues($albumValues);
 		$album->save();
 		$albumArray = $album->toArray();
