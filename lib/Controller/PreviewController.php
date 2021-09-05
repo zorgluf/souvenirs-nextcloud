@@ -140,7 +140,7 @@ class PreviewController extends Controller {
 			);
 		}
 
-		$preview['name'] = $previewFile->getName();
+		$preview['name'] = $fileObj->getName();
 		$preview['preview'] = $previewImg;
 		$preview['mimetype'] = $mimeType;
 		$response = new ImageResponse($preview);
