@@ -119,7 +119,12 @@ class PreviewController extends Controller {
 			if (substr($mimeType, 0, 5) !== "image") { //force image mimetype if no extension to image
 				$mimeType = "image/jpeg";
 			}
-			$previewFile = $this->preview->getPreview($fileObj, $width, $height, false, \OCP\IPreview::MODE_FILL, $mimeType);
+			if ($mimeType === "image/gif") {
+				//no preview since it breaks animation
+				$previewFile = $fileObj;
+			} else {
+				$previewFile = $this->preview->getPreview($fileObj, $width, $height, false, \OCP\IPreview::MODE_FILL, $mimeType);
+			}
 			$previewImg = $previewFile->getContent();
 
 		} catch (\Exception $exception) {
