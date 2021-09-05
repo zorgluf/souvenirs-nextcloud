@@ -4,6 +4,10 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.2.0:
+* Enable animated gif
+* bug fix :
+  * Images in old album format
 v1.1.0:
 *  Removed old v1 api
 *  Added pagination on album list
