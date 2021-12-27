@@ -226,6 +226,13 @@ class Album {
     }
 
     public function toArrayFull() {
+        $albumArray = $this->contentArray;
+        //remove buggy shared informations
+        foreach (array("isShared","shareToken") as $key) {
+            if (array_key_exists($key,$albumArray)) {
+                unset($albumArray[$key]);
+            }
+        }
         return $this->contentArray;
     }
 
