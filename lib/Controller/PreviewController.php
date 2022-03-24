@@ -119,7 +119,10 @@ class PreviewController extends Controller {
 			if (substr($mimeType, 0, 5) !== "image") { //force image mimetype if no extension to image
 				$mimeType = "image/jpeg";
 			}
-			if ($mimeType === "image/gif") {
+			if (($width === -1) && ($height === -1)) {
+				//return raw image when no size asked
+				$previewFile = $fileObj;
+			} elseif ($mimeType === "image/gif") {
 				//no preview since it breaks animation
 				$previewFile = $fileObj;
 			} else {

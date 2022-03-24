@@ -12,7 +12,8 @@
             </div>
         </div>
         <div class="fullscreen" v-on:click="fullscreen"></div>
-        <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
+        <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
+            v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
         <div v-if="loading" class="center">
             <img src="./img/loading.gif"/>
@@ -35,6 +36,7 @@ export default {
             "displayedPage": 0,
             "imageFullOn": false,
             "imageFullUrl": "",
+            "imageFullIsPhotosphere": false,
             "sName": "",
             "pages": [],
             "loading": true,
@@ -70,8 +72,9 @@ export default {
         showN: function(index) {
             this.displayedPage = index;
         },
-        openImgFull: function(imageUrl) {
+        openImgFull: function(imageUrl,isPhotosphere) {
             this.imageFullUrl = imageUrl;
+            this.imageFullIsPhotosphere = isPhotosphere;
             this.imageFullOn = true;
         },
         closeImgFull: function() {
