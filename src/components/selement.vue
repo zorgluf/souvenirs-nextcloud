@@ -5,6 +5,7 @@
         v-if="sImage != '' && sClass.endsWith('ImageElement')" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
+        <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
     </div>
 </template>
 
@@ -13,6 +14,8 @@
 const IMG_FILL = 0;
 const IMG_CENTERCROP = 1;
 const IMG_ZOOMOFFSET = 2;
+
+const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
 export default {
     props: {
@@ -31,6 +34,7 @@ export default {
       "albumPath": String,
       "preload": Boolean,
       "token": String,
+      "sMime": String,
     },
     data: function() {
         return {
@@ -103,8 +107,11 @@ export default {
                 return 'preview?apath=' + this.albumPath + '&file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
             }
         },
+        isPhotosphere: function() {
+            return (this.sMime == GOOGLE_PANORAMA_360_MIMETYPE);
+        },
         openImgFull: function() {
-            this.$emit("imagefull",this.imageUrl(true));
+            this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         }
     }
 }
@@ -180,6 +187,20 @@ function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, 
 
 .image-element {
     pointer-events: all;
+}
+
+.image-element-pano-icon {
+    background-image: url("./img/pano.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+	position: absolute;
+    left: 10px;
+    top: 10px;
+    opacity: 50%;
 }
 
 </style>

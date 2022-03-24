@@ -30,6 +30,7 @@ export default {
             snackbarText: "",
             unsortedAlbumList: [],
             loading: true,
+            lastPage: 0,
         }
     },
     components: {
@@ -38,6 +39,12 @@ export default {
     created: function() {
         this.refreshAlbums();
         this.refreshShares();
+        window.onscroll = () => {
+            let bottomOfWindow = document.documentElement.scrollTop + document.documentElement.clientHeight >= document.documentElement.scrollHeight;
+            if (bottomOfWindow & !this.loading) {
+                this.loadOneAlbumsPage();
+            }
+        };
     },
     computed: {
         "albumList": function() {
@@ -56,22 +63,22 @@ export default {
             });
         },
         refreshAlbums: function() {
-            this.loading = true;
             this.unsortedAlbumList.splice(0);
-            this.refreshAlbumsPage(1);
+            this.lastPage = 0;
+            this.loadOneAlbumsPage();
         },
-        refreshAlbumsPage: function(page) {
-            $.get("apiv2/album?page="+page, data => {
+        loadOneAlbumsPage: function() {
+            this.loading = true;
+            $.get("apiv2/album?page="+(this.lastPage+1), data => {
                 if (data.length > 0) {
+                    this.lastPage += 1;
                     data.forEach(albumId => {
                         $.get("apiv2/album/"+albumId, album => {
                             this.unsortedAlbumList.push(album);
                         });
                     });
-                    this.refreshAlbumsPage(page+1);
-                } else {
-                    this.loading = false;
                 }
+                this.loading = false;
             });
         },
         activateSnackbar: function(texte) {

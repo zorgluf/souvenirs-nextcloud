@@ -4,7 +4,9 @@
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
         v-bind:s-offset-x="element.offsetX" v-bind:s-offset-y="element.offsetY" v-bind:s-zoom="element.zoom"
-				v-bind:s-image="('image' in element) ? element.image.replace(/.*\//, '') : ''" v-bind:key="element.id"
+				v-bind:s-image="('image' in element) ? element.image.replace(/.*\//, '') : ''" 
+        v-bind:s-mime="element.mime"
+        v-bind:key="element.id"
                 v-bind:album-path="albumPath" v-bind:token="token"
                 v-bind:preload="pagePreload" v-bind:s-transform-type="element.transformType"
                 v-bind:s-class="element.class"
@@ -54,8 +56,8 @@ export default {
         "selement": Selement,
     },
     methods: {
-      openImgFull: function(imageUrl) {
-        this.$emit("imagefull",imageUrl);
+      openImgFull: function(imageUrl,isPhotosphere) {
+        this.$emit("imagefull",imageUrl,isPhotosphere);
       }
     },
     mounted: function() {

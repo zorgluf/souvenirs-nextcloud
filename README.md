@@ -4,6 +4,11 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.3.0:
+* Photosphere support
+* Pagination on album list
+* bug fix:
+  * issues with share status sync with android client
 v1.2.0:
 * Enable animated gif
 * bug fix :
