@@ -178,15 +178,23 @@ class Api2Controller extends Controller {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
+		//search locally
 		if ($album->hasAsset($asset_path)) {
 			$asset_relative_path = $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path));
 			return new JSONResponse(array("status" => "ok",
 										"path" => $asset_relative_path,
 									"size" => $this->userFolder->get($asset_relative_path)->getSize() ));
-		} else {
-			return new JSONResponse(array("path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path)),
-				"status" => "missing"));
 		}
+		//search local link
+		if ($album->hasAssetLink($asset_path)) {
+			$asset_link = $album->getAssetLink($asset_path);
+			$asset_relative_path = $this->userFolder->getRelativePath($asset_link->getAssetPath());
+			return new JSONResponse(array("status" => "ok",
+										"path" => $asset_relative_path,
+									"size" => $asset_link->getAssetSize()));
+		}
+		return new JSONResponse(array("path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path)),
+				"status" => "missing"));
 	}
 
 	/**
@@ -200,7 +208,7 @@ class Api2Controller extends Controller {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		if ($album->cleanAssets()) {
+		if ($album->cleanAssets($this->userFolder)) {
 			return new JSONResponse("OK");
 		} else {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);

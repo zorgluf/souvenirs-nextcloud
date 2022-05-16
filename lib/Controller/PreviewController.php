@@ -14,8 +14,7 @@ use \OCP\ILogger;
 use OCA\Souvenirs\Http\ImageResponse;
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
-
-define("DATA_DIR","data");
+use OCA\Souvenirs\Model\Album;
 
 class PreviewController extends Controller {
 
@@ -49,7 +48,9 @@ class PreviewController extends Controller {
 	public function getPreview($apath, $file, $width=-1, $height=-1) {
 
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		return $this->preview($userFolder, $apath, $file, $width, $height);
+		$album = Album::withFolder($userFolder->get($apath));
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		return $this->preview($realFilePath, $width, $height);
 	}
 	
 	/**
@@ -83,15 +84,16 @@ class PreviewController extends Controller {
 		if (is_null($album)) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 		}
-		return $this->preview($userFolder, $userFolder->getRelativePath($album->getAlbumPath()), $file, $width, $height);
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		return $this->preview($realFilePath, $width, $height);
 	}
 
 	/*
 	* internal get preview image function
 	*/
-	private function preview($userFolder, $apath, $file, $width=-1, $height=-1) {
+	private function preview($filePath, $width=-1, $height=-1) {
 		try {
-			$fileObj = $userFolder->get($apath . "/" . DATA_DIR . "/" . $file);
+			$fileObj = $this->rootFolder->get($filePath);
 		} catch (\Exception $exception) {
 			return new JSONResponse(
 				[
