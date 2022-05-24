@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import AlbumItemList from './components/album-item-list'
 
-Vue.config.devtools = true
-
 //for nextcloud vue components
 Vue.prototype.t = window.t
 Vue.prototype.n = window.n

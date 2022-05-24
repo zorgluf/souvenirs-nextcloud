@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Album from './components/album'
 
-Vue.config.devtools = true
 __webpack_nonce__ = btoa(OC.requestToken)
 __webpack_public_path__ = OC.linkTo('souvenirs', 'js/')
 
