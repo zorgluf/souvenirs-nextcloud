@@ -2,6 +2,7 @@
 namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
+use OCP\IConfig;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -9,24 +10,26 @@ use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
 use OCP\AppFramework\Http\JSONResponse;
+use OCA\Souvenirs\Controller\Utils;
 
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
 
-define("ALBUM_CONF_FILENAME","album.json");
-define("ALBUM_DIR","/album");
 
 class PublicController extends Controller {
 	private $il10n;
 	private $shareMapper;
 	private $rootFolder;
+	private $config;
 
 
-	public function __construct($AppName, IRequest $request, IRootFolder $rootFolder, IL10N $il10n, ShareMapper $shareMapper){
+	public function __construct($AppName, IRequest $request, IRootFolder $rootFolder, IL10N $il10n, 
+								ShareMapper $shareMapper, IConfig $config) {
 		parent::__construct($AppName, $request);
 		$this->rootFolder = $rootFolder;
 		$this->il10n = $il10n;
 		$this->shareMapper = $shareMapper;
+		$this->config = $config;
 	}
 
 	/**
@@ -48,7 +51,8 @@ class PublicController extends Controller {
 		$param = array();
 		try {
 			$userFolder = $this->rootFolder->getUserFolder($share->getUser());
-			$albumList = AlbumList::getInstance($userFolder);
+			$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($share->getAlbumId());
 			if (is_null($album)) {
 				return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
@@ -79,7 +83,8 @@ class PublicController extends Controller {
 		}
 		try {
 			$userFolder = $this->rootFolder->getUserFolder($share->getUser());
-			$albumList = AlbumList::getInstance($userFolder);
+			$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($share->getAlbumId());
 			if (is_null($album)) {
 				return new JSONResponse(array(), Http::STATUS_NOT_FOUND);

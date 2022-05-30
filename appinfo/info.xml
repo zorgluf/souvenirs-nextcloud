@@ -24,4 +24,8 @@
             <route>souvenirs.page.index</route>
         </navigation>
     </navigations>
+    <settings>
+        <personal>OCA\Souvenirs\Settings\AdminSettings</personal>
+        <personal-section>OCA\Souvenirs\Settings\AdminSection</personal-section>
+    </settings>
 </info>

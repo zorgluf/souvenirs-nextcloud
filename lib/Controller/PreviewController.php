@@ -2,6 +2,7 @@
 namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
+use OCP\IConfig;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
@@ -15,6 +16,7 @@ use OCA\Souvenirs\Http\ImageResponse;
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
+use OCA\Souvenirs\Controller\Utils;
 
 class PreviewController extends Controller {
 
@@ -23,14 +25,17 @@ class PreviewController extends Controller {
 	private $shareMapper;
 	private $rootFolder;
 	private $logger;
+	private $config;
 
-    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, IPreview $preview, ShareMapper $shareMapper){
+    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, 
+								IPreview $preview, ShareMapper $shareMapper, IConfig $config) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->rootFolder = $rootFolder;
 		$this->preview = $preview;
 		$this->shareMapper = $shareMapper;
 		$this->logger = $logger;
+		$this->config = $config;
     }
     
     /**
@@ -79,7 +84,8 @@ class PreviewController extends Controller {
 			);
 		}
 		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
-		$albumList = AlbumList::getInstance($userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($share->getAlbumId());
 		if (is_null($album)) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));

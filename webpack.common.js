@@ -48,7 +48,7 @@ module.exports = {
 			},
 			{
 				test: /\.svg$/,
-				loader: 'svg-url-loader'
+				type: "asset/inline"
 			}
 		]
 	},
@@ -56,6 +56,6 @@ module.exports = {
 		new VueLoaderPlugin()
 	],
 	resolve: {
-		extensions: ['*', '.js', '.vue', '.json']
+		extensions: [ '.js', '.vue', '.json']
 	}
 }

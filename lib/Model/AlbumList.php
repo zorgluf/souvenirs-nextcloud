@@ -5,22 +5,21 @@ use OCP\Files\IRootFolder;
 use OCP\IL10N;
 use OCA\Souvenirs\Model\Album;
 
-define("ALBUM_DIR","/album");
-
 class AlbumList {
 
-    private $userFolder;
+    private $albumsFolder;
 
 
-    public function __construct($userFolder) {
-        $this->userFolder = $userFolder;
+    public function __construct($albumsFolder) {
+        $this->albumsFolder = $albumsFolder;
     }
+
+
 
     public function getList() {
         try {
-			$file = $this->userFolder->get(ALBUM_DIR);
-			if($file instanceof \OCP\Files\Folder) {
-				$nodes = $file->getDirectoryListing();
+			if($this->albumsFolder instanceof \OCP\Files\Folder) {
+				$nodes = $this->albumsFolder->getDirectoryListing();
 				usort($nodes,function($a,$b) {
 					return strcmp($b->getName(),$a->getName());
 				});
@@ -42,15 +41,14 @@ class AlbumList {
         }
     }
 
-    public static function getInstance($userFolder) {
-        return new AlbumList($userFolder);
+    public static function getInstance($albumsFolder) {
+        return new AlbumList($albumsFolder);
 	}
 	
 	public function getAlbum($id) {
 		try {
-			$file = $this->userFolder->get(ALBUM_DIR);
-			if($file instanceof \OCP\Files\Folder) {
-				$nodes = $file->getDirectoryListing();
+			if($this->albumsFolder instanceof \OCP\Files\Folder) {
+				$nodes = $this->albumsFolder->getDirectoryListing();
 				foreach ($nodes as $node) {
 					if($node instanceof \OCP\Files\Folder) {
 						$album = Album::withFolder($node);
@@ -72,7 +70,7 @@ class AlbumList {
 		if ($this->getAlbum($id) === NULL) {
 			//get dir name
 			$dirname = strftime("%Y%m%d%H%M%S");
-			$albumNode = $this->userFolder->get(ALBUM_DIR)->newFolder($dirname);
+			$albumNode = $$this->albumsFolder->newFolder($dirname);
 			//create album
 			return Album::create($albumNode,$id);
 		} else {
