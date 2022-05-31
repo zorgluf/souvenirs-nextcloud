@@ -4,6 +4,12 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.4.0:
+* Do not duplicate images in album when image already exists on nextcloud storage in user context. Works only on new albums or albums modified by Android client version 2.5.0+.
+* Introduce a new settings, allowing to change the root directory storing the albums files. Default directory set to "Souvenirs" on a fresh install, otherwise old "album" directory used.
+* Major udpates on npm dependencies.
+* bug fix:
+  * Albums list pagination/scrolling not working on mobile devices.
 v1.3.0:
 * Photosphere support
 * Pagination on album list
