@@ -2,6 +2,7 @@
 namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
+use OCP\IConfig;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
@@ -14,8 +15,8 @@ use \OCP\ILogger;
 use OCA\Souvenirs\Http\ImageResponse;
 use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
-
-define("DATA_DIR","data");
+use OCA\Souvenirs\Model\Album;
+use OCA\Souvenirs\Controller\Utils;
 
 class PreviewController extends Controller {
 
@@ -24,14 +25,17 @@ class PreviewController extends Controller {
 	private $shareMapper;
 	private $rootFolder;
 	private $logger;
+	private $config;
 
-    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, IPreview $preview, ShareMapper $shareMapper){
+    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, 
+								IPreview $preview, ShareMapper $shareMapper, IConfig $config) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->rootFolder = $rootFolder;
 		$this->preview = $preview;
 		$this->shareMapper = $shareMapper;
 		$this->logger = $logger;
+		$this->config = $config;
     }
     
     /**
@@ -49,7 +53,9 @@ class PreviewController extends Controller {
 	public function getPreview($apath, $file, $width=-1, $height=-1) {
 
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		return $this->preview($userFolder, $apath, $file, $width, $height);
+		$album = Album::withFolder($userFolder->get($apath));
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		return $this->preview($realFilePath, $width, $height);
 	}
 	
 	/**
@@ -78,20 +84,22 @@ class PreviewController extends Controller {
 			);
 		}
 		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
-		$albumList = AlbumList::getInstance($userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($share->getAlbumId());
 		if (is_null($album)) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 		}
-		return $this->preview($userFolder, $userFolder->getRelativePath($album->getAlbumPath()), $file, $width, $height);
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		return $this->preview($realFilePath, $width, $height);
 	}
 
 	/*
 	* internal get preview image function
 	*/
-	private function preview($userFolder, $apath, $file, $width=-1, $height=-1) {
+	private function preview($filePath, $width=-1, $height=-1) {
 		try {
-			$fileObj = $userFolder->get($apath . "/" . DATA_DIR . "/" . $file);
+			$fileObj = $this->rootFolder->get($filePath);
 		} catch (\Exception $exception) {
 			return new JSONResponse(
 				[

@@ -2,6 +2,7 @@
 namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
+use OCP\IConfig;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
@@ -12,6 +13,7 @@ use OCA\Souvenirs\Db\ShareMapper;
 use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
+use OCA\Souvenirs\Controller\Utils;
 
 define("ALBUM_LIST_PAGE_SIZE",10);
 
@@ -22,16 +24,18 @@ class Api2Controller extends Controller {
 	private $il10n;
 	private $shareMapper;
 	private $urlGen;
+	private $config;
 
-
-	public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, IL10N $il10n, ShareMapper $shareMapper, IURLGenerator $urlGen){
+	public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, IL10N $il10n, 
+								ShareMapper $shareMapper, IURLGenerator $urlGen, IConfig $config) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->userFolder = $rootFolder->getUserFolder($UserId);
 		$this->il10n = $il10n;
 		$this->shareMapper = $shareMapper;
 		$this->urlGen = $urlGen;
-		}
+		$this->config = $config;
+	}
 
 	/**
 	* list album of current user
@@ -39,7 +43,8 @@ class Api2Controller extends Controller {
 	* @NoCSRFRequired
 	*/
 	public function listAlbums($page = 1) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$arrayAlbum = $albumList->getList();
 		if (is_null($arrayAlbum)) {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -58,7 +63,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function createAlbum($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->createAlbum($id);
 		if (!is_null($album)) {
 			return new JSONResponse($album->toArray());
@@ -77,7 +83,8 @@ class Api2Controller extends Controller {
 		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
-			$albumList = AlbumList::getInstance($this->userFolder);
+			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($id);
 		}
 		if (is_null($album)) {
@@ -104,7 +111,8 @@ class Api2Controller extends Controller {
 		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
-			$albumList = AlbumList::getInstance($this->userFolder);
+			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($id);
 		}
 		if (is_null($album)) {
@@ -133,7 +141,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function postAlbum($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -155,7 +164,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function deleteAlbum($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -173,20 +183,29 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function assetExistsInAlbum($id,$asset_path) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
+		//search locally
 		if ($album->hasAsset($asset_path)) {
 			$asset_relative_path = $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path));
 			return new JSONResponse(array("status" => "ok",
 										"path" => $asset_relative_path,
 									"size" => $this->userFolder->get($asset_relative_path)->getSize() ));
-		} else {
-			return new JSONResponse(array("path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path)),
-				"status" => "missing"));
 		}
+		//search local link
+		if ($album->hasAssetLink($asset_path)) {
+			$asset_link = $album->getAssetLink($asset_path);
+			$asset_relative_path = $this->userFolder->getRelativePath($asset_link->getAssetPath());
+			return new JSONResponse(array("status" => "ok",
+										"path" => $asset_relative_path,
+									"size" => $asset_link->getAssetSize()));
+		}
+		return new JSONResponse(array("path" => $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path)),
+				"status" => "missing"));
 	}
 
 	/**
@@ -195,12 +214,13 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function cleanAssets($id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		if ($album->cleanAssets()) {
+		if ($album->cleanAssets($this->userFolder)) {
 			return new JSONResponse("OK");
 		} else {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -213,7 +233,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function createPage($album_id,$page_pos) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -237,7 +258,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function DeletePage($album_id,$page_id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -256,7 +278,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function postPage($album_id,$page_id) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -280,7 +303,8 @@ class Api2Controller extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function movePage($album_id,$page_id,$page_pos) {
-		$albumList = AlbumList::getInstance($this->userFolder);
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->getAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);

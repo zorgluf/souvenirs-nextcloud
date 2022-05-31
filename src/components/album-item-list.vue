@@ -40,7 +40,7 @@ export default {
         this.refreshAlbums();
         this.refreshShares();
         window.onscroll = () => {
-            let bottomOfWindow = document.documentElement.scrollTop + document.documentElement.clientHeight >= document.documentElement.scrollHeight;
+            let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2;
             if (bottomOfWindow & !this.loading) {
                 this.loadOneAlbumsPage();
             }

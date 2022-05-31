@@ -14,6 +14,9 @@ return [
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
 
+    // admin
+    ['name' => 'admin#update', 'url' => '/admin', 'verb' => 'PUT'],
+
     //API v2
     ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET', 'requirements' => array('page' => '[0-9]+') ],
     ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
