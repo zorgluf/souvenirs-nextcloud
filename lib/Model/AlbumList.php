@@ -70,7 +70,7 @@ class AlbumList {
 		if ($this->getAlbum($id) === NULL) {
 			//get dir name
 			$dirname = strftime("%Y%m%d%H%M%S");
-			$albumNode = $$this->albumsFolder->newFolder($dirname);
+			$albumNode = $this->albumsFolder->newFolder($dirname);
 			//create album
 			return Album::create($albumNode,$id);
 		} else {
