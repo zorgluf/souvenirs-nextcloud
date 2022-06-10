@@ -24,6 +24,17 @@ class Element {
         return $this->getContent("image");
     }
 
+    public function getAsset() {
+        $asset = $this->getContent("image");
+        if ($asset === NULL) {
+            $asset = $this->getContent("audio");
+            if ($asset === "") {
+                $asset = NULL;
+            }
+        }
+        return $asset;
+    }
+
     public function toArray() {
         $elementArray = $this->contentArray;
         foreach ($elementArray as $key => $value) {

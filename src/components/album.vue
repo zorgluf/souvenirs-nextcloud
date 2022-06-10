@@ -15,6 +15,7 @@
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
+        <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
         <div v-if="loading" class="center">
             <img src="./img/loading.gif"/>
         </div>
@@ -25,6 +26,7 @@
 
 import Page from './page'
 import Imagefull from './imagefull'
+import AudioPlayer from './audio_player'
 
 export default {
     props: {
@@ -54,7 +56,32 @@ export default {
         },
         "nbPage": function() {
             return this.pages.length;
-        }
+        },
+        "audioUrl": function() {
+            if (this.pages.length > 0) {
+                var audioElement = getAudioElement(this.pages[this.displayedPage]);
+                if (audioElement != null) {
+                    if (audioElement.audio != "") {
+                        if (this.token != "") {
+                            return this.token+'/asset?file=' + basename(audioElement.audio);
+                        } else {
+                            return 'asset?apath=' + this.path + '&file=' + basename(audioElement.audio);
+                        }
+                        
+                    }
+                }
+            }
+            return "";
+        },
+        "isStopCmd": function() {
+            if (this.pages.length > 0) {
+                var audioElement = getAudioElement(this.pages[this.displayedPage]);
+                if (audioElement != null) {
+                    return audioElement.stop;
+                }
+            }
+            return false;
+        },
     },
     methods: {
         showNext: function () {
@@ -105,7 +132,21 @@ export default {
     components: {
         page: Page,
         Imagefull: Imagefull,
+        AudioPlayer: AudioPlayer,
     },
+}
+
+var getAudioElement = function(page) {
+    for (let i = 0; i < page.elements.length; i++) {
+        var element = page.elements[i];
+        if (element.class == "AudioElement") {
+            return element;
+        }
+    }
+    return null;
+}
+function basename(path) {
+   return path.split('/').reverse()[0];
 }
 </script>
 

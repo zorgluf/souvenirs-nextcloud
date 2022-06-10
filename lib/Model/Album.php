@@ -224,9 +224,9 @@ class Album {
         //loop on page/element to check if assets still in use
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
-                if (!is_null($element->getImage())) {
+                if (!is_null($element->getAsset())) {
                     $dataFiles = array_filter($dataFiles,function ($v) use ($element) {
-                        return !(str_starts_with($v->getName(),basename($element->getImage())));
+                        return !(str_starts_with($v->getName(),basename($element->getAsset())));
                     });
                 }
             }

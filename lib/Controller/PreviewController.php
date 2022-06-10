@@ -6,6 +6,7 @@ use OCP\IConfig;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\StreamResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
@@ -37,6 +38,23 @@ class PreviewController extends Controller {
 		$this->logger = $logger;
 		$this->config = $config;
     }
+
+	/**
+	 * get asset
+	 * @NoAdminRequiredrealFilePath
+	 * @NoCSRFRequired
+	 */
+	public function getAsset($apath, $file) {
+		$userFolder = $this->rootFolder->getUserFolder($this->userId);
+		$album = Album::withFolder($userFolder->get($apath));
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		$node = $this->rootFolder->get($realFilePath);
+		$response = new StreamResponse($node->fopen("r"));
+		$response->addHeader('Content-Disposition', 'attachment; filename="' . $node->getName() . '"');
+		$response->addHeader('Content-Type', $node->getMimetype());
+		return $response;
+
+	}
     
     /**
 	 * @NoAdminRequired
@@ -92,6 +110,36 @@ class PreviewController extends Controller {
 		}
 		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
 		return $this->preview($realFilePath, $width, $height);
+	}
+
+	/**
+	 * get public asset
+	 * @NoAdminRequiredrealFilePath
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 */
+	public function getPublicAsset($token, $file) {
+		//check token and get album path
+		$share = $this->shareMapper->findByToken($token);
+		if (is_null($share)) {
+			return new JSONResponse(
+				[
+					'message' => "Album do not exists.",
+					'success' => false
+				], Http::STATUS_NOT_FOUND
+			);
+		}
+		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
+		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
+		$album = $albumList->getAlbum($share->getAlbumId());
+		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		$node = $this->rootFolder->get($realFilePath);
+		$response = new StreamResponse($node->fopen("r"));
+		$response->addHeader('Content-Disposition', 'attachment; filename="' . $node->getName() . '"');
+		$response->addHeader('Content-Type', $node->getMimetype());
+		return $response;
+
 	}
 
 	/*
