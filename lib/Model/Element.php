@@ -24,15 +24,21 @@ class Element {
         return $this->getContent("image");
     }
 
-    public function getAsset() {
-        $asset = $this->getContent("image");
-        if ($asset === NULL) {
-            $asset = $this->getContent("audio");
-            if ($asset === "") {
-                $asset = NULL;
-            }
+    public function getAssets() {
+        $assets = array();
+        $asset_image = $this->getContent("image");
+        if (($asset_image !== NULL) && ($asset_image !== "")) {
+            array_push($assets,$asset_image);
         }
-        return $asset;
+        $asset_audio = $this->getContent("audio");
+        if (($asset_audio !== NULL) && ($asset_audio !== "")) {
+            array_push($assets,$asset_audio);
+        }
+        $asset_video = $this->getContent("video");
+        if (($asset_video !== NULL) && ($asset_video !== "")) {
+            array_push($assets,$asset_video);
+        }
+        return $assets;
     }
 
     public function toArray() {

@@ -3,7 +3,7 @@
 	    <i class="arrow-left" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path"
-            v-bind:token="token" v-on:imagefull="openImgFull">
+            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	    </page>
 	    <i class="arrow-right" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
         <div class="progress">
@@ -15,6 +15,9 @@
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
+        <videofull v-if="videoFullOn" v-bind:videoUrl="videoFullUrl"
+            v-on:click="closeVideoFull" v-on:closevideofull="closeVideoFull">
+        </videofull>
         <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
         <div v-if="loading" class="center">
             <img src="./img/loading.gif"/>
@@ -26,6 +29,7 @@
 
 import Page from './page'
 import Imagefull from './imagefull'
+import Videofull from './videofull'
 import AudioPlayer from './audio_player'
 
 export default {
@@ -39,6 +43,8 @@ export default {
             "imageFullOn": false,
             "imageFullUrl": "",
             "imageFullIsPhotosphere": false,
+            "videoFullOn": false,
+            "videoFullUrl": "",
             "sName": "",
             "pages": [],
             "loading": true,
@@ -104,8 +110,15 @@ export default {
             this.imageFullIsPhotosphere = isPhotosphere;
             this.imageFullOn = true;
         },
+        openVideoFull: function(videoUrl) {
+            this.videoFullUrl = videoUrl;
+            this.videoFullOn = true;
+        },
         closeImgFull: function() {
             this.imageFullOn = false;
+        },
+        closeVideoFull: function() {
+            this.videoFullOn = false;
         },
         fullscreen: function() {
             $(".s-album").each(function() {
@@ -132,6 +145,7 @@ export default {
     components: {
         page: Page,
         Imagefull: Imagefull,
+        Videofull: Videofull,
         AudioPlayer: AudioPlayer,
     },
 }
