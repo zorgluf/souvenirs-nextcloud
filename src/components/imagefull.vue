@@ -1,5 +1,5 @@
 <template>
-    <div v-bind:class="isPhotosphere ? 'image-full' : 'image-full'" id="image_full">
+    <div class="image-full" id="image_full">
 		<img class="fill" v-bind:src="imageUrl" v-on:click="closeImgFull" v-if="!isPhotosphere"/>
     </div>
 </template>

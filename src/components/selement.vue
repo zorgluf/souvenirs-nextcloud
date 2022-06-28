@@ -1,11 +1,16 @@
 <template>
     <div ref="eldiv" v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
+        <video id="video" v-if="isFocus && sClass.endsWith('VideoElement')" v-on:click="openVideo"
+            v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
+            <source v-bind:src="videoUrl">
+        </video>
 		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
-        v-if="sImage != '' && sClass.endsWith('ImageElement')" 
+        v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
+        <div v-if="sVideo != null" class="image-element-video-icon"/>
     </div>
 </template>
 
@@ -26,6 +31,7 @@ export default {
       "sRight": Number,
       "sText": String,
       "sImage": String,
+      "sVideo": String,
       "sTransformType": Number,
       "sZoom": Number,
       "sOffsetX": Number,
@@ -35,6 +41,7 @@ export default {
       "preload": Boolean,
       "token": String,
       "sMime": String,
+      "isFocus": Boolean,
     },
     data: function() {
         return {
@@ -50,7 +57,7 @@ export default {
                     this.loadImage();
                 }
             }
-        }
+        },
     },
     created: function() {
             if (this.preload) {
@@ -78,6 +85,15 @@ export default {
         'isImgFill': function() {
             return (this.sTransformType == IMG_FILL);
         },
+        'videoUrl': function() {
+            if (this.sVideo != null) {
+                if (this.token != "") {
+                    return this.token+'/asset?file=' + basename(this.sVideo);
+                } else {
+                    return 'asset?apath=' + this.albumPath + '&file=' + basename(this.sVideo);
+                }
+            }
+        },
     },
     methods: {
         loadImage: function() {
@@ -89,7 +105,7 @@ export default {
         },
         onLoadedImage: function() {
             this.sImageSrc = this.loadingImage.src;
-            if ((this.sClass == 'ImageElement') && (this.sTransformType == IMG_ZOOMOFFSET)) {
+            if (((this.sClass == 'ImageElement') || (this.sClass == 'VideoElement')) && (this.sTransformType == IMG_ZOOMOFFSET)) {
                 this.imageStyle = getImageZoomOffsetStyle(this.sZoom,this.sOffsetX,this.sOffsetY,this.$refs.eldiv.clientWidth,this.$refs.eldiv.clientHeight,this.loadingImage.width,this.loadingImage.height);
             }
         },
@@ -112,6 +128,9 @@ export default {
         },
         openImgFull: function() {
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
+        },
+        openVideo: function() {
+            this.$emit("videofull",this.videoUrl);
         }
     }
 }
@@ -138,6 +157,10 @@ function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, 
     style["transform-origin"] = originX+"px "+originY+"px";
             
     return style;
+}
+
+function basename(path) {
+   return path.split('/').reverse()[0];
 }
 </script>
 
@@ -189,8 +212,27 @@ function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, 
     pointer-events: all;
 }
 
+.video-element {
+    z-index: 5;
+    pointer-events: all;
+}
+
 .image-element-pano-icon {
     background-image: url("./img/pano.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+	position: absolute;
+    left: 10px;
+    top: 10px;
+    opacity: 50%;
+}
+
+.image-element-video-icon {
+    background-image: url("./img/video.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;

@@ -10,7 +10,8 @@
                 v-bind:album-path="albumPath" v-bind:token="token"
                 v-bind:preload="pagePreload" v-bind:s-transform-type="element.transformType"
                 v-bind:s-class="element.class"
-                v-on:imagefull="openImgFull">
+                v-bind:s-video="element.video" v-bind:is-focus="isFocus"
+                v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	</selement>
     </div>
 </template>
@@ -28,6 +29,11 @@ export default {
       "albumPath": String,
       "token": String,
     },
+    data: function() {
+        return {
+            "isFocus": false,
+        }
+    },
     computed: {
         "pagePreload": function() {
           if (Math.abs(this.displayedPage - this.sNum) < 3) {
@@ -41,13 +47,17 @@ export default {
         // whenever page changes, this function will run
         displayedPage: function (newPage, oldPage) {
           if (this.displayedPage == this.sNum) {
-              //update text size
-              fitText();
-              //scroll to page
-              var albumEl = $("#"+this.sId).parent();
-              albumEl.animate(
-                { scrollLeft: albumEl.scrollLeft() + $("#"+this.sId).offset().left - (albumEl.width() - albumEl.height())/2 },
-                500);
+            //update text size
+            fitText();
+            //scroll to page
+            var albumEl = $("#"+this.sId).parent();
+            albumEl.animate(
+              { scrollLeft: albumEl.scrollLeft() + $("#"+this.sId).offset().left - (albumEl.width() - albumEl.height())/2 },
+              500);
+            //mark page as displayed
+            this.isFocus = true;
+          } else {
+            this.isFocus = false;
           }
           
         }
@@ -58,6 +68,9 @@ export default {
     methods: {
       openImgFull: function(imageUrl,isPhotosphere) {
         this.$emit("imagefull",imageUrl,isPhotosphere);
+      },
+      openVideoFull: function(videoUrl) {
+        this.$emit("videofull",videoUrl);
       }
     },
     mounted: function() {

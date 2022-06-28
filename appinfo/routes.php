@@ -13,6 +13,7 @@ return [
        ['name' => 'page#show', 'url' => '/show', 'verb' => 'GET', 'requirements' => array('apath' => '.+')],
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
+    ['name' => 'preview#get_asset', 'url' => '/asset', 'verb' => 'GET', 'requirements' => array('apath' => '.+', 'file' => '.+') ],
 
     // admin
     ['name' => 'admin#update', 'url' => '/admin', 'verb' => 'PUT'],
@@ -41,6 +42,7 @@ return [
     ['name' => 'public#show', 'url' => '/public/{token}', 'verb' => 'GET'],
     ['name' => 'public#get_album_full', 'url' => '/public/{token}/album', 'verb' => 'GET'],
     ['name' => 'preview#get_public_preview', 'url' => '/public/{token}/preview', 'verb' => 'GET','requirements' => array('file' => '.+')],
+    ['name' => 'preview#get_public_asset', 'url' => '/public/{token}/asset', 'verb' => 'GET','requirements' => array('file' => '.+')],
     
     ]
 ];
