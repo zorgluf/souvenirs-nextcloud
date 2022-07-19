@@ -27,6 +27,7 @@ return [
     ['name' => 'api2#delete_album', 'url' => '/apiv2/album/{id}', 'verb' => 'DELETE' ],
 
     ['name' => 'api2#asset_exists_in_album', 'url' => '/apiv2/album/{id}/assetprobe/{asset_path}', 'verb' => 'GET', 'requirements' => array('asset_path' => '.+')],
+    ['name' => 'api2#asset_search', 'url' => '/apiv2/album/{id}/assetsearch', 'verb' => 'GET' ],
     ['name' => 'api2#clean_assets', 'url' => '/apiv2/album/{id}/clean', 'verb' => 'GET' ],
 
     ['name' => 'api2#create_page', 'url' => '/apiv2/album/{album_id}/page/{page_pos}', 'verb' => 'PUT' ],

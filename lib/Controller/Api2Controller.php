@@ -209,6 +209,26 @@ class Api2Controller extends Controller {
 	}
 
 	/**
+	 * search for same asset in all nextcloud user files
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function assetSearch($id,$asset,$asset_name,$asset_size) {
+		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+		$albumList = AlbumList::getInstance($albumsFolder);
+		$album = $albumList->getAlbum($id);
+		if (is_null($album)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
+		if ($album->searchAssetAndLink($this->userFolder,$asset,$asset_name,(int)$asset_size)) {
+			return new JSONResponse(array("linkCreated" => "OK",
+				"status" => "found"));
+		} else {
+			return new JSONResponse(array("status" => "notfound"));
+		}
+	}
+
+	/**
 	 * clean assets
 	 * @NoAdminRequired
 	 * @NoCSRFRequired

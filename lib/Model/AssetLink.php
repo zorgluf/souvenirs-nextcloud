@@ -17,26 +17,34 @@ class AssetLink {
     public static function createFromFile(File $assetLinkFile) {
         $assetLinkJson = json_decode($assetLinkFile->getContent());
         $assetLink = new self();
+        if ($assetLinkJson->assetPath == NULL) {
+            return NULL;
+        }
         $assetLink->setAssetPath($assetLinkJson->assetPath);
+        if ($assetLinkJson->assetSize == NULL) {
+            return NULL;
+        }
         $assetLink->setAssetSize($assetLinkJson->assetSize);
         return $assetLink;
     }
 
-    public static function replaceAssetWithLink(File $asset, Node $targetFile) {
+    public static function createLinkFromAsset(File $link, File $asset, Node $targetFile) {
+        //save assetlink
+        $assetLink = AssetLink::createLink($link,$targetFile);
+        //delete original asset
+        $asset->delete();
+
+        return $assetLink;
+    }
+
+    public static function createLink(File $link, Node $targetFile) {
         //create assetlink
         $assetLink = new self();
         $assetLink->setAssetPath($targetFile->getPath());
         $assetLink->setAssetSize($targetFile->getSize());
         //save assetlink
-        $linkName = $asset->getName().".lnk";
-        if ($asset->getParent()->nodeExists($linkName)) {
-            $file = $asset->getParent()->get($linkName);
-        } else {
-            $file = $asset->getParent()->newFile($linkName);
-        }
-        $assetLink->saveToFile($file);
-        //delete original asset
-        $asset->delete();
+        $assetLink->saveToFile($link);
+
         return $assetLink;
     }
 
