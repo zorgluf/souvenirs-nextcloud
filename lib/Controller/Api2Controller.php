@@ -135,6 +135,26 @@ class Api2Controller extends Controller {
 		return new JSONResponse($albumArray);
 	}
 
+		/**
+	 * get album assets
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function getAlbumAssets($id,$apath) {
+		if ($apath !== null) {
+			$album = Album::withFolder($this->userFolder->get($apath));
+		} else {
+			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
+			$album = $albumList->getAlbum($id);
+		}
+		if (is_null($album)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
+		$assetsArray = $album->getAssets();
+		return new JSONResponse($assetsArray);
+	}
+
 	/**
 	 * post album infos
 	 * @NoAdminRequired

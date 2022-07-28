@@ -253,6 +253,18 @@ class Album {
         return true;
     }
 
+    public function getAssets() {
+        $assets = array();
+        foreach ($this->getPages() as $page) {
+            foreach ($page->getElements() as $element) {
+                foreach ($element->getAssets() as $asset) {
+                    $assets[] = array("assetPath" => $asset);
+                }
+            }
+        }
+        return $assets;    
+    }
+
     public function searchAssetAndLink($userFolder,$assetPath,$asset_name,$asset_size) {
         //if link exists, skip the search
         if ($this->hasAssetLink($assetPath)) {

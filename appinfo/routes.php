@@ -22,6 +22,7 @@ return [
     ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET', 'requirements' => array('page' => '[0-9]+') ],
     ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
     ['name' => 'api2#get_album_full', 'url' => '/apiv2/album/{id}/full', 'verb' => 'GET' ],
+    ['name' => 'api2#get_album_assets', 'url' => '/apiv2/album/{id}/assets', 'verb' => 'GET' ],
     ['name' => 'api2#create_album', 'url' => '/apiv2/album/{id}', 'verb' => 'PUT' ],
     ['name' => 'api2#post_album', 'url' => '/apiv2/album/{id}', 'verb' => 'POST' ],
     ['name' => 'api2#delete_album', 'url' => '/apiv2/album/{id}', 'verb' => 'DELETE' ],

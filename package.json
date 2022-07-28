@@ -15,7 +15,9 @@
     "webpack-merge": "^5.8.0",
     "@nextcloud/vue": "^5.3.1",
     "@nextcloud/router": "^2.0.0",
-    "photo-sphere-viewer": "^4.6.2"
+    "photo-sphere-viewer": "^4.6.2",
+    "jszip": "^3.10.0",
+    "file-saver": "^2.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.18.0",

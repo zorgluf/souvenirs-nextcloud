@@ -11,7 +11,8 @@
             v-on:click="showN(index)">
             </div>
         </div>
-        <div class="fullscreen" v-on:click="fullscreen"></div>
+        <div class="fullscreenIcon transparent top-right" v-on:click="fullscreen"></div>
+        <div class="downloadIcon transparent top-left" v-on:click="openDownloadModal"></div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
@@ -19,9 +20,14 @@
             v-on:click="closeVideoFull" v-on:closevideofull="closeVideoFull">
         </videofull>
         <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
-        <div v-if="loading" class="center">
+        <div v-if="loading" class="center-page">
             <img src="./img/loading.gif"/>
         </div>
+        <Modal v-if="downloadModal" @close="closeDownload" size="small">
+            <p class="center">Click to download album in a zip file.</p>
+            <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
+            <ProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
+        </Modal>
     </div>
 </template>
 
@@ -31,6 +37,10 @@ import Page from './page'
 import Imagefull from './imagefull'
 import Videofull from './videofull'
 import AudioPlayer from './audio_player'
+import Modal from '@nextcloud/vue/dist/Components/Modal'
+import ProgressBar from '@nextcloud/vue/dist/Components/ProgressBar'
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 
 export default {
     props: {
@@ -48,6 +58,10 @@ export default {
             "sName": "",
             "pages": [],
             "loading": true,
+            "downloadModal": false,
+            "downloadActive": false,
+            "downloadProgress": 0,
+            "albumJson": "",
         }
     },
     mounted: function() {
@@ -125,19 +139,76 @@ export default {
                 this.requestFullscreen();
             });
         },
+        openDownloadModal: function() {
+            this.downloadModal = true;
+        },
+        closeDownload: function() {
+            this.downloadModal = false;
+        },
+        download: async function() {
+            this.downloadProgress = 0;
+            this.downloadActive = true;
+            await this.$nextTick();
+
+            //create zip instance
+            var zip = new JSZip();
+            //add album
+            zip.file("album.json",this.albumJson);
+            var data = zip.folder("data");
+            //gen assets list
+            var asset_list = [];
+            for (let p = 0; p < this.pages.length; p++) {
+                let page = this.pages[p];
+                for (let e = 0; e < page.elements.length; e++) {
+                    let element = page.elements[e];
+                    if ("image" in element) {
+                        asset_list.push(element.image);
+                    }
+                    if ("video" in element) {
+                        asset_list.push(element.video);
+                    }
+                    if ("audio" in element) {
+                        asset_list.push(element.audio);
+                    }
+                }
+            }
+            //download and add to zip
+            for (let i = 0; i < asset_list.length; i++) {
+                let asset = asset_list[i];
+                if (this.token != "") {
+                    const d = await getFile(this.token + '/asset?file=' + encodeURIComponent(basename(asset)));
+                    if (d) data.file(basename(asset),d,{binary:true});
+                } else {
+                    const d = await getFile('asset' + '?apath=' + encodeURIComponent(this.path) + '&file=' + encodeURIComponent(basename(asset)));
+                    if (d) data.file(basename(asset),d,{binary:true});
+                }
+                this.downloadProgress = 100 * i / asset_list.length;
+                await this.$nextTick();
+            }
+            //download zip
+            let zipName = this.sName;
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                saveAs(content, zipName);
+            });
+
+            this.downloadActive = false;
+            this.downloadModal = false;
+        },
         refreshAlbum: function() {
             this.loading = true;
             if (this.token != "") {
                 $.get(this.token+"/album", album => {
-                this.sName = album.name;
-                this.pages = album.pages;
-                this.loading = false;
+                    this.albumJson = JSON.stringify(album);
+                    this.sName = album.name;
+                    this.pages = album.pages;
+                    this.loading = false;
                 });
             } else {
                 $.get("apiv2/album/unknown/full?apath="+this.path, album => {
-                this.sName = album.name;
-                this.pages = album.pages;
-                this.loading = false;
+                    this.albumJson = JSON.stringify(album);
+                    this.sName = album.name;
+                    this.pages = album.pages;
+                    this.loading = false;
                 });
             }
         },
@@ -147,6 +218,8 @@ export default {
         Imagefull: Imagefull,
         Videofull: Videofull,
         AudioPlayer: AudioPlayer,
+        Modal: Modal,
+        ProgressBar: ProgressBar,
     },
 }
 
@@ -161,6 +234,17 @@ var getAudioElement = function(page) {
 }
 function basename(path) {
    return path.split('/').reverse()[0];
+}
+function getFile($url) {
+    return new Promise(function(result) {
+        const request = new XMLHttpRequest();
+        request.open('GET', $url);
+        request.responseType = "arraybuffer";
+        request.onload = function (oEvent) {
+            result(request.response); 
+        };
+        request.send(null);
+    });
 }
 </script>
 
@@ -239,28 +323,57 @@ function basename(path) {
     background-color: #d2d2d2;
 }
 
-.fullscreen {
+.fullscreenIcon {
     background-image: url("./img/fullscreen.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+
+.transparent {
+    opacity: 50%;
+}
+
+.top-right {
     display: inline-block;
 	position: absolute;
     right: 5px;
     top: 5px;
+}
+
+.top-left {
+    display: inline-block;
+	position: absolute;
+    left: 5px;
+    top: 5px;
+}
+
+.downloadIcon {
+    background-image: url("./img/download.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
     width: 50px;
     height: 50px;
-    opacity: 50%;
 }
 
 :fullscreen .fullscreen {
     visibility: hidden;
 }
 
-.center {
+.center-page {
   position: fixed;
   top: 50%;
   left: 50%;
 }
 
+p.center {
+    text-align: center;    
+}
+
+div.center {
+    margin: 0 auto;
+}
 </style>
