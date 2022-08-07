@@ -29,7 +29,7 @@ export default {
             shares: [],
             snackbarText: "",
             unsortedAlbumList: [],
-            loading: true,
+            loading: 0,
             lastPage: 0,
         }
     },
@@ -39,12 +39,14 @@ export default {
     created: function() {
         this.refreshAlbums();
         this.refreshShares();
-        window.onscroll = () => {
-            let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2;
-            if (bottomOfWindow & !this.loading) {
-                this.loadOneAlbumsPage();
+        window.onscroll = () => this.loadAlbumPageIfNeeded();
+    },
+    watch: {
+        loading(newLoading, oldLoading) {
+            if ((newLoading == 0) && (oldLoading != 0)) {
+                this.loadAlbumPageIfNeeded();
             }
-        };
+        }
     },
     computed: {
         "albumList": function() {
@@ -67,18 +69,41 @@ export default {
             this.lastPage = 0;
             this.loadOneAlbumsPage();
         },
+        loadAlbumPageIfNeeded: function() {
+            let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2;
+            if (bottomOfWindow & (this.loading == 0)) {
+                this.loadOneAlbumsPage();
+            }
+        },
         loadOneAlbumsPage: function() {
-            this.loading = true;
-            $.get("apiv2/album?page="+(this.lastPage+1), data => {
-                if (data.length > 0) {
-                    this.lastPage += 1;
-                    data.forEach(albumId => {
-                        $.get("apiv2/album/"+albumId, album => {
-                            this.unsortedAlbumList.push(album);
+            this.loading += 1;
+            var that = this;
+            $.ajax({
+                url: "apiv2/album?page="+(that.lastPage+1),
+                type: "GET",
+                success: function(data) {
+                    if (data.length > 0) {
+                        that.lastPage += 1;
+                        data.forEach(albumId => {
+                            that.loading += 1;
+                            $.ajax({
+                                url: "apiv2/album/"+albumId,
+                                type: "GET",
+                                success: function(album) {
+                                    that.unsortedAlbumList.push(album);
+                                    that.loading -= 1;
+                                },
+                                error: function(data) {
+                                    that.loading -= 1;
+                                }
+                            });
                         });
-                    });
+                    }
+                    that.loading -= 1;
+                },
+                error: function(data) {
+                    that.loading -= 1;
                 }
-                this.loading = false;
             });
         },
         activateSnackbar: function(texte) {

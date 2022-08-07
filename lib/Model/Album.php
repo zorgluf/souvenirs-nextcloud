@@ -244,42 +244,66 @@ class Album {
         //search for duplicated files in user root FS and create assetLinks
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
-                if (is_null($element->getImage())) {
-                    continue;
+                foreach ($element->getAssets() as $asset) {
+                    $this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$element->getContent("size"));
                 }
-                //if link exists, skip the search
-                if ($this->hasAssetLink($element->getImage())) {
-                    continue;
-                }
-                if (is_null($element->getContent("name")) || $element->getContent("name") === "") {
-                    continue;
-                }
-                if (is_null($element->getContent("size")) || $element->getContent("size") === 0) {
-                    continue;
-                }
-                //if name and size look for similar file
-                $nodesSameName = $userFolder->search($element->getContent("name"));
-                foreach ($nodesSameName as $node) {
-                    //do not link if in an other album
-                    if (str_starts_with($node->getPath(),$this->albumNode->getParent()->getPath())) {
-                        continue;
-                    }
-                    if ($node->getSize() === $element->getContent("size")) {
-                        //same name and size -> replace asset with a link
-                        try {
-                            $asset = $this->albumNode->get($element->getContent("image"));
-                            $link = AssetLink::replaceAssetWithLink($asset, $node);
-                            break;
-                        } catch (NotFoundException $e) {
-                            //TODO log error
-                            continue;
-                        }
-                        
-                    }
-                }
+                
             }
         }
         return true;
+    }
+
+    public function getAssets() {
+        $assets = array();
+        foreach ($this->getPages() as $page) {
+            foreach ($page->getElements() as $element) {
+                foreach ($element->getAssets() as $asset) {
+                    $assets[] = array("assetPath" => $asset);
+                }
+            }
+        }
+        return $assets;    
+    }
+
+    public function searchAssetAndLink($userFolder,$assetPath,$asset_name,$asset_size) {
+        //if link exists, skip the search
+        if ($this->hasAssetLink($assetPath)) {
+            return TRUE;
+        }
+        if (is_null($asset_name) || $asset_name === "") {
+            return FALSE;
+        }
+        if (is_null($asset_size) || $asset_size === 0) {
+            return FALSE;
+        }
+        //if name and size look for similar file
+        $nodesSameName = $userFolder->search($asset_name);
+        foreach ($nodesSameName as $node) {
+            //do not link if in an other album
+            if (str_starts_with($node->getPath(),$this->albumNode->getParent()->getPath())) {
+                continue;
+            }
+            if ($node->getSize() === $asset_size) {
+                //compute link name
+                $linkPath = $assetPath.".lnk";
+                if ($this->albumNode->nodeExists($linkPath)) {
+                    $linkFile = $this->albumNode->get($linkPath);
+                } else {
+                    $linkFile = $this->albumNode->newFile($linkPath);
+                }
+                //if asset exists, replace with link
+                if ($this->albumNode->nodeExists($assetPath)) {
+                    $assetNode = $this->albumNode->get($assetPath);
+                    $link = AssetLink::createLinkFromAsset($linkFile,$assetNode, $node);
+                    return TRUE;
+                } else {
+                    //just create link
+                    $link = AssetLink::createLink($linkFile, $node);
+                    return TRUE;
+                }
+            }
+        }
+        return FALSE;
     }
 
     public function getPath() {
