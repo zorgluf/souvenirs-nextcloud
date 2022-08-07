@@ -4,6 +4,12 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.6.0:
+* Enable asset (image, video) reuse on nextcloud server, preventing unecessary uploads
+* Enable the user to download full album in a zip file
+* Bug fix:
+  * Broken link on image loading icon
+  * Album list incomplete on large screen
 v1.5.0:
 * Add audio support
 * Add video support
