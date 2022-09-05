@@ -24,6 +24,14 @@ class Element {
         return $this->getContent("image");
     }
 
+    public function isVideo() {
+        $class = $this->getContent("class");
+        if ($class === "VideoElement") {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
     public function getAssets() {
         $assets = array();
         $asset_image = $this->getContent("image");

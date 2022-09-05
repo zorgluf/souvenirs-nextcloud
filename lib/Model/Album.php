@@ -244,10 +244,14 @@ class Album {
         //search for duplicated files in user root FS and create assetLinks
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
-                foreach ($element->getAssets() as $asset) {
-                    $this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$element->getContent("size"));
+                if ($element->isVideo()) {
+                    //search only for video asset, preview image is generated, so not present elsewhere
+                    $this->searchAssetAndLink($userFolder,$element->getContent("video"),$element->getContent("name"),$element->getContent("size"));
+                } else {
+                    foreach ($element->getAssets() as $asset) {
+                        $this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$element->getContent("size"));
+                    }
                 }
-                
             }
         }
         return true;
