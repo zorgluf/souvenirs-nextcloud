@@ -289,7 +289,7 @@ function getFile($url) {
     background-position: center center;
     background-size: contain;
 	display: inline-block;
-	position: absolute;
+	position: fixed;
     top: 50%;
     transform: translateY(-50%);
 	right: 20px;
@@ -309,7 +309,7 @@ function getFile($url) {
     background-position: center center;
     background-size: contain;
 	display: inline-block;
-	position: absolute;
+	position: fixed;
 	left: 20px;
 	width: 100px;
 	height: 80%;
