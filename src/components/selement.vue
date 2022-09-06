@@ -22,6 +22,8 @@ const IMG_ZOOMOFFSET = 2;
 
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
+import ImgLoading from "./img/loading.gif"
+
 export default {
     props: {
       "sId": String,
@@ -45,7 +47,7 @@ export default {
     },
     data: function() {
         return {
-            "sImageSrc": require('./img/loading.gif'),
+            "sImageSrc": ImgLoading,
             "loadingImage": null,
             "imageStyle": {},
         }
