@@ -1,5 +1,7 @@
 <template>
-    <div ref="eldiv" v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
+    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
+    v-bind:id="sId"
+    v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
         <video id="video" v-if="isFocus && sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
@@ -245,6 +247,21 @@ function basename(path) {
     left: 10px;
     top: 10px;
     opacity: 50%;
+}
+
+.blur-back::before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--image-src-url);
+    background-size: 100% 100%;
+    background-position: center;
+    filter: blur(25px);
+    opacity: 0.5;
 }
 
 </style>
