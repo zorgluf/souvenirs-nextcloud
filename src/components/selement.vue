@@ -7,12 +7,13 @@
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
             <source v-bind:src="videoUrl">
         </video>
-		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
+		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
         v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
+        <div v-bind:id="'pano-'+sId" style="position:absolute;top:0;left:0;width: 100%;height: 100%;"/>
     </div>
 </template>
 
@@ -25,6 +26,8 @@ const IMG_ZOOMOFFSET = 2;
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
 import ImgLoading from "./img/loading.gif"
+import { Viewer } from 'photo-sphere-viewer';
+import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
 
 export default {
     props: {
@@ -111,6 +114,17 @@ export default {
             this.sImageSrc = this.loadingImage.src;
             if (((this.sClass == 'ImageElement') || (this.sClass == 'VideoElement')) && (this.sTransformType == IMG_ZOOMOFFSET)) {
                 this.imageStyle = getImageZoomOffsetStyle(this.sZoom,this.sOffsetX,this.sOffsetY,this.$refs.eldiv.clientWidth,this.$refs.eldiv.clientHeight,this.loadingImage.width,this.loadingImage.height);
+            }
+            if (this.isPhotosphere()) {
+                var pano = new Viewer({
+                    panorama: this.imageUrl(true),
+                    container: "pano-"+this.sId,
+                    loadingImg: './img/loading.gif',
+                    useXmpData: true,
+                    defaultLong: 110,
+                    navbar: [],
+                    autorotateDelay: 1
+                });
             }
         },
         imageUrl: function(full = false) {
