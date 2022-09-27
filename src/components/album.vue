@@ -21,7 +21,7 @@
         </videofull>
         <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
         <div v-if="loading" class="center-page">
-            <img src="./img/loading.gif"/>
+            <img v-bind:src="imgLoading"/>
         </div>
         <Modal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">Click to download album in a zip file.</p>
@@ -41,6 +41,7 @@ import Modal from '@nextcloud/vue/dist/Components/Modal'
 import ProgressBar from '@nextcloud/vue/dist/Components/ProgressBar'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import ImgLoading from "./img/loading.gif"
 
 export default {
     props: {
@@ -62,6 +63,7 @@ export default {
             "downloadActive": false,
             "downloadProgress": 0,
             "albumJson": "",
+            "imgLoading": ImgLoading,
         }
     },
     mounted: function() {

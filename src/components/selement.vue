@@ -1,16 +1,19 @@
 <template>
-    <div ref="eldiv" v-bind:class="['s-element', ]" v-bind:id="sId" v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;'">
+    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
+    v-bind:id="sId"
+    v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
         <video id="video" v-if="isFocus && sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
             <source v-bind:src="videoUrl">
         </video>
-		<img v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
+		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
         v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
+        <div v-bind:id="'pano-'+sId" style="position:absolute;top:0;left:0;width: 100%;height: 100%;"/>
     </div>
 </template>
 
@@ -21,6 +24,10 @@ const IMG_CENTERCROP = 1;
 const IMG_ZOOMOFFSET = 2;
 
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
+
+import ImgLoading from "./img/loading.gif"
+import { Viewer } from 'photo-sphere-viewer';
+import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
 
 export default {
     props: {
@@ -45,7 +52,7 @@ export default {
     },
     data: function() {
         return {
-            "sImageSrc": require('./img/loading.gif'),
+            "sImageSrc": ImgLoading,
             "loadingImage": null,
             "imageStyle": {},
         }
@@ -107,6 +114,17 @@ export default {
             this.sImageSrc = this.loadingImage.src;
             if (((this.sClass == 'ImageElement') || (this.sClass == 'VideoElement')) && (this.sTransformType == IMG_ZOOMOFFSET)) {
                 this.imageStyle = getImageZoomOffsetStyle(this.sZoom,this.sOffsetX,this.sOffsetY,this.$refs.eldiv.clientWidth,this.$refs.eldiv.clientHeight,this.loadingImage.width,this.loadingImage.height);
+            }
+            if (this.isPhotosphere()) {
+                var pano = new Viewer({
+                    panorama: this.imageUrl(true),
+                    container: "pano-"+this.sId,
+                    loadingImg: './img/loading.gif',
+                    useXmpData: true,
+                    defaultLong: 110,
+                    navbar: [],
+                    autorotateDelay: 1
+                });
             }
         },
         imageUrl: function(full = false) {
@@ -243,6 +261,21 @@ function basename(path) {
     left: 10px;
     top: 10px;
     opacity: 50%;
+}
+
+.blur-back::before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--image-src-url);
+    background-size: 100% 100%;
+    background-position: center;
+    filter: blur(25px);
+    opacity: 0.5;
 }
 
 </style>

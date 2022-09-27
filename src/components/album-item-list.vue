@@ -5,12 +5,12 @@
         v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' v-on:refresh-shares="refreshShares"
         v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
         </album-item>
-        <div v-if="!loading && (albumList.length == 0)" class="center">
+        <div v-if="(loading <= 0) && (unsortedAlbumList.length == 0)" class="center">
             <div class="icon-folder"></div>
             <h2>No album</h2>
         </div>
-        <div v-if="loading" class="center">
-            <img src="./img/loading.gif"/>
+        <div v-if="loading > 0" class="center">
+            <img v-bind:src="imgLoading"/>
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
@@ -19,7 +19,8 @@
 
 <script>
 
-import AlbumItem from './album-item';
+import AlbumItem from './album-item'
+import ImgLoading from "./img/loading.gif"
 
 export default {
     props: {
@@ -31,6 +32,7 @@ export default {
             unsortedAlbumList: [],
             loading: 0,
             lastPage: 0,
+            "imgLoading": ImgLoading,
         }
     },
     components: {
@@ -98,6 +100,9 @@ export default {
                                 }
                             });
                         });
+                    } else {
+                        that.loading = -1;
+                        return;
                     }
                     that.loading -= 1;
                 },
