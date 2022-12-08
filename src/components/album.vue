@@ -11,8 +11,12 @@
             v-on:click="showN(index)">
             </div>
         </div>
-        <div class="fullscreenIcon transparent top-right" v-on:click="fullscreen"></div>
-        <div class="downloadIcon transparent top-left" v-on:click="openDownloadModal"></div>
+        <div class="top-right">
+            <Actions default-icon="icon-menu" :force-menu="true" :primary="true">
+                <ActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</ActionButton>
+                <ActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</ActionButton>
+            </Actions>
+        </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
@@ -37,6 +41,8 @@ import Page from './page'
 import Imagefull from './imagefull'
 import Videofull from './videofull'
 import AudioPlayer from './audio_player'
+import Actions from '@nextcloud/vue/dist/Components/Actions'
+import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import Modal from '@nextcloud/vue/dist/Components/Modal'
 import ProgressBar from '@nextcloud/vue/dist/Components/ProgressBar'
 import JSZip from 'jszip'
@@ -222,6 +228,8 @@ export default {
         AudioPlayer: AudioPlayer,
         Modal: Modal,
         ProgressBar: ProgressBar,
+        Actions,
+        ActionButton
     },
 }
 
