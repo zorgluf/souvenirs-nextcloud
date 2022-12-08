@@ -292,6 +292,11 @@ function getFile($url) {
     height: 100%;
     white-space: nowrap;
     overflow: scroll;
+    background-color: white;
+}
+
+.s-album:fullscreen {
+    background-color: black;
 }
 .arrow-right {
     background-image: url("./img/right_arrow.svg");
@@ -333,14 +338,6 @@ function getFile($url) {
     background-color: #d2d2d2;
 }
 
-.fullscreenIcon {
-    background-image: url("./img/fullscreen.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    width: 50px;
-    height: 50px;
-}
 
 .transparent {
     opacity: 50%;
@@ -360,19 +357,6 @@ function getFile($url) {
     top: 5px;
 }
 
-.downloadIcon {
-    background-image: url("./img/download.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    width: 50px;
-    height: 50px;
-}
-
-:fullscreen .fullscreen {
-    visibility: hidden;
-}
-
 .center-page {
   position: fixed;
   top: 50%;
@@ -386,4 +370,5 @@ p.center {
 div.center {
     margin: 0 auto;
 }
+
 </style>
