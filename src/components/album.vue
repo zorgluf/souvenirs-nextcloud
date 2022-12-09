@@ -12,7 +12,7 @@
             </div>
         </div>
         <div class="top-right">
-            <Actions default-icon="icon-menu" :force-menu="true" :primary="true">
+            <Actions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
                 <ActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</ActionButton>
                 <ActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</ActionButton>
             </Actions>
@@ -70,10 +70,23 @@ export default {
             "downloadProgress": 0,
             "albumJson": "",
             "imgLoading": ImgLoading,
+            "fullscreenMode": false,
         }
     },
     mounted: function() {
         this.refreshAlbum();
+        if (document.addEventListener) {
+            document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
+        }
+    },
+    watch: {
+        fullscreenMode(newValue, oldValue) {
+            if (newValue == true) {
+                $(".s-album").each(function() {
+                    this.requestFullscreen();
+                }); 
+            }
+        }
     },
     computed: {
         'aLeftVisible': function() {
@@ -143,9 +156,7 @@ export default {
             this.videoFullOn = false;
         },
         fullscreen: function() {
-            $(".s-album").each(function() {
-                this.requestFullscreen();
-            });
+            this.fullscreenMode = true;
         },
         openDownloadModal: function() {
             this.downloadModal = true;
@@ -298,6 +309,8 @@ function getFile($url) {
 .s-album:fullscreen {
     background-color: black;
 }
+
+
 .arrow-right {
     background-image: url("./img/right_arrow.svg");
     background-repeat: no-repeat;
