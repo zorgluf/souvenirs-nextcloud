@@ -59,11 +59,20 @@ export default {
     },
     methods: {
         refreshShares: function() {
-            $.get("apiv2/share", data => {
-                this.shares.splice(0);
-                for (var d in data) {
-                    this.shares.push(data[d]);
+            fetch("apiv2/share", {
+                headers: {
+                    'requesttoken': OC.requestToken,
                 }
+                })
+            .then(response => {
+                response.json().then(data => {
+                    this.shares.splice(0);
+                    for (var d in data) {
+                        this.shares.push(data[d]);
+                    }
+                })
+            }).catch(error => {
+                console.log("Error in fetching share status.");
             });
         },
         refreshAlbums: function() {
@@ -80,24 +89,25 @@ export default {
         loadOneAlbumsPage: function() {
             this.loading += 1;
             var that = this;
-            $.ajax({
-                url: "apiv2/album?page="+(that.lastPage+1),
-                type: "GET",
-                success: function(data) {
+            fetch("apiv2/album?page="+(that.lastPage+1), {
+                headers: { 'requesttoken': OC.requestToken, }
+                })
+            .then(response => {
+                response.json().then(data => {
                     if (data.length > 0) {
                         that.lastPage += 1;
                         data.forEach(albumId => {
                             that.loading += 1;
-                            $.ajax({
-                                url: "apiv2/album/"+albumId,
-                                type: "GET",
-                                success: function(album) {
-                                    that.unsortedAlbumList.push(album);
+                            fetch("apiv2/album/"+albumId, {
+                                headers: { 'requesttoken': OC.requestToken, }
+                                })
+                            .then(response => {
+                                response.json().then(data => {
+                                    that.unsortedAlbumList.push(data);
                                     that.loading -= 1;
-                                },
-                                error: function(data) {
-                                    that.loading -= 1;
-                                }
+                                })
+                            }).catch(error => {
+                                that.loading -= 1;
                             });
                         });
                     } else {
@@ -105,10 +115,9 @@ export default {
                         return;
                     }
                     that.loading -= 1;
-                },
-                error: function(data) {
-                    that.loading -= 1;
-                }
+                })
+            }).catch(error => {
+                that.loading -= 1;
             });
         },
         activateSnackbar: function(texte) {

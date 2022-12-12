@@ -50,10 +50,13 @@ export default {
             //update text size
             fitText();
             //scroll to page
-            var albumEl = $("#"+this.sId).parent();
-            albumEl.animate(
-              { scrollLeft: albumEl.scrollLeft() + $("#"+this.sId).offset().left - (albumEl.width() - albumEl.height())/2 },
-              500);
+            var albumEl = document.getElementById(this.sId).parentNode;
+            var left_offset = document.getElementById(this.sId).offsetLeft - (albumEl.clientWidth - albumEl.clientHeight)/2;
+            albumEl.scrollTo({
+              top: 0,
+              left: left_offset,
+              behavior: 'smooth'
+            });
             //mark page as displayed
             this.isFocus = true;
           } else {
@@ -80,15 +83,15 @@ export default {
 
 //tools : autosize text
 var fitText = function() {
-    var elements = $('.resize');
+    var elements = document.querySelectorAll('.resize');
     if(elements.length < 0) {
       return;
     }
-    elements.each(function(i, element) {
+    elements.forEach(function(element) {
       while(element.scrollWidth > element.offsetWidth || element.scrollHeight > element.offsetHeight) {
-        var newFontSize = (parseFloat($(element).css('font-size').slice(0, -2)) * 0.95) + 'px';
-        $(element).css('font-size', newFontSize);
-        $(element).css('line-height', newFontSize);
+        var newFontSize = (parseFloat(window.getComputedStyle(element).fontSize.slice(0, -2)) * 0.95) + 'px';
+        element.style.fontSize = newFontSize;
+        element.style.lineHeight = newFontSize;
       }
     });
   };

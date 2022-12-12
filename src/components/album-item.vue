@@ -85,14 +85,19 @@ export default {
     },
     methods: {
         'deleteAlbum': function() {
-            $.ajax({
-                    url: "apiv2/album/"+this.albumId,
-                    type: "DELETE",
-                    success: data => {
-                        this.$emit("snackbar","Album deleted.");
-                        this.$emit('refresh-albums');
-                    }
-                });
+            var that = this;
+            fetch("apiv2/album/"+this.albumId, {
+                headers: {
+                    'requesttoken': OC.requestToken,
+                },
+                method: "DELETE",
+                })
+            .then(response => {
+                that.$emit("snackbar","Album deleted.");
+                that.$emit('refresh-albums');
+            }).catch(error => {
+                console.log("Error in deleting album.");
+            });
             event.preventDefault();
         },
         'toggleShare': function(event) {
@@ -105,30 +110,39 @@ export default {
         },
         'deleteShare': function() {
             if (this.isShared) {
+                var that = this;
                 var token = this.shares.find(share => {
                     return share['albumId'] == this.albumId
                 }).token;
-                $.ajax({
-                    url: "apiv2/share/"+token,
-                    type: "DELETE",
-                    success: data => {
-                        this.$emit('refresh-shares');
-                        this.$emit("snackbar","Album share removed.");
-                    }
+                fetch("apiv2/share/"+token, {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    },
+                    method: "DELETE",
+                    })
+                .then(response => {
+                    that.$emit('refresh-shares');
+                    that.$emit("snackbar","Album share removed.");
+                }).catch(error => {
+                    console.log("Error in deleting share.");
                 });
             }
         },
         'createShare': function() {
             if (!this.isShared) {
-                $.ajax({
-                    url: "apiv2/share",
-                    data: {'albumId': this.albumId},
-                    type: "POST",
-                    success: data => {
-                        
-                        this.$emit('refresh-shares');
-                        
-                    }
+                var that = this;
+                fetch("apiv2/share", {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                    body: JSON.stringify({'albumId': this.albumId})
+                    })
+                .then(response => {
+                    that.$emit('refresh-shares');
+                }).catch(error => {
+                    console.log("Error in creating share.");
                 });
             }
         },

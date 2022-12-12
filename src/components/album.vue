@@ -82,9 +82,7 @@ export default {
     watch: {
         fullscreenMode(newValue, oldValue) {
             if (newValue == true) {
-                $(".s-album").each(function() {
-                    this.requestFullscreen();
-                }); 
+                document.querySelector(".s-album").requestFullscreen();
             }
         }
     },
@@ -215,19 +213,38 @@ export default {
         },
         refreshAlbum: function() {
             this.loading = true;
+            var that = this;
             if (this.token != "") {
-                $.get(this.token+"/album", album => {
-                    this.albumJson = JSON.stringify(album);
-                    this.sName = album.name;
-                    this.pages = album.pages;
-                    this.loading = false;
+                fetch(this.token+"/album", {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    }
+                    })
+                .then(response => {
+                    response.json().then(data => {
+                        that.albumJson = JSON.stringify(data);
+                        that.sName = data.name;
+                        that.pages = data.pages;
+                        that.loading = false;
+                    })
+                }).catch(error => {
+                    console.log("Error in refresh album.");
                 });
             } else {
-                $.get("apiv2/album/unknown/full?apath="+this.path, album => {
-                    this.albumJson = JSON.stringify(album);
-                    this.sName = album.name;
-                    this.pages = album.pages;
-                    this.loading = false;
+                fetch("apiv2/album/unknown/full?apath="+this.path, {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    }
+                    })
+                .then(response => {
+                    response.json().then(data => {
+                        that.albumJson = JSON.stringify(data);
+                        that.sName = data.name;
+                        that.pages = data.pages;
+                        that.loading = false;
+                    })
+                }).catch(error => {
+                    console.log("Error in refresh album.");
                 });
             }
         },
@@ -256,10 +273,10 @@ var getAudioElement = function(page) {
 function basename(path) {
    return path.split('/').reverse()[0];
 }
-function getFile($url) {
+function getFile(url) {
     return new Promise(function(result) {
         const request = new XMLHttpRequest();
-        request.open('GET', $url);
+        request.open('GET', url);
         request.responseType = "arraybuffer";
         request.onload = function (oEvent) {
             result(request.response); 
