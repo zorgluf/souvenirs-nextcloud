@@ -73,14 +73,14 @@ export default {
         },
     computed: {
         'sWidth': function() {
-            var ew = $("#album-parent-frame").width();
+            var ew = document.getElementById("album-parent-frame").clientWidth;
             if (this.sTransformType == IMG_ZOOMOFFSET) {
                 ew = ew*this.sZoom/100;
             }
             return Math.floor(ew*(this.sRight-this.sLeft)/100);
         },
         'sHeight': function() {
-            var eh = $("#album-parent-frame").height();
+            var eh = document.getElementById("album-parent-frame").clientHeight;
             if (this.sTransformType == IMG_ZOOMOFFSET) {
                 eh = eh*this.sZoom/100;
             }

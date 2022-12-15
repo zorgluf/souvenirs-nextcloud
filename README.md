@@ -4,6 +4,11 @@ View and share albums made by the [Souvenirs android application](https://github
 
 ## Changelog
 
+v1.7.0:
+* Photosphere preview inside album
+* Blured background to fill tile on small image 
+* Bug fix:
+  * Loading icon broken link
 v1.6.0:
 * Enable asset (image, video) reuse on nextcloud server, preventing unecessary uploads
 * Enable the user to download full album in a zip file

@@ -15,14 +15,14 @@
         {{dateString}}
     </div>
     <div class="right s-action-menu">
-        <Actions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
-            <ActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</ActionButton>
-            <ActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</ActionLink>
-            <ActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</ActionButton>
-        </Actions>
-        <Actions default-icon="icon-delete" :force-menu="true">
-            <ActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</ActionButton>
-        </Actions>
+        <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
+            <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>
+            <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
+            <NcActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</NcActionButton>
+        </NcActions>
+        <NcActions default-icon="icon-delete" :force-menu="true">
+            <NcActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</NcActionButton>
+        </NcActions>
     </div>
     <input type="text"  style="display: none" v-bind:value="shareUrl"/>
     <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
@@ -32,9 +32,7 @@
 
 <script>
 
-import Actions from '@nextcloud/vue/dist/Components/Actions'
-import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
-import ActionLink from '@nextcloud/vue/dist/Components/ActionLink'
+import { NcActionLink, NcActionButton, NcActions } from '@nextcloud/vue'
 import { generateUrl, imagePath } from '@nextcloud/router'
 
 export default {
@@ -47,9 +45,9 @@ export default {
         'albumId': String,
     },
     components: {
-        Actions,
-        ActionButton,
-        ActionLink
+        NcActions,
+        NcActionButton,
+        NcActionLink
     },
     computed: {
         "isShared": function() {
@@ -85,14 +83,19 @@ export default {
     },
     methods: {
         'deleteAlbum': function() {
-            $.ajax({
-                    url: "apiv2/album/"+this.albumId,
-                    type: "DELETE",
-                    success: data => {
-                        this.$emit("snackbar","Album deleted.");
-                        this.$emit('refresh-albums');
-                    }
-                });
+            var that = this;
+            fetch("apiv2/album/"+this.albumId, {
+                headers: {
+                    'requesttoken': OC.requestToken,
+                },
+                method: "DELETE",
+                })
+            .then(response => {
+                that.$emit("snackbar","Album deleted.");
+                that.$emit('refresh-albums');
+            }).catch(error => {
+                console.log("Error in deleting album.");
+            });
             event.preventDefault();
         },
         'toggleShare': function(event) {
@@ -105,30 +108,39 @@ export default {
         },
         'deleteShare': function() {
             if (this.isShared) {
+                var that = this;
                 var token = this.shares.find(share => {
                     return share['albumId'] == this.albumId
                 }).token;
-                $.ajax({
-                    url: "apiv2/share/"+token,
-                    type: "DELETE",
-                    success: data => {
-                        this.$emit('refresh-shares');
-                        this.$emit("snackbar","Album share removed.");
-                    }
+                fetch("apiv2/share/"+token, {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    },
+                    method: "DELETE",
+                    })
+                .then(response => {
+                    that.$emit('refresh-shares');
+                    that.$emit("snackbar","Album share removed.");
+                }).catch(error => {
+                    console.log("Error in deleting share.");
                 });
             }
         },
         'createShare': function() {
             if (!this.isShared) {
-                $.ajax({
-                    url: "apiv2/share",
-                    data: {'albumId': this.albumId},
-                    type: "POST",
-                    success: data => {
-                        
-                        this.$emit('refresh-shares');
-                        
-                    }
+                var that = this;
+                fetch("apiv2/share", {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                    body: JSON.stringify({'albumId': this.albumId})
+                    })
+                .then(response => {
+                    that.$emit('refresh-shares');
+                }).catch(error => {
+                    console.log("Error in creating share.");
                 });
             }
         },

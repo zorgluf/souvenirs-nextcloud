@@ -1,5 +1,5 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext">
+	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
 	    <i class="arrow-left" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path"
@@ -11,8 +11,17 @@
             v-on:click="showN(index)">
             </div>
         </div>
-        <div class="fullscreenIcon transparent top-right" v-on:click="fullscreen"></div>
-        <div class="downloadIcon transparent top-left" v-on:click="openDownloadModal"></div>
+        <div class="top-right">
+            <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
+                <NcActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</NcActionButton>
+                <NcActionSeparator/>
+                <NcActionButton icon="icon-play" @click="diaporama(true)" v-if="!diaporamaMode">Start slideshow</NcActionButton>
+                <NcActionInput icon="" type="number" @submit="diaporama(true)" v-if="!diaporamaMode" :value="diaporamaSpeed" @input="diaporamaSpeed=$event.target.value">Slideshow speed</NcActionInput>
+                <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">Stop slideshow</NcActionButton>
+                <NcActionSeparator/>
+                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</NcActionButton>
+            </NcActions>
+        </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
         </imagefull>
@@ -23,11 +32,11 @@
         <div v-if="loading" class="center-page">
             <img v-bind:src="imgLoading"/>
         </div>
-        <Modal v-if="downloadModal" @close="closeDownload" size="small">
+        <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">Click to download album in a zip file.</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
-            <ProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
-        </Modal>
+            <NcProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
+        </NcModal>
     </div>
 </template>
 
@@ -37,8 +46,7 @@ import Page from './page'
 import Imagefull from './imagefull'
 import Videofull from './videofull'
 import AudioPlayer from './audio_player'
-import Modal from '@nextcloud/vue/dist/Components/Modal'
-import ProgressBar from '@nextcloud/vue/dist/Components/ProgressBar'
+import { NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import ImgLoading from "./img/loading.gif"
@@ -64,10 +72,32 @@ export default {
             "downloadProgress": 0,
             "albumJson": "",
             "imgLoading": ImgLoading,
+            "fullscreenMode": false,
+            "diaporamaMode": false,
+            "diap_timeout": null,
+            "diaporamaSpeed": 5,
         }
     },
     mounted: function() {
         this.refreshAlbum();
+        if (document.addEventListener) {
+            document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
+        }
+        document.querySelector(".s-album").focus();
+    },
+    watch: {
+        fullscreenMode(newValue, oldValue) {
+            if (newValue == true) {
+                document.querySelector(".s-album").requestFullscreen();
+            }
+        },
+        diaporamaMode(newValue, oldValue) {
+            if (newValue == true) {
+                this.diapoTick();
+            } else {
+                clearTimeout(this.diap_timeout);
+            }
+        }
     },
     computed: {
         'aLeftVisible': function() {
@@ -112,6 +142,16 @@ export default {
             }
             this.displayedPage += 1;
         },
+        diapoTick: function() {
+            this.diap_timeout = setTimeout(() => {
+                    if (this.displayedPage >= (this.nbPage - 1)) {
+                        this.diaporamaMode = false;
+                        return;
+                    }
+                    this.displayedPage += 1;
+                    this.diapoTick();
+                }, this.diaporamaSpeed * 1000);
+        },
         showPrev: function () {
             if (this.displayedPage == 0) {
                 return;
@@ -137,9 +177,14 @@ export default {
             this.videoFullOn = false;
         },
         fullscreen: function() {
-            $(".s-album").each(function() {
-                this.requestFullscreen();
-            });
+            this.fullscreenMode = true;
+        },
+        diaporama: function(start) {
+            if (start == true) {
+                this.diaporamaMode = true;
+            } else {
+                this.diaporamaMode = false;
+            }
         },
         openDownloadModal: function() {
             this.downloadModal = true;
@@ -198,19 +243,38 @@ export default {
         },
         refreshAlbum: function() {
             this.loading = true;
+            var that = this;
             if (this.token != "") {
-                $.get(this.token+"/album", album => {
-                    this.albumJson = JSON.stringify(album);
-                    this.sName = album.name;
-                    this.pages = album.pages;
-                    this.loading = false;
+                fetch(this.token+"/album", {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    }
+                    })
+                .then(response => {
+                    response.json().then(data => {
+                        that.albumJson = JSON.stringify(data);
+                        that.sName = data.name;
+                        that.pages = data.pages;
+                        that.loading = false;
+                    })
+                }).catch(error => {
+                    console.log("Error in refresh album.");
                 });
             } else {
-                $.get("apiv2/album/unknown/full?apath="+this.path, album => {
-                    this.albumJson = JSON.stringify(album);
-                    this.sName = album.name;
-                    this.pages = album.pages;
-                    this.loading = false;
+                fetch("apiv2/album/unknown/full?apath="+this.path, {
+                    headers: {
+                        'requesttoken': OC.requestToken,
+                    }
+                    })
+                .then(response => {
+                    response.json().then(data => {
+                        that.albumJson = JSON.stringify(data);
+                        that.sName = data.name;
+                        that.pages = data.pages;
+                        that.loading = false;
+                    })
+                }).catch(error => {
+                    console.log("Error in refresh album.");
                 });
             }
         },
@@ -220,8 +284,12 @@ export default {
         Imagefull: Imagefull,
         Videofull: Videofull,
         AudioPlayer: AudioPlayer,
-        Modal: Modal,
-        ProgressBar: ProgressBar,
+        NcModal,
+        NcProgressBar,
+        NcActions,
+        NcActionButton,
+        NcActionInput,
+        NcActionSeparator
     },
 }
 
@@ -237,10 +305,10 @@ var getAudioElement = function(page) {
 function basename(path) {
    return path.split('/').reverse()[0];
 }
-function getFile($url) {
+function getFile(url) {
     return new Promise(function(result) {
         const request = new XMLHttpRequest();
-        request.open('GET', $url);
+        request.open('GET', url);
         request.responseType = "arraybuffer";
         request.onload = function (oEvent) {
             result(request.response); 
@@ -284,7 +352,23 @@ function getFile($url) {
     height: 100%;
     white-space: nowrap;
     overflow: scroll;
+    background-color: white;
 }
+
+.s-album:fullscreen {
+    background-color: black;
+}
+
+.downloadIcon {
+    background-image: url("./img/download.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+
+
 .arrow-right {
     background-image: url("./img/right_arrow.svg");
     background-repeat: no-repeat;
@@ -325,14 +409,6 @@ function getFile($url) {
     background-color: #d2d2d2;
 }
 
-.fullscreenIcon {
-    background-image: url("./img/fullscreen.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    width: 50px;
-    height: 50px;
-}
 
 .transparent {
     opacity: 50%;
@@ -352,19 +428,6 @@ function getFile($url) {
     top: 5px;
 }
 
-.downloadIcon {
-    background-image: url("./img/download.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    width: 50px;
-    height: 50px;
-}
-
-:fullscreen .fullscreen {
-    visibility: hidden;
-}
-
 .center-page {
   position: fixed;
   top: 50%;
@@ -378,4 +441,5 @@ p.center {
 div.center {
     margin: 0 auto;
 }
+
 </style>
