@@ -1,5 +1,5 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext">
+	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
 	    <i class="arrow-left" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path"
@@ -12,10 +12,15 @@
             </div>
         </div>
         <div class="top-right">
-            <Actions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
-                <ActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</ActionButton>
-                <ActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</ActionButton>
-            </Actions>
+            <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
+                <NcActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</NcActionButton>
+                <NcActionSeparator/>
+                <NcActionButton icon="icon-play" @click="diaporama(true)" v-if="!diaporamaMode">Start slideshow</NcActionButton>
+                <NcActionInput icon="" type="number" @submit="diaporama(true)" v-if="!diaporamaMode" :value="diaporamaSpeed" @input="diaporamaSpeed=$event.target.value">Slideshow speed</NcActionInput>
+                <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">Stop slideshow</NcActionButton>
+                <NcActionSeparator/>
+                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</NcActionButton>
+            </NcActions>
         </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
@@ -27,11 +32,11 @@
         <div v-if="loading" class="center-page">
             <img v-bind:src="imgLoading"/>
         </div>
-        <Modal v-if="downloadModal" @close="closeDownload" size="small">
+        <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">Click to download album in a zip file.</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
-            <ProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
-        </Modal>
+            <NcProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
+        </NcModal>
     </div>
 </template>
 
@@ -41,10 +46,7 @@ import Page from './page'
 import Imagefull from './imagefull'
 import Videofull from './videofull'
 import AudioPlayer from './audio_player'
-import Actions from '@nextcloud/vue/dist/Components/Actions'
-import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
-import Modal from '@nextcloud/vue/dist/Components/Modal'
-import ProgressBar from '@nextcloud/vue/dist/Components/ProgressBar'
+import { NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import ImgLoading from "./img/loading.gif"
@@ -71,6 +73,9 @@ export default {
             "albumJson": "",
             "imgLoading": ImgLoading,
             "fullscreenMode": false,
+            "diaporamaMode": false,
+            "diap_timeout": null,
+            "diaporamaSpeed": 5,
         }
     },
     mounted: function() {
@@ -78,11 +83,19 @@ export default {
         if (document.addEventListener) {
             document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
         }
+        document.querySelector(".s-album").focus();
     },
     watch: {
         fullscreenMode(newValue, oldValue) {
             if (newValue == true) {
                 document.querySelector(".s-album").requestFullscreen();
+            }
+        },
+        diaporamaMode(newValue, oldValue) {
+            if (newValue == true) {
+                this.diapoTick();
+            } else {
+                clearTimeout(this.diap_timeout);
             }
         }
     },
@@ -129,6 +142,16 @@ export default {
             }
             this.displayedPage += 1;
         },
+        diapoTick: function() {
+            this.diap_timeout = setTimeout(() => {
+                    if (this.displayedPage >= (this.nbPage - 1)) {
+                        this.diaporamaMode = false;
+                        return;
+                    }
+                    this.displayedPage += 1;
+                    this.diapoTick();
+                }, this.diaporamaSpeed * 1000);
+        },
         showPrev: function () {
             if (this.displayedPage == 0) {
                 return;
@@ -155,6 +178,13 @@ export default {
         },
         fullscreen: function() {
             this.fullscreenMode = true;
+        },
+        diaporama: function(start) {
+            if (start == true) {
+                this.diaporamaMode = true;
+            } else {
+                this.diaporamaMode = false;
+            }
         },
         openDownloadModal: function() {
             this.downloadModal = true;
@@ -254,10 +284,12 @@ export default {
         Imagefull: Imagefull,
         Videofull: Videofull,
         AudioPlayer: AudioPlayer,
-        Modal: Modal,
-        ProgressBar: ProgressBar,
-        Actions,
-        ActionButton
+        NcModal,
+        NcProgressBar,
+        NcActions,
+        NcActionButton,
+        NcActionInput,
+        NcActionSeparator
     },
 }
 
@@ -325,6 +357,15 @@ function getFile(url) {
 
 .s-album:fullscreen {
     background-color: black;
+}
+
+.downloadIcon {
+    background-image: url("./img/download.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
 }
 
 

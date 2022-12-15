@@ -15,14 +15,14 @@
         {{dateString}}
     </div>
     <div class="right s-action-menu">
-        <Actions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
-            <ActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</ActionButton>
-            <ActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</ActionLink>
-            <ActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</ActionButton>
-        </Actions>
-        <Actions default-icon="icon-delete" :force-menu="true">
-            <ActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</ActionButton>
-        </Actions>
+        <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
+            <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>
+            <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
+            <NcActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</NcActionButton>
+        </NcActions>
+        <NcActions default-icon="icon-delete" :force-menu="true">
+            <NcActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</NcActionButton>
+        </NcActions>
     </div>
     <input type="text"  style="display: none" v-bind:value="shareUrl"/>
     <textarea style="display: none; height: 0px" v-model="shareUrl" v-bind:id='"input-"+aPath'></textarea>
@@ -32,9 +32,7 @@
 
 <script>
 
-import Actions from '@nextcloud/vue/dist/Components/Actions'
-import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
-import ActionLink from '@nextcloud/vue/dist/Components/ActionLink'
+import { NcActionLink, NcActionButton, NcActions } from '@nextcloud/vue'
 import { generateUrl, imagePath } from '@nextcloud/router'
 
 export default {
@@ -47,9 +45,9 @@ export default {
         'albumId': String,
     },
     components: {
-        Actions,
-        ActionButton,
-        ActionLink
+        NcActions,
+        NcActionButton,
+        NcActionLink
     },
     computed: {
         "isShared": function() {
