@@ -2,6 +2,8 @@
 
 View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
 
+This application is just a viewer. Edition features are not implemented right now on the nextcloud interface.
+
 ## Changelog
 
 v1.7.0:
@@ -9,35 +11,42 @@ v1.7.0:
 * Blured background to fill tile on small image 
 * Bug fix:
   * Loading icon broken link
+
 v1.6.0:
 * Enable asset (image, video) reuse on nextcloud server, preventing unecessary uploads
 * Enable the user to download full album in a zip file
 * Bug fix:
   * Broken link on image loading icon
   * Album list incomplete on large screen
+
 v1.5.0:
 * Add audio support
 * Add video support
+
 v1.4.0:
 * Do not duplicate images in album when image already exists on nextcloud storage in user context. Works only on new albums or albums modified by Android client version 2.5.0+.
 * Introduce a new settings, allowing to change the root directory storing the albums files. Default directory set to "Souvenirs" on a fresh install, otherwise old "album" directory used.
 * Major udpates on npm dependencies.
 * bug fix:
   * Albums list pagination/scrolling not working on mobile devices.
+
 v1.3.0:
 * Photosphere support
 * Pagination on album list
 * bug fix:
   * issues with share status sync with android client
+
 v1.2.0:
 * Enable animated gif
 * bug fix :
   * Images in old album format
+
 v1.1.0:
 *  Removed old v1 api
 *  Added pagination on album list
 * bug fix :
   *  Display of album without album image
+
 v1.0.0:
 *  app_id change (souvenir to souvenirs) : disruptive, need android application v2+
 *  Improved GUI on share actions and link display

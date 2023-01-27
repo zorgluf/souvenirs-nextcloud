@@ -7,7 +7,7 @@
         </album-item>
         <div v-if="(loading <= 0) && (unsortedAlbumList.length == 0)" class="center">
             <div class="icon-folder"></div>
-            <h2>No album</h2>
+            <h2>{{ sNoAblum }}</h2>
         </div>
         <div v-if="loading > 0" class="center">
             <img v-bind:src="imgLoading"/>
@@ -33,6 +33,7 @@ export default {
             loading: 0,
             lastPage: 0,
             "imgLoading": ImgLoading,
+            "sNoAblum": t("souvenirs","No album"),
         }
     },
     components: {
