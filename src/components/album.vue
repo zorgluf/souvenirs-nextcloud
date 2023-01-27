@@ -13,13 +13,13 @@
         </div>
         <div class="top-right">
             <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
-                <NcActionButton icon="icon-fullscreen" @click="fullscreen">Fullscreen</NcActionButton>
+                <NcActionButton icon="icon-fullscreen" @click="fullscreen">{{ sFullscreen }}</NcActionButton>
                 <NcActionSeparator/>
-                <NcActionButton icon="icon-play" @click="diaporama(true)" v-if="!diaporamaMode">Start slideshow</NcActionButton>
-                <NcActionInput icon="" type="number" @submit="diaporama(true)" v-if="!diaporamaMode" :value="diaporamaSpeed" @input="diaporamaSpeed=$event.target.value">Slideshow speed</NcActionInput>
-                <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">Stop slideshow</NcActionButton>
+                <NcActionButton icon="icon-play" @click="diaporama(true)" v-if="!diaporamaMode">{{ sStartSh }}</NcActionButton>
+                <NcActionInput icon="" type="number" @submit="diaporama(true)" v-if="!diaporamaMode" :value="diaporamaSpeed" @input="diaporamaSpeed=$event.target.value">{{ sSpeedSh }}</NcActionInput>
+                <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">{{ sStopSh }}</NcActionButton>
                 <NcActionSeparator/>
-                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">Download</NcActionButton>
+                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">{{ sDownload }}</NcActionButton>
             </NcActions>
         </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
@@ -33,7 +33,7 @@
             <img v-bind:src="imgLoading"/>
         </div>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
-            <p class="center">Click to download album in a zip file.</p>
+            <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
             <NcProgressBar v-if="downloadActive" size="medium" v-bind:value="downloadProgress"/>
         </NcModal>
@@ -76,6 +76,12 @@ export default {
             "diaporamaMode": false,
             "diap_timeout": null,
             "diaporamaSpeed": 5,
+            "sStartSh": t("souvenirs","Start slideshow"),
+            "sStopSh": t("souvenirs","Stop slideshow"),
+            "sSpeedSh": t("souvenirs","Slideshow speed"),
+            "sDownload": t("souvenirs","Download"),
+            "sFullscreen": t("souvenirs","Fullscreen"),
+            "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
         }
     },
     mounted: function() {
