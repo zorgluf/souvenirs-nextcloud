@@ -33,7 +33,7 @@ export default {
             loading: 0,
             lastPage: 0,
             "imgLoading": ImgLoading,
-            "sNoAblum": t("souvenirs","No album"),
+            "sNoAblum": t("souvenirs","No album available. You will need to upload them from the android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
         }
     },
     components: {
