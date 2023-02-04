@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Start slideshow" : "Pradėti skaidrių rodymą",
+    "Stop slideshow" : "Stabdyti skaidrių rodymą",
+    "Slideshow speed" : "Skaidrių rodymo greitis",
     "Download" : "Atsisiųsti",
     "Fullscreen" : "Visas ekranas"
 },
