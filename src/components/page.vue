@@ -1,5 +1,5 @@
 <template>
-    <div class="s-page" v-bind:id="sId">
+    <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId">
 	<selement v-for="(element, index) in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
@@ -28,6 +28,7 @@ export default {
       "elements": Array,
       "albumPath": String,
       "token": String,
+      "isWinPortrait": Boolean,
     },
     data: function() {
         return {
@@ -51,12 +52,22 @@ export default {
             fitText();
             //scroll to page
             var albumEl = document.getElementById(this.sId).parentNode;
-            var left_offset = document.getElementById(this.sId).offsetLeft - (albumEl.clientWidth - albumEl.clientHeight)/2;
-            albumEl.scrollTo({
-              top: 0,
-              left: left_offset,
-              behavior: 'smooth'
-            });
+            if (this.isWinPortrait) {
+              let top_offset = document.getElementById(this.sId).offsetTop - (albumEl.clientHeight - albumEl.clientWidth)/2;
+              albumEl.scrollTo({
+                top: top_offset,
+                left: 0,
+                behavior: 'smooth'
+              });
+            } else {
+              let left_offset = document.getElementById(this.sId).offsetLeft - (albumEl.clientWidth - albumEl.clientHeight)/2;
+              albumEl.scrollTo({
+                top: 0,
+                left: left_offset,
+                behavior: 'smooth'
+              });
+            }
+
             //mark page as displayed
             this.isFocus = true;
           } else {
@@ -119,10 +130,17 @@ function elementInViewport(el) {
 
 <style scoped>
 
-.s-page {
+.s-page-vert {
+  display: block;
+  height: 100vmin;
+  width: 100vmin;
+  position: relative;
+}
+
+.s-page-hori {
+  display: inline-block;
   height: calc(100vmin - 50px);
   width: calc(100vmin - 50px);
-  display: inline-block;
   position: relative;
 }
 </style>

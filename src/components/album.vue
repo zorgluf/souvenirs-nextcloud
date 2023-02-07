@@ -1,11 +1,12 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
-	    <i class="arrow-left" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
+	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext"
+    v-on:keyup.up="showPrev" v-on:keyup.down="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
+	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
-            v-bind:elements="page.elements" v-bind:album-path="path"
+            v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	    </page>
-	    <i class="arrow-right" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
+	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
         <div class="progress">
             <div class="progress-item" v-for="(page, index) in pages" v-bind:key="index" v-bind:class="index == displayedPage ? 'progress-item-full' : 'progress-item-empty'"
             v-on:click="showN(index)">
@@ -76,6 +77,7 @@ export default {
             "diaporamaMode": false,
             "diap_timeout": null,
             "diaporamaSpeed": 5,
+            "isWinPortrait": false,
             "sStartSh": t("souvenirs","Start slideshow"),
             "sStopSh": t("souvenirs","Stop slideshow"),
             "sSpeedSh": t("souvenirs","Slideshow speed"),
@@ -84,7 +86,14 @@ export default {
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
         }
     },
+    created: function() {
+        window.addEventListener("resize", this.resizeEventHandler);
+    },
+    destroyed: function() {
+        window.removeEventListener("resize", this.resizeEventHandler);
+    },
     mounted: function() {
+        this.resizeEventHandler(null);
         this.refreshAlbum();
         if (document.addEventListener) {
             document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
@@ -284,6 +293,17 @@ export default {
                 });
             }
         },
+        resizeEventHandler: function(e) {
+            if (window.innerHeight > window.innerWidth) {
+                if (!this.isWinPortrait) {
+                    this.isWinPortrait = true;
+                }
+            } else {
+                if (this.isWinPortrait) {
+                    this.isWinPortrait = false;
+                }
+            }
+        }
     },
     components: {
         page: Page,
@@ -376,14 +396,14 @@ function getFile(url) {
 
 
 .arrow-right {
-    background-image: url("./img/right_arrow.svg");
+    background-image: url("./img/left_arrow.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
 	display: inline-block;
 	position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 10%;
+    transform: rotate(180deg);
 	right: 20px;
 	width: 100px;
 	height: 80%;
@@ -412,6 +432,48 @@ function getFile(url) {
 }
 
 .arrow-left:hover {
+    background-color: #d2d2d2;
+}
+
+.arrow-top {
+    background-image: url("./img/left_arrow.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+	display: inline-block;
+	position: fixed;
+	left: 0;
+	width: 100px;
+	height: 80vmin;
+    z-index: 9;
+    opacity: 0.2;
+    top: 0;
+    transform: rotate(90deg) translateY(-90vmin) translateX(70px);
+    transform-origin: top left;
+}
+
+.arrow-top:hover {
+    background-color: #d2d2d2;
+}
+
+.arrow-bottom {
+    background-image: url("./img/left_arrow.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+	display: inline-block;
+	position: fixed;
+	bottom: 0;
+	width: 100px;
+	height: 80vmin;
+    z-index: 9;
+    opacity: 0.2;
+    right: 0;
+    transform: rotate(-90deg) translateX(100%) translateX(20px) translateY(-10vmin);
+    transform-origin: bottom right;
+}
+
+.arrow-bottom:hover {
     background-color: #d2d2d2;
 }
 
