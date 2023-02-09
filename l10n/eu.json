@@ -1,4 +1,5 @@
 { "translations": {
+    "No album" : "Ez dago albumik",
     "Download" : "Deskargatu",
     "Fullscreen" : "Pantaila osoa"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
