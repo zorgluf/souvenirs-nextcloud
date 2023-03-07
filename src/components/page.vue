@@ -50,24 +50,6 @@ export default {
           if (this.displayedPage == this.sNum) {
             //update text size
             fitText();
-            //scroll to page
-            var albumEl = document.getElementById(this.sId).parentNode;
-            if (this.isWinPortrait) {
-              let top_offset = document.getElementById(this.sId).offsetTop - (albumEl.clientHeight - albumEl.clientWidth)/2;
-              albumEl.scrollTo({
-                top: top_offset,
-                left: 0,
-                behavior: 'smooth'
-              });
-            } else {
-              let left_offset = document.getElementById(this.sId).offsetLeft - (albumEl.clientWidth - albumEl.clientHeight)/2;
-              albumEl.scrollTo({
-                top: 0,
-                left: left_offset,
-                behavior: 'smooth'
-              });
-            }
-
             //mark page as displayed
             this.isFocus = true;
           } else {
@@ -107,25 +89,15 @@ var fitText = function() {
     });
   };
 
-function elementInViewport(el) {
-  var top = el.offsetTop;
-  var left = el.offsetLeft;
-  var width = el.offsetWidth;
-  var height = el.offsetHeight;
+function isFullyVisible(el) {
+    var rect = el.getBoundingClientRect();
+    var elemTop = rect.top;
+    var elemBottom = rect.bottom;
 
-  while(el.offsetParent) {
-    el = el.offsetParent;
-    top += el.offsetTop;
-    left += el.offsetLeft;
-  }
-
-  return (
-    top < (window.pageYOffset + window.innerHeight) &&
-    left < (window.pageXOffset + window.innerWidth) &&
-    (top + height) > window.pageYOffset &&
-    (left + width) > window.pageXOffset
-  );
+    var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+    return isVisible;
 }
+
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext"
-    v-on:keyup.up="showPrev" v-on:keyup.down="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
+	<div class="s-album" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
+    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
@@ -91,6 +91,7 @@ export default {
     },
     destroyed: function() {
         window.removeEventListener("resize", this.resizeEventHandler);
+        document.querySelector(".s-album").removeEventListener("scroll",this.updatePageDisplayed)
     },
     mounted: function() {
         this.resizeEventHandler(null);
@@ -99,6 +100,7 @@ export default {
             document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
         }
         document.querySelector(".s-album").focus();
+        document.querySelector(".s-album").addEventListener('scroll', this.updatePageDisplayed);
     },
     watch: {
         fullscreenMode(newValue, oldValue) {
@@ -156,6 +158,7 @@ export default {
                 return;
             }
             this.displayedPage += 1;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         diapoTick: function() {
             this.diap_timeout = setTimeout(() => {
@@ -172,9 +175,11 @@ export default {
                 return;
             }
             this.displayedPage -= 1;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         showN: function(index) {
             this.displayedPage = index;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         openImgFull: function(imageUrl,isPhotosphere) {
             this.imageFullUrl = imageUrl;
@@ -303,6 +308,9 @@ export default {
                     this.isWinPortrait = false;
                 }
             }
+        },
+        updatePageDisplayed: function(e) {
+            this.displayedPage = getFirstPageDisplayed(document.querySelector(".s-album"),this.isWinPortrait);
         }
     },
     components: {
@@ -342,6 +350,33 @@ function getFile(url) {
         request.send(null);
     });
 }
+
+function getFirstPageDisplayed(el, isPortrait) {
+    if (isPortrait) {
+        return Math.ceil(el.scrollTop / el.clientWidth);
+    } else {
+        return Math.ceil(el.scrollLeft / el.clientHeight);
+    }
+    
+}
+function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
+    if (isPortrait) {
+        let top_offset = el.clientWidth * dPage - ((el.clientHeight - el.clientWidth) / 2);
+        el.scrollTo({
+            top: top_offset,
+            left: 0,
+            behavior: 'smooth'
+        });
+    } else {
+        let left_offset = el.clientHeight * dPage - ((el.clientWidth - el.clientHeight) / 2);
+        el.scrollTo({
+            top: 0,
+            left: left_offset,
+            behavior: 'smooth'
+        });
+    }
+}
+
 </script>
 
 <style scoped>
