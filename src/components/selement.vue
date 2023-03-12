@@ -7,6 +7,10 @@
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
             <source v-bind:src="videoUrl">
         </video>
+        <div v-if="sImageSrc == null && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))">
+            <NcLoadingIcon :size="64"></NcLoadingIcon>
+        </div>
+        
 		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
         v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))" 
         v-bind:src="sImageSrc" v-on:click="openImgFull" />
@@ -25,9 +29,9 @@ const IMG_ZOOMOFFSET = 2;
 
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
-import ImgLoading from "./img/loading.gif"
 import { Viewer } from 'photo-sphere-viewer';
 import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import { NcLoadingIcon } from '@nextcloud/vue'
 
 export default {
     props: {
@@ -52,10 +56,13 @@ export default {
     },
     data: function() {
         return {
-            "sImageSrc": ImgLoading,
+            "sImageSrc": null,
             "loadingImage": null,
             "imageStyle": {},
         }
+    },
+    components: {
+        NcLoadingIcon,
     },
     watch: {
         "preload": function(newPreload, oldPreload) {

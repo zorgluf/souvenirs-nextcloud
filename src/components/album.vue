@@ -31,7 +31,8 @@
         </videofull>
         <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
         <div v-if="loading" class="center-page">
-            <img v-bind:src="imgLoading"/>
+            <NcLoadingIcon :size="64">
+            </NcLoadingIcon>
         </div>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
@@ -47,10 +48,9 @@ import Page from './page'
 import Imagefull from './imagefull'
 import Videofull from './videofull'
 import AudioPlayer from './audio_player'
-import { NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
+import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import ImgLoading from "./img/loading.gif"
 
 export default {
     props: {
@@ -72,7 +72,6 @@ export default {
             "downloadActive": false,
             "downloadProgress": 0,
             "albumJson": "",
-            "imgLoading": ImgLoading,
             "fullscreenMode": false,
             "diaporamaMode": false,
             "diap_timeout": null,
@@ -323,7 +322,8 @@ export default {
         NcActions,
         NcActionButton,
         NcActionInput,
-        NcActionSeparator
+        NcActionSeparator,
+        NcLoadingIcon
     },
 }
 

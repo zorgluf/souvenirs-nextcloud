@@ -1,6 +1,6 @@
 <template>
     <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId">
-	<selement v-for="(element, index) in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
+	<selement v-for="element in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
         v-bind:s-offset-x="element.offsetX" v-bind:s-offset-y="element.offsetY" v-bind:s-zoom="element.zoom"

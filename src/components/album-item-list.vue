@@ -11,7 +11,8 @@
             <h2>{{ sNoAblum }}</h2>
         </div>
         <div v-if="loading > 0" class="center">
-            <img v-bind:src="imgLoading"/>
+            <NcLoadingIcon v-bind:title="sLoading" :size="64">
+            </NcLoadingIcon>
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
@@ -21,7 +22,7 @@
 <script>
 
 import AlbumItem from './album-item'
-import ImgLoading from "./img/loading.gif"
+import { NcLoadingIcon } from '@nextcloud/vue'
 
 export default {
     props: {
@@ -33,13 +34,14 @@ export default {
             unsortedAlbumList: [],
             loading: 0,
             lastPage: 0,
-            "imgLoading": ImgLoading,
             "isWinPortrait": false,
+            "sLoading": t("souvenirs","Loading album list..."),
             "sNoAblum": t("souvenirs","No album available. You will need to upload them from the android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
         }
     },
     components: {
         'album-item': AlbumItem,
+        NcLoadingIcon,
     },
     created: function() {
         this.refreshAlbums();
