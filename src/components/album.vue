@@ -7,8 +7,8 @@
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
-        <div class="progress">
-            <div class="progress-item" v-for="(page, index) in pages" v-bind:key="index" v-bind:class="index == displayedPage ? 'progress-item-full' : 'progress-item-empty'"
+        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'">
+            <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
             v-on:click="showN(index)">
             </div>
         </div>
@@ -387,6 +387,13 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     margin: 2px;
 }
 
+.progress-item-portrait {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    margin: 2px;
+}
+
 .progress-item-full {
     background-image: url("./img/circle_full.svg");
     background-size: cover;
@@ -407,6 +414,14 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     position: absolute;
     bottom: 20px;
     height: 20px;
+}
+
+.progress-portrait {
+    width: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 .s-album {
     width: 100%;
