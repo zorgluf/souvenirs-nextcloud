@@ -21,7 +21,7 @@
 
 <script>
 
-import AlbumItem from './album-item'
+import AlbumItem from './album-item.vue'
 import { NcLoadingIcon } from '@nextcloud/vue'
 
 export default {

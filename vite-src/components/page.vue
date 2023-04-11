@@ -18,7 +18,7 @@
 
 <script>
 
-import Selement from "./selement"
+import Selement from "./selement.vue"
 
 export default {
     props: {

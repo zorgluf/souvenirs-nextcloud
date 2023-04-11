@@ -6,6 +6,7 @@ use OCP\IConfig;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
+use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
@@ -42,6 +43,8 @@ class PublicController extends Controller {
 	 * @param string $token
 	 */
 	public function show($token) {
+		$isDev = $this->config->getSystemValue("debug");
+
 		// check token and get album path
 		$share = $this->shareMapper->findByToken($token);
 		if (is_null($share)) {
@@ -57,7 +60,7 @@ class PublicController extends Controller {
 			if (is_null($album)) {
 				return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 			}
-			$param = array('apath' => $album->getAlbumPath(), "token" => $token);
+			$param = array("isDev" => $isDev);
 		} catch(\OCP\Files\NotFoundException $e) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'File does not exist'));
 		}
@@ -65,6 +68,7 @@ class PublicController extends Controller {
 		$template = new PublicTemplateResponse($this->appName, 'publicshow', $param);
         $template->setHeaderTitle('Public albums');
         $template->setHeaderDetails($album->getName());
+		$template->setFooterVisible(false);
         return $template;
 	}
 

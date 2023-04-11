@@ -35,10 +35,11 @@ class PageController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
+		$isDev = $this->config->getSystemValue("debug");
 		try { 
 			$albumsDir = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
 			if($albumsDir instanceof \OCP\Files\Folder) {
-				return new TemplateResponse('souvenirs','index');
+				return new TemplateResponse('souvenirs','index', array("isDev" => $isDev));
 			} else {
 				return new TemplateResponse('souvenirs','error',array('msg' => 'Wrong album path {$albumsDir->getPath()}'));
 			}

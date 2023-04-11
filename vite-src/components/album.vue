@@ -44,18 +44,24 @@
 
 <script>
 
-import Page from './page'
-import Imagefull from './imagefull'
-import Videofull from './videofull'
-import AudioPlayer from './audio_player'
+import Page from './page.vue'
+import Imagefull from './imagefull.vue'
+import Videofull from './videofull.vue'
+import AudioPlayer from './audio_player.vue'
 import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
 export default {
     props: {
-      "path": String,
-      "token": String,
+      "path": {
+        type: String,
+        default: "",
+      },
+      "token": {
+        type: String,
+        default: "",
+      },
     },
     data: function() {
         return {
@@ -165,7 +171,7 @@ export default {
                         this.diaporamaMode = false;
                         return;
                     }
-                    this.displayedPage += 1;
+                    this.showNext();
                     this.diapoTick();
                 }, this.diaporamaSpeed * 1000);
         },
@@ -361,14 +367,14 @@ function getFirstPageDisplayed(el, isPortrait) {
 }
 function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     if (isPortrait) {
-        let top_offset = el.clientWidth * dPage - ((el.clientHeight - el.clientWidth) / 2);
+        let top_offset = el.clientWidth * dPage - (el.clientWidth / 2);
         el.scrollTo({
             top: top_offset,
             left: 0,
             behavior: 'smooth'
         });
     } else {
-        let left_offset = el.clientHeight * dPage - ((el.clientWidth - el.clientHeight) / 2);
+        let left_offset = el.clientHeight * dPage - (el.clientHeight / 2);
         el.scrollTo({
             top: 0,
             left: left_offset,
@@ -423,6 +429,7 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     top: 50%;
     transform: translateY(-50%);
 }
+
 .s-album {
     width: 100%;
     height: 100%;

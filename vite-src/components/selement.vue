@@ -80,14 +80,14 @@ export default {
         },
     computed: {
         'sWidth': function() {
-            var ew = document.getElementById("album-parent-frame").clientWidth;
+            var ew = document.getElementById("souvenirs-main").clientWidth;
             if (this.sTransformType == IMG_ZOOMOFFSET) {
                 ew = ew*this.sZoom/100;
             }
             return Math.floor(ew*(this.sRight-this.sLeft)/100);
         },
         'sHeight': function() {
-            var eh = document.getElementById("album-parent-frame").clientHeight;
+            var eh = document.getElementById("souvenirs-main").clientHeight;
             if (this.sTransformType == IMG_ZOOMOFFSET) {
                 eh = eh*this.sZoom/100;
             }

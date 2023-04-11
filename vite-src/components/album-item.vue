@@ -2,7 +2,7 @@
 
 <div v-bind:class="isWinPortrait ? 's-box-portrait': 's-box'"> 
     <div class="s-spiral"></div>
-    <a v-bind:href='"show?apath="+encodeURIComponent(aPath)'>
+    <router-link :to="{ path: '/show', query: { apath: encodeURIComponent(aPath) }}">
         <div v-bind:class="isWinPortrait ? 's-square-portrait': 's-square'">
             <img v-bind:class="isWinPortrait ? 's-album-image-portrait': 's-album-image'" v-bind:src='albumImageUrl'
             />
@@ -13,7 +13,7 @@
         <div class="s-subtitle s-oneline">
             {{dateString}}
         </div>
-    </a>
+    </router-link>
     <div v-bind:class="[ 'right', isWinPortrait ? 's-action-menu-portrait': 's-action-menu' ]">
         <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
             <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>

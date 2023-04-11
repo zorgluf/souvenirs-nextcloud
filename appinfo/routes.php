@@ -10,7 +10,6 @@
 return [
     'routes' => [
 	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-       ['name' => 'page#show', 'url' => '/show', 'verb' => 'GET', 'requirements' => array('apath' => '.+')],
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
     ['name' => 'preview#get_asset', 'url' => '/asset', 'verb' => 'GET', 'requirements' => array('apath' => '.+', 'file' => '.+') ],
