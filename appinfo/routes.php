@@ -18,6 +18,7 @@ return [
     ['name' => 'admin#update', 'url' => '/admin', 'verb' => 'PUT'],
 
     //API v2
+    [ 'name' => 'api2#preflighted_cors', 'url' => '/apiv2/{path}', 'verb' => 'OPTIONS', 'requirements' => array('path' => '.+')],
     ['name' => 'api2#list_albums', 'url' => '/apiv2/album', 'verb' => 'GET', 'requirements' => array('page' => '[0-9]+') ],
     ['name' => 'api2#get_album', 'url' => '/apiv2/album/{id}', 'verb' => 'GET' ],
     ['name' => 'api2#get_album_full', 'url' => '/apiv2/album/{id}/full', 'verb' => 'GET' ],
@@ -40,6 +41,7 @@ return [
     ['name' => 'api2#get_share_by_user', 'url' => '/apiv2/share', 'verb' => 'GET'],
 
     //public API
+    [ 'name' => 'public#preflighted_cors', 'url' => '/public/{path}', 'verb' => 'OPTIONS', 'requirements' => array('path' => '.+')],
     ['name' => 'public#show', 'url' => '/public/{token}', 'verb' => 'GET'],
     ['name' => 'public#get_album_full', 'url' => '/public/{token}/album', 'verb' => 'GET'],
     ['name' => 'preview#get_public_preview', 'url' => '/public/{token}/preview', 'verb' => 'GET','requirements' => array('file' => '.+')],
