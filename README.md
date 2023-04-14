@@ -6,6 +6,11 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.9.0:
+* Enhanced display mode for smartphones
+* UI enhancements
+* Technical refactoring webpack -> vite.js (as SPA)
+
 v1.7.0:
 * Photosphere preview inside album
 * Blured background to fill tile on small image 
