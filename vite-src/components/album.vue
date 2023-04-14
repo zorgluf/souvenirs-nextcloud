@@ -1,13 +1,14 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keyup.left="showPrev" v-on:keyup.right="showNext" v-on:keyup.space="diaporama(!diaporamaMode)">
-	    <i class="arrow-left" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
+	<div class="s-album" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
+    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
+	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
-            v-bind:elements="page.elements" v-bind:album-path="path"
+            v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	    </page>
-	    <i class="arrow-right" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
-        <div class="progress">
-            <div class="progress-item" v-for="(page, index) in pages" v-bind:key="index" v-bind:class="index == displayedPage ? 'progress-item-full' : 'progress-item-empty'"
+	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
+        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'">
+            <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
             v-on:click="showN(index)">
             </div>
         </div>
@@ -30,7 +31,8 @@
         </videofull>
         <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
         <div v-if="loading" class="center-page">
-            <img v-bind:src="imgLoading"/>
+            <NcLoadingIcon :size="64">
+            </NcLoadingIcon>
         </div>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
@@ -42,19 +44,24 @@
 
 <script>
 
-import Page from './page'
-import Imagefull from './imagefull'
-import Videofull from './videofull'
-import AudioPlayer from './audio_player'
-import { NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
+import Page from './page.vue'
+import Imagefull from './imagefull.vue'
+import Videofull from './videofull.vue'
+import AudioPlayer from './audio_player.vue'
+import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import ImgLoading from "./img/loading.gif"
 
 export default {
     props: {
-      "path": String,
-      "token": String,
+      "path": {
+        type: String,
+        default: "",
+      },
+      "token": {
+        type: String,
+        default: "",
+      },
     },
     data: function() {
         return {
@@ -71,11 +78,11 @@ export default {
             "downloadActive": false,
             "downloadProgress": 0,
             "albumJson": "",
-            "imgLoading": ImgLoading,
             "fullscreenMode": false,
             "diaporamaMode": false,
             "diap_timeout": null,
             "diaporamaSpeed": 5,
+            "isWinPortrait": false,
             "sStartSh": t("souvenirs","Start slideshow"),
             "sStopSh": t("souvenirs","Stop slideshow"),
             "sSpeedSh": t("souvenirs","Slideshow speed"),
@@ -84,12 +91,21 @@ export default {
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
         }
     },
+    created: function() {
+        window.addEventListener("resize", this.resizeEventHandler);
+    },
+    destroyed: function() {
+        window.removeEventListener("resize", this.resizeEventHandler);
+        document.querySelector(".s-album").removeEventListener("scroll",this.updatePageDisplayed)
+    },
     mounted: function() {
+        this.resizeEventHandler(null);
         this.refreshAlbum();
         if (document.addEventListener) {
             document.addEventListener('fullscreenchange', ()=> {this.fullscreenMode = (document.fullscreenElement != null)}, false);
         }
         document.querySelector(".s-album").focus();
+        document.querySelector(".s-album").addEventListener('scroll', this.updatePageDisplayed);
     },
     watch: {
         fullscreenMode(newValue, oldValue) {
@@ -147,6 +163,7 @@ export default {
                 return;
             }
             this.displayedPage += 1;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         diapoTick: function() {
             this.diap_timeout = setTimeout(() => {
@@ -154,7 +171,7 @@ export default {
                         this.diaporamaMode = false;
                         return;
                     }
-                    this.displayedPage += 1;
+                    this.showNext();
                     this.diapoTick();
                 }, this.diaporamaSpeed * 1000);
         },
@@ -163,9 +180,11 @@ export default {
                 return;
             }
             this.displayedPage -= 1;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         showN: function(index) {
             this.displayedPage = index;
+            updateScrollWithPageDisplayed(document.querySelector(".s-album"),this.displayedPage,this.isWinPortrait);
         },
         openImgFull: function(imageUrl,isPhotosphere) {
             this.imageFullUrl = imageUrl;
@@ -284,6 +303,20 @@ export default {
                 });
             }
         },
+        resizeEventHandler: function(e) {
+            if (window.innerHeight > window.innerWidth) {
+                if (!this.isWinPortrait) {
+                    this.isWinPortrait = true;
+                }
+            } else {
+                if (this.isWinPortrait) {
+                    this.isWinPortrait = false;
+                }
+            }
+        },
+        updatePageDisplayed: function(e) {
+            this.displayedPage = getFirstPageDisplayed(document.querySelector(".s-album"),this.isWinPortrait);
+        }
     },
     components: {
         page: Page,
@@ -295,7 +328,8 @@ export default {
         NcActions,
         NcActionButton,
         NcActionInput,
-        NcActionSeparator
+        NcActionSeparator,
+        NcLoadingIcon
     },
 }
 
@@ -322,6 +356,33 @@ function getFile(url) {
         request.send(null);
     });
 }
+
+function getFirstPageDisplayed(el, isPortrait) {
+    if (isPortrait) {
+        return Math.ceil(el.scrollTop / el.clientWidth);
+    } else {
+        return Math.ceil(el.scrollLeft / el.clientHeight);
+    }
+    
+}
+function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
+    if (isPortrait) {
+        let top_offset = el.clientWidth * dPage - (el.clientWidth / 2);
+        el.scrollTo({
+            top: top_offset,
+            left: 0,
+            behavior: 'smooth'
+        });
+    } else {
+        let left_offset = el.clientHeight * dPage - (el.clientHeight / 2);
+        el.scrollTo({
+            top: 0,
+            left: left_offset,
+            behavior: 'smooth'
+        });
+    }
+}
+
 </script>
 
 <style scoped>
@@ -329,6 +390,13 @@ function getFile(url) {
     width: 20px;
     height: 20px;
     display: inline-block;
+    margin: 2px;
+}
+
+.progress-item-portrait {
+    width: 20px;
+    height: 20px;
+    display: flex;
     margin: 2px;
 }
 
@@ -353,6 +421,15 @@ function getFile(url) {
     bottom: 20px;
     height: 20px;
 }
+
+.progress-portrait {
+    width: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .s-album {
     width: 100%;
     height: 100%;
@@ -376,14 +453,14 @@ function getFile(url) {
 
 
 .arrow-right {
-    background-image: url("./img/right_arrow.svg");
+    background-image: url("./img/left_arrow.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
 	display: inline-block;
 	position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 10%;
+    transform: rotate(180deg);
 	right: 20px;
 	width: 100px;
 	height: 80%;
@@ -412,6 +489,48 @@ function getFile(url) {
 }
 
 .arrow-left:hover {
+    background-color: #d2d2d2;
+}
+
+.arrow-top {
+    background-image: url("./img/left_arrow.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+	display: inline-block;
+	position: fixed;
+	left: 0;
+	width: 100px;
+	height: 80vmin;
+    z-index: 9;
+    opacity: 0.2;
+    top: 0;
+    transform: rotate(90deg) translateY(-90vmin) translateX(70px);
+    transform-origin: top left;
+}
+
+.arrow-top:hover {
+    background-color: #d2d2d2;
+}
+
+.arrow-bottom {
+    background-image: url("./img/left_arrow.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+	display: inline-block;
+	position: fixed;
+	bottom: 0;
+	width: 100px;
+	height: 80vmin;
+    z-index: 9;
+    opacity: 0.2;
+    right: 0;
+    transform: rotate(-90deg) translateX(100%) translateX(20px) translateY(-10vmin);
+    transform-origin: bottom right;
+}
+
+.arrow-bottom:hover {
     background-color: #d2d2d2;
 }
 

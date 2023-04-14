@@ -1,6 +1,6 @@
 <template>
-    <div class="s-page" v-bind:id="sId">
-	<selement v-for="(element, index) in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
+    <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId">
+	<selement v-for="element in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
         v-bind:s-offset-x="element.offsetX" v-bind:s-offset-y="element.offsetY" v-bind:s-zoom="element.zoom"
@@ -18,7 +18,7 @@
 
 <script>
 
-import Selement from "./selement"
+import Selement from "./selement.vue"
 
 export default {
     props: {
@@ -28,6 +28,7 @@ export default {
       "elements": Array,
       "albumPath": String,
       "token": String,
+      "isWinPortrait": Boolean,
     },
     data: function() {
         return {
@@ -49,14 +50,6 @@ export default {
           if (this.displayedPage == this.sNum) {
             //update text size
             fitText();
-            //scroll to page
-            var albumEl = document.getElementById(this.sId).parentNode;
-            var left_offset = document.getElementById(this.sId).offsetLeft - (albumEl.clientWidth - albumEl.clientHeight)/2;
-            albumEl.scrollTo({
-              top: 0,
-              left: left_offset,
-              behavior: 'smooth'
-            });
             //mark page as displayed
             this.isFocus = true;
           } else {
@@ -96,33 +89,30 @@ var fitText = function() {
     });
   };
 
-function elementInViewport(el) {
-  var top = el.offsetTop;
-  var left = el.offsetLeft;
-  var width = el.offsetWidth;
-  var height = el.offsetHeight;
+function isFullyVisible(el) {
+    var rect = el.getBoundingClientRect();
+    var elemTop = rect.top;
+    var elemBottom = rect.bottom;
 
-  while(el.offsetParent) {
-    el = el.offsetParent;
-    top += el.offsetTop;
-    left += el.offsetLeft;
-  }
-
-  return (
-    top < (window.pageYOffset + window.innerHeight) &&
-    left < (window.pageXOffset + window.innerWidth) &&
-    (top + height) > window.pageYOffset &&
-    (left + width) > window.pageXOffset
-  );
+    var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+    return isVisible;
 }
+
 </script>
 
 <style scoped>
 
-.s-page {
+.s-page-vert {
+  display: block;
+  height: 100vmin;
+  width: 100vmin;
+  position: relative;
+}
+
+.s-page-hori {
+  display: inline-block;
   height: calc(100vmin - 50px);
   width: calc(100vmin - 50px);
-  display: inline-block;
   position: relative;
 }
 </style>

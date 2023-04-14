@@ -1,20 +1,20 @@
 <template>
 
-<div class="s-box"> 
+<div v-bind:class="isWinPortrait ? 's-box-portrait': 's-box'"> 
     <div class="s-spiral"></div>
-    <a v-bind:href='"show?apath="+encodeURIComponent(aPath)'>
-        <div class="s-square">
-            <img class="s-album-image" v-bind:src='albumImageUrl'
+    <router-link :to="{ path: '/show', query: { apath: encodeURIComponent(aPath) }}">
+        <div v-bind:class="isWinPortrait ? 's-square-portrait': 's-square'">
+            <img v-bind:class="isWinPortrait ? 's-album-image-portrait': 's-album-image'" v-bind:src='albumImageUrl'
             />
         </div>
-    </a>
-    <div class="s-oneline s-title">
-        {{name}}
-    </div>
-    <div class="s-subtitle s-oneline">
-        {{dateString}}
-    </div>
-    <div class="right s-action-menu">
+        <div class="s-oneline s-title">
+            {{name}}
+        </div>
+        <div class="s-subtitle s-oneline">
+            {{dateString}}
+        </div>
+    </router-link>
+    <div v-bind:class="[ 'right', isWinPortrait ? 's-action-menu-portrait': 's-action-menu' ]">
         <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
             <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>
             <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
@@ -43,6 +43,7 @@ export default {
         'name': String,
         'date': String,
         'albumId': String,
+        'isWinPortrait': Boolean,
     },
     components: {
         NcActions,
@@ -150,7 +151,7 @@ export default {
             }, function() {
                 this.$emit("snackbar","Clipboard error!");
             });
-        }
+        },
     },
 }
 
@@ -172,6 +173,8 @@ export default {
 .s-subtitle {
 	font-style: italic;
 	padding-left: 20px;
+    z-index: 1;
+    position: relative;
 }
 
 .s-oneline {
@@ -184,6 +187,8 @@ export default {
 	font-weight: bold;
 	font-size: 200%;
 	line-height: 200%;
+    z-index: 1;
+    position: relative;
 }
 
 .s-box {
@@ -196,6 +201,22 @@ export default {
 	padding: 20px;
 	position: relative;
 }
+
+.s-box-portrait {
+	display: block;
+	border-width: 2px;  
+	border-color: var(--color-border);
+	border-style: solid;
+    padding: 5px;
+    position: relative;
+    margin-left: 5px;
+    padding-left: 10px;
+}
+
+.s-box-portrait:hover {
+	box-shadow: 5px 5px var(--color-box-shadow);
+}
+
 .s-box:hover {
 	box-shadow: 5px 5px var(--color-box-shadow);
 }
@@ -203,6 +224,12 @@ export default {
 .s-square {
 	padding-top: 100%;
 	position: relative;
+}
+
+.s-square-portrait {
+    position: absolute;
+    height: 100%;
+    width: 100%;
 }
 
 .s-album-image {
@@ -214,9 +241,28 @@ export default {
 	left: 0px;
 }
 
+.s-album-image-portrait {
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 20%;
+}
+
 .s-action-menu {
     display: inline;
+    z-index: 1;
+    position: relative;
 }
+
+.s-action-menu-portrait {
+    z-index: 1;
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 
 .right {
     float: right;

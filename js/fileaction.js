@@ -8,19 +8,18 @@
           name: 'AlbumOpen',
           mime: 'application/json',
           permissions: OC.PERMISSION_READ,
-          icon: OC.imagePath('souvenir', 'icon'),
+          icon: OC.imagePath('souvenirs', 'icon'),
           actionHandler: function (fileName, context) {
             OC.redirect(
               OC.generateUrl(
-                'apps/souvenir/show?apath={dir}',
+                'apps/souvenirs/#/show?apath={dir}',
                 {'dir': context.dir}
               )
             );
           },
-          displayName: t('souvenir', 'Open Album')
+          displayName: t('souvenirs', 'Open Album')
         });
   
-        //OCA.Files.fileActions.setDefault('application/json', 'AlbumOpen');
       }
     });
   })(jQuery, OC);

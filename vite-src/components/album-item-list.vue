@@ -1,16 +1,18 @@
 <template>
-    <div>
+    <div v-bind:class="isWinPortrait ? 'albumlist-portrait': ''">
         <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]'
         v-bind:album-image-path='("albumImage" in album) ? album["albumImage"] : ""'
-        v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' v-on:refresh-shares="refreshShares"
-        v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
+        v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' 
+        v-bind:is-win-portrait="isWinPortrait"
+        v-on:refresh-shares="refreshShares" v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
         </album-item>
         <div v-if="(loading <= 0) && (unsortedAlbumList.length == 0)" class="center">
             <div class="icon-folder"></div>
             <h2>{{ sNoAblum }}</h2>
         </div>
         <div v-if="loading > 0" class="center">
-            <img v-bind:src="imgLoading"/>
+            <NcLoadingIcon v-bind:title="sLoading" :size="64">
+            </NcLoadingIcon>
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
@@ -19,8 +21,8 @@
 
 <script>
 
-import AlbumItem from './album-item'
-import ImgLoading from "./img/loading.gif"
+import AlbumItem from './album-item.vue'
+import { NcLoadingIcon } from '@nextcloud/vue'
 
 export default {
     props: {
@@ -32,17 +34,26 @@ export default {
             unsortedAlbumList: [],
             loading: 0,
             lastPage: 0,
-            "imgLoading": ImgLoading,
-            "sNoAblum": t("souvenirs","No album"),
+            "isWinPortrait": false,
+            "sLoading": t("souvenirs","Loading album list..."),
+            "sNoAblum": t("souvenirs","No album available. You will need to upload them from the android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
         }
     },
     components: {
         'album-item': AlbumItem,
+        NcLoadingIcon,
     },
     created: function() {
         this.refreshAlbums();
         this.refreshShares();
         window.onscroll = () => this.loadAlbumPageIfNeeded();
+        window.addEventListener("resize", this.resizeEventHandler);
+    },
+    mounted: function() {
+        this.resizeEventHandler(null);
+    },
+    destroyed: function() {
+        window.removeEventListener("resize", this.resizeEventHandler);
     },
     watch: {
         loading(newLoading, oldLoading) {
@@ -126,12 +137,27 @@ export default {
             this.snackbarText = texte;
             x.className = "show";
             setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-        }
+        },
+        resizeEventHandler: function(e) {
+            if (window.innerHeight > window.innerWidth) {
+                if (!this.isWinPortrait) {
+                    this.isWinPortrait = true;
+                }
+            } else {
+                if (this.isWinPortrait) {
+                    this.isWinPortrait = false;
+                }
+            }
+        },
     }
 }
 </script>
 
 <style scoped>
+
+.albumlist-portrait {
+    width: 100vw;
+}
 
 #snackbar {
   visibility: hidden; 

@@ -4,7 +4,7 @@ namespace OCA\Souvenirs\Controller;
 use OCP\IRequest;
 use OCP\IConfig;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Controller;
+use OCP\AppFramework\ApiController;
 use OCP\Files\IRootFolder;
 use OCP\IL10N;
 use OCP\AppFramework\Http;
@@ -18,7 +18,7 @@ use OCA\Souvenirs\Controller\Utils;
 define("ALBUM_LIST_PAGE_SIZE",10);
 
 
-class Api2Controller extends Controller {
+class Api2Controller extends ApiController {
 	private $userId;
 	private $userFolder;
 	private $il10n;
@@ -39,6 +39,7 @@ class Api2Controller extends Controller {
 
 	/**
 	* list album of current user
+	* @CORS
 	* @NoAdminRequired
 	* @NoCSRFRequired
 	*/
@@ -59,6 +60,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * create blank album
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -76,6 +78,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * get album
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -104,6 +107,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * get album full
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -135,8 +139,9 @@ class Api2Controller extends Controller {
 		return new JSONResponse($albumArray);
 	}
 
-		/**
+	/**
 	 * get album assets
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -157,6 +162,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * post album infos
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -180,6 +186,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * delete album
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -199,6 +206,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * get asset status infos
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -230,6 +238,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * search for same asset in all nextcloud user files
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -250,6 +259,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * clean assets
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -269,6 +279,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * create page
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -294,6 +305,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * delete page
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -314,6 +326,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * post page
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -339,6 +352,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * move page
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -377,6 +391,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * create share
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -391,6 +406,7 @@ class Api2Controller extends Controller {
 
 	/**
 	 * delete share
+	 * @CORS
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @param string $token
