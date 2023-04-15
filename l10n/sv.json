@@ -1,7 +1,7 @@
 { "translations": {
     "Souvenirs" : "Souvenirer",
     "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Bläddra bland och visa dina souverniralbum i Nextclouds webbapplikation.",
-    "No album" : "Inga album",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "Visa och dela album gjorda med [Souvenirs androidapplikation](https://github.com/zorgluf/souvenirs-android).\n    \\nApplikationen är endast en bildvisare. Inga funktioner för att skapa eller redigering finns för närvarande . Du måste skapa album i androidappen och synka dem till dina Nextcloud-server.",
     "Start slideshow" : "Starta bildspel",
     "Stop slideshow" : "Stoppa bildsspel",
     "Slideshow speed" : "Hastighet på bildspelet",

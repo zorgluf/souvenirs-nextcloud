@@ -3,7 +3,7 @@ OC.L10N.register(
     {
     "Souvenirs" : "Meenutused",
     "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Sirvi ja vaata oma \" meenutuste\" albumeid nextcloudi veebiliideses",
-    "No album" : "Albumit ei ole",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android). \n\\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server.",
     "Start slideshow" : "Slaidiesitluse käivitamine",
     "Stop slideshow" : "Slaidiesitluse peatamine",
     "Slideshow speed" : "Slaidiesitluse kiirus",

@@ -1,7 +1,6 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "No album" : "Ei albumia",
     "Start slideshow" : "Aloita diaesitys",
     "Stop slideshow" : "Pysäytä diaesistys",
     "Slideshow speed" : "Diaesityksen nopeus",

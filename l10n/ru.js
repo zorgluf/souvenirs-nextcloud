@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Souvenirs" : "Воспоминания",
     "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Просматривайте альбомы своих \"воспоминаний\" в интерфейсе nextcloud",
-    "No album" : "Нет альбома",
     "Start slideshow" : "Начать слайд шоу",
     "Stop slideshow" : "Остановить слайд шоу",
     "Slideshow speed" : "Скорость слайд шоу",
