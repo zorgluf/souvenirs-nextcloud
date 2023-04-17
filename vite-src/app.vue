@@ -9,6 +9,14 @@
     background-color: white;
     position: relative;
     width: 100%;
+    overflow-y: scroll;
+}
+
+@media (prefers-color-scheme: dark) {
+    .souvenirs-main {
+        background-color: black;
+    }
+
 }
 
 </style>
