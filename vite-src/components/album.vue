@@ -567,4 +567,11 @@ div.center {
     margin: 0 auto;
 }
 
+@media (prefers-color-scheme: dark) {
+    .s-album {
+        background-color: black;
+    }
+
+}
+
 </style>

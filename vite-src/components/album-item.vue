@@ -207,10 +207,9 @@ export default {
 	border-width: 2px;  
 	border-color: var(--color-border);
 	border-style: solid;
-    padding: 5px;
+    margin: 5px;
     position: relative;
     margin-left: 5px;
-    padding-left: 10px;
 }
 
 .s-box-portrait:hover {
@@ -266,5 +265,32 @@ export default {
 
 .right {
     float: right;
+}
+
+@media (prefers-color-scheme: dark) {
+    .s-album-image-portrait {
+        opacity: 80%;
+    }
+
+    .s-spiral {
+        filter: invert(100%);
+    }
+
+    .s-box {
+        border-color: var(--color-border-dark);
+    }
+
+    .s-box-portrait {
+        border-color: var(--color-border-dark);
+    }
+
+    .s-box-portrait:hover {
+        box-shadow: 5px 5px var(--color-primary-element);
+    }
+
+    .s-box:hover {
+        box-shadow: 5px 5px var(--color-primary-element);
+    }
+
 }
 </style>
