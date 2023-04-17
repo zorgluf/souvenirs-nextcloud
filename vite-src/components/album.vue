@@ -367,14 +367,14 @@ function getFirstPageDisplayed(el, isPortrait) {
 }
 function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     if (isPortrait) {
-        let top_offset = el.clientWidth * dPage - (el.clientWidth / 2);
+        let top_offset = el.clientWidth * dPage - ((el.clientHeight - el.clientWidth) / 2);
         el.scrollTo({
             top: top_offset,
             left: 0,
             behavior: 'smooth'
         });
     } else {
-        let left_offset = el.clientHeight * dPage - (el.clientHeight / 2);
+        let left_offset = el.clientHeight * dPage - ((el.clientWidth - el.clientHeight) / 2);
         el.scrollTo({
             top: 0,
             left: left_offset,
