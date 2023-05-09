@@ -104,15 +104,15 @@ function isFullyVisible(el) {
 
 .s-page-vert {
   display: block;
-  height: 100vmin;
-  width: 100vmin;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   position: relative;
 }
 
 .s-page-hori {
   display: inline-block;
-  height: calc(100vmin - 50px);
-  width: calc(100vmin - 50px);
+  height: 100%;
+  aspect-ratio: 1 / 1;
   position: relative;
 }
 </style>
