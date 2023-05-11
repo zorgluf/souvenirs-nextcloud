@@ -4,7 +4,9 @@
     v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
         <video id="video" v-if="isFocus && sClass.endsWith('VideoElement')" v-on:click="openVideo"
-            v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" autoplay="true">
+            v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" 
+            autoplay="true" loop="true" preload="auto"
+            v-on:waiting="waitingVideo" v-on:playing="playingVideo" v-on:loadstart="waitingVideo">
             <source v-bind:src="videoUrl">
         </video>
         <div v-if="sImageSrc == null && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))">
@@ -18,6 +20,10 @@
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
         <div v-bind:id="'pano-'+sId" style="position:absolute;top:0;left:0;width: 100%;height: 100%;"/>
+        <div v-if="isVideoLoading" class="center">
+            <NcLoadingIcon :size="64">
+            </NcLoadingIcon>
+        </div>
     </div>
 </template>
 
@@ -59,6 +65,7 @@ export default {
             "sImageSrc": null,
             "loadingImage": null,
             "imageStyle": {},
+            "isVideoLoading": false,
         }
     },
     components: {
@@ -126,7 +133,7 @@ export default {
                 var pano = new Viewer({
                     panorama: this.imageUrl(true),
                     container: "pano-"+this.sId,
-                    loadingImg: './img/loading.gif',
+                    loadingImg: './img/loading.gif', //FIXME : broken
                     useXmpData: true,
                     defaultLong: 110,
                     navbar: [],
@@ -155,7 +162,16 @@ export default {
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         },
         openVideo: function() {
+            this.isFocus = false;
             this.$emit("videofull",this.videoUrl);
+        },
+        waitingVideo: function() {
+            this.isVideoLoading = true;
+            console.log("waiting");
+        },
+        playingVideo: function() {
+            this.isVideoLoading = false;
+            console.log("playing");
         }
     }
 }
@@ -217,12 +233,17 @@ function basename(path) {
     color: white;
 }
 
+center {
+    margin:auto;
+    position: absolute;
+}
+
 .centercrop {
     object-fit: cover;
     width: 100%;
 	height: 100%;
 }
-
+reture
 .fill {
     object-fit: contain;
     width: 100%;

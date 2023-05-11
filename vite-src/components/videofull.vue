@@ -1,6 +1,6 @@
 <template>
-    <video id="video_full" class="video-full" v-on:click="closeVideoFull"
-        autoplay="true">
+    <video id="video_full" class="video-full" v-on:keydown.escape="closeVideoFull"
+        autoplay="true" controls>
         <source v-bind:src="videoUrl">
     </video>
 </template>
@@ -10,6 +10,9 @@
 export default {
     props: {
       "videoUrl": String,
+    },
+    mounted: function() {
+        document.querySelector("#video_full").focus();
     },
     data: function() {
         return {
