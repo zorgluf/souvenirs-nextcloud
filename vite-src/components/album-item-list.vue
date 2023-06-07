@@ -35,7 +35,7 @@ export default {
             loading: 0,
             lastPage: 0,
             "isWinPortrait": false,
-            "sLoading": t("souvenirs","Loading album list..."),
+            "sLoading": t("souvenirs","Loading album list…"),
             "sNoAblum": t("souvenirs","No album available. You will need to upload them from the android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
         }
     },
