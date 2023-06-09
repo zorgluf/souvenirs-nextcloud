@@ -4,8 +4,6 @@ OC.L10N.register(
     "Souvenirs" : "Hediyelikler",
     "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Nextcloud site arayüzünde \"hediyelikler\" albümlerinize göz atın ve görüntüleyin",
     "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "[Hediyelikler Android uygulaması](https://github.com/zorgluf/souvenirs-android) tarafından oluşturulmuş albümleri görüntüleyin ve paylaşın.\n\\nBu uygulama yalnızca bir görüntüleyicidir. Şu an için albüm oluşturma veya düzenleme özelliği bulunmuyor. Android uygulamasını kullanarak albümler oluşturmanız ve bunları Nextcloud sunucunuzla eşitlemeniz gerekir.",
-    "Loading album list..." : "Albüm listesi yükleniyor...",
-    "No album available. You will need to upload them from the android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Kullanılabilecek bir albüm yok. Souvenirs Android uygulamasından yüklemelisiniz (https://github.com/zorgluf/souvenirs-android).",
     "Start slideshow" : "Slayt sunumunu başlat",
     "Stop slideshow" : "Slayt sunumunu durdur",
     "Slideshow speed" : "Slayt sunumu hızı",
