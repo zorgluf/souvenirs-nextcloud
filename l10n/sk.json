@@ -1,4 +1,7 @@
 { "translations": {
+    "Start slideshow" : "Spustiť prehliadku",
+    "Stop slideshow" : "Zastaviť prehliadku",
+    "Slideshow speed" : "Rýchlosť prehliadky",
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku"
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"
