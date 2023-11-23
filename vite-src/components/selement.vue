@@ -3,11 +3,11 @@
     v-bind:id="sId"
     v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
-        <video id="video" v-if="isFocus && sClass.endsWith('VideoElement')" v-on:click="openVideo"
+        <video id="video" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" 
-            autoplay="true" loop="true" preload="auto"
-            v-on:waiting="waitingVideo" v-on:playing="playingVideo" v-on:loadstart="waitingVideo">
-            <source v-bind:src="videoUrl">
+            loop="true" preload="auto" :key="videoUrlSrc"
+            v-on:waiting="waitingVideo" v-on:canplay="playingVideo" v-on:loadstart="waitingVideo">
+            <source v-bind:src="videoUrlSrc">
         </video>
         <div v-if="sImageSrc == null && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))">
             <NcLoadingIcon :size="64"></NcLoadingIcon>
@@ -63,6 +63,7 @@ export default {
     data: function() {
         return {
             "sImageSrc": null,
+            "videoUrlSrc": null,
             "loadingImage": null,
             "imageStyle": {},
             "isVideoLoading": false,
@@ -79,6 +80,24 @@ export default {
                 }
             }
         },
+        "isFocus": function(newFocus,oldFocus) {
+            if (this.sClass == 'VideoElement') {
+                if (newFocus != oldFocus) {
+                    let video = document.getElementById("video");
+                    if (newFocus) {
+                        if (!this.isVideoLoading) {
+                            video.play();
+                        }
+                    } else {
+                        const isVideoPlaying = video => !!(video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 3);
+                        if (isVideoPlaying) {
+                            video.pause();
+                            console.log("pause");
+                        }
+                    }
+                }
+            }
+        }
     },
     created: function() {
             if (this.preload) {
@@ -123,6 +142,9 @@ export default {
                 this.loadingImage.onload = this.onLoadedImage;
                 this.loadingImage.src = this.imageUrl();
             }
+            if ((this.sVideo != '') && (this.sVideo != undefined)) {
+                this.videoUrlSrc = this.videoUrl;
+            }
         },
         onLoadedImage: function() {
             this.sImageSrc = this.loadingImage.src;
@@ -162,16 +184,19 @@ export default {
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         },
         openVideo: function() {
-            this.isFocus = false;
+            //TODO
+            //this.isFocus = false;
+            document.getElementById("video").pause();
             this.$emit("videofull",this.videoUrl);
         },
         waitingVideo: function() {
             this.isVideoLoading = true;
-            console.log("waiting");
         },
         playingVideo: function() {
             this.isVideoLoading = false;
-            console.log("playing");
+            if (this.isFocus) {
+                document.getElementById("video").play();
+            }
         }
     }
 }

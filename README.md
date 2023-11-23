@@ -6,6 +6,9 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.9.3:
+* bug fix on album containing multiples videos
+
 v1.9.1:
 * bug fixes in scrolling and dark mode
 
