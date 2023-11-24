@@ -19,7 +19,8 @@
     "ical.js": "^1.5.0",
     "uuid": "^8.3.2",
     "linkifyjs": "^4.0.2",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "vue-device-detector-js": "^1.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue2": "^2.2.0",

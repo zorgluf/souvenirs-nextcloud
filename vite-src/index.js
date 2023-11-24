@@ -4,8 +4,10 @@ import AlbumItemList from './components/album-item-list.vue'
 import Album from './components/album.vue'
 import App from './app.vue'
 import VueRouter from 'vue-router'
+import device from "vue-device-detector-js"
 
 Vue.use(VueRouter)
+Vue.use(device)
 
 const routes = [
   { path: '/', component: AlbumItemList },

@@ -33,11 +33,12 @@ export default {
     data: function() {
         return {
             "isFocus": false,
+            "preloadScope": 5,
         }
     },
     computed: {
         "pagePreload": function() {
-          if (Math.abs(this.displayedPage - this.sNum) < 3) {
+          if (Math.abs(this.displayedPage - this.sNum) < this.preloadScope) {
             return true;
           } else {
             return false;
@@ -77,11 +78,11 @@ export default {
 //tools : autosize text
 var fitText = function() {
     var elements = document.querySelectorAll('.resize');
-    if(elements.length < 0) {
+    if(elements.length <= 0) {
       return;
     }
     elements.forEach(function(element) {
-      while(element.scrollWidth > element.offsetWidth || element.scrollHeight > element.offsetHeight) {
+      while( (element.scrollWidth > element.offsetWidth) || (element.scrollHeight > element.offsetHeight) ) {
         var newFontSize = (parseFloat(window.getComputedStyle(element).fontSize.slice(0, -2)) * 0.95) + 'px';
         element.style.fontSize = newFontSize;
         element.style.lineHeight = newFontSize;

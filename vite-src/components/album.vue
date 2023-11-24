@@ -1,13 +1,15 @@
 <template>
 	<div class="s-album" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
     v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
-	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev" v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
+	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!$device.isMobile"
+            v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
 	    </page>
-	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
-        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'">
+	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!$device.isMobile"
+            v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
+        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'" v-if="!$device.isMobile">
             <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
             v-on:click="showN(index)">
             </div>
@@ -106,6 +108,7 @@ export default {
         }
         document.querySelector(".s-album").focus();
         document.querySelector(".s-album").addEventListener('scroll', this.updatePageDisplayed);
+        console.log(this.$device);
     },
     watch: {
         fullscreenMode(newValue, oldValue) {
@@ -329,7 +332,7 @@ export default {
         NcActionButton,
         NcActionInput,
         NcActionSeparator,
-        NcLoadingIcon
+        NcLoadingIcon,
     },
 }
 

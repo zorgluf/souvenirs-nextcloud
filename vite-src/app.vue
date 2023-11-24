@@ -4,6 +4,7 @@
     </div>
 </template>
 
+
 <style scoped>
 .souvenirs-main {
     background-color: white;
