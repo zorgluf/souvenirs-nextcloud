@@ -3,7 +3,7 @@
     v-bind:id="sId"
     v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
-        <video id="video" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
+        <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" 
             loop="true" preload="auto" :key="videoUrlSrc"
             v-on:waiting="waitingVideo" v-on:canplay="playingVideo" v-on:loadstart="waitingVideo">
@@ -83,7 +83,7 @@ export default {
         "isFocus": function(newFocus,oldFocus) {
             if (this.sClass == 'VideoElement') {
                 if (newFocus != oldFocus) {
-                    let video = document.getElementById("video");
+                    let video = document.getElementById(this.sId+"video");
                     if (newFocus) {
                         if (!this.isVideoLoading) {
                             video.play();
@@ -92,7 +92,6 @@ export default {
                         const isVideoPlaying = video => !!(video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 3);
                         if (isVideoPlaying) {
                             video.pause();
-                            console.log("pause");
                         }
                     }
                 }
@@ -184,9 +183,7 @@ export default {
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         },
         openVideo: function() {
-            //TODO
-            //this.isFocus = false;
-            document.getElementById("video").pause();
+            document.getElementById(this.sId+"video").pause();
             this.$emit("videofull",this.videoUrl);
         },
         waitingVideo: function() {
@@ -195,7 +192,7 @@ export default {
         playingVideo: function() {
             this.isVideoLoading = false;
             if (this.isFocus) {
-                document.getElementById("video").play();
+                document.getElementById(this.sId+"video").play();
             }
         }
     }
