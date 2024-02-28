@@ -547,6 +547,7 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
 	position: absolute;
     right: 5px;
     top: 5px;
+    z-index: 6;
 }
 
 .top-left {
