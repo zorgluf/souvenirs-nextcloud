@@ -6,6 +6,9 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.9.5:
+* bug fixes on video format, downloading album, support nc28
+
 v1.9.4:
 * bug fix on album containing multiples videos
 
