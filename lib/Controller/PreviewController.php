@@ -46,7 +46,7 @@ class PreviewController extends Controller {
 	 */
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get($apath));
+		$album = Album::withFolder($userFolder->get(urldecode($apath)));
 		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
 		$node = $this->rootFolder->get($realFilePath);
 		$response = new StreamResponse($node->fopen("r"));
