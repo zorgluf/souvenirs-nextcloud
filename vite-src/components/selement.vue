@@ -1,7 +1,7 @@
 <template>
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
     v-bind:id="sId"
-    v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+sImageSrc+'\')'">
+    v-bind:style="'top:'+sTop.toString()+'%;left:'+sLeft.toString()+'%;width:'+(sRight-sLeft).toString()+'%;height:'+(sBottom-sTop).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
         <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', sZoom == 100 ? 'fill' : 'centercrop' ]" 
@@ -62,7 +62,7 @@ export default {
     },
     data: function() {
         return {
-            "sImageSrc": null,
+            "sImageSrc": "",
             "videoUrlSrc": null,
             "loadingImage": null,
             "imageStyle": {},
