@@ -5,7 +5,7 @@
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
-            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
+            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!$device.isMobile"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -91,6 +91,7 @@ export default {
             "sDownload": t("souvenirs","Download"),
             "sFullscreen": t("souvenirs","Fullscreen"),
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
+            "elementMargin": 1,
         }
     },
     created: function() {
@@ -299,6 +300,7 @@ export default {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
                         that.pages = data.pages;
+                        that.elementMargin = data.elementMargin ??= 0;
                         that.loading = false;
                     })
                 }).catch(error => {
