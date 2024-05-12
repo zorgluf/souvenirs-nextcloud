@@ -11,7 +11,8 @@
                 v-bind:preload="pagePreload" v-bind:s-transform-type="element.transformType"
                 v-bind:s-class="element.class"
                 v-bind:s-video="element.video" v-bind:is-focus="isFocus"
-                v-on:imagefull="openImgFull" v-on:videofull="openVideoFull">
+                v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
+                v-bind:element-margin="elementMargin">
 	</selement>
     </div>
 </template>
@@ -29,6 +30,7 @@ export default {
       "albumPath": String,
       "token": String,
       "isWinPortrait": Boolean,
+      "elementMargin": Number,
     },
     data: function() {
         return {
