@@ -4,7 +4,7 @@
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
 		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
         <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
-            v-bind:class="['video-element', sZoom == 100 ? 'fill' : 'centercrop' ]" 
+            v-bind:class="['video-element', sZoom == 100 ? 'centercrop' : 'fill' ]" 
             loop="true" preload="auto" :key="videoUrlSrc"
             v-on:waiting="waitingVideo" v-on:canplay="playingVideo" v-on:loadstart="waitingVideo">
             <source v-bind:src="videoUrlSrc">
@@ -262,10 +262,11 @@ center {
 }
 
 .centercrop {
+    object-fit: cover;
     width: 100%;
 	height: 100%;
 }
-reture
+
 .fill {
     object-fit: contain;
     width: 100%;
