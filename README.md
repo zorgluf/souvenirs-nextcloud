@@ -6,6 +6,10 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.9.7:
+* support for margin between elements
+* bug fixes on video format
+
 v1.9.6:
 * bug fixes on video format, downloading album, support nc28
 
