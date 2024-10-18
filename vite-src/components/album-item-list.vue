@@ -99,6 +99,7 @@ export default {
             }
         },
         loadOneAlbumsPage: function() {
+            //TODO : fix -1 value for loading
             this.loading += 1;
             var that = this;
             fetch("apiv2/album?page="+(that.lastPage+1), {
@@ -122,9 +123,6 @@ export default {
                                 that.loading -= 1;
                             });
                         });
-                    } else {
-                        that.loading = -1;
-                        return;
                     }
                     that.loading -= 1;
                 })

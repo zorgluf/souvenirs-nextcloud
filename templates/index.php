@@ -4,8 +4,8 @@ use \OCP\Util;
 $util = new Util();
 
 if ($_['isDev']) {
-    print_unescaped('<script type="module" src="https://localhost:5173/@vite/client"></script>');
-    print_unescaped('<script type="module" src="https://localhost:5173/index.js"></script>');
+    emit_script_tag("https://localhost:5173/@vite/client" . '" type="module');
+    emit_script_tag("https://localhost:5173/index.js" . '" type="module');
 } else {
 	function manifest(): array
     {
