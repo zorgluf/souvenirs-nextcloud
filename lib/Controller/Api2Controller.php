@@ -10,6 +10,7 @@ use OCP\IL10N;
 use OCP\AppFramework\Http;
 use OCP\IURLGenerator;
 use OCA\Souvenirs\Db\ShareMapper;
+use OCA\Souvenirs\Db\AlbumMapper;
 use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
@@ -27,12 +28,14 @@ class Api2Controller extends ApiController {
 	private $config;
 
 	public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, IL10N $il10n, 
-								ShareMapper $shareMapper, IURLGenerator $urlGen, IConfig $config) {
+								ShareMapper $shareMapper, IURLGenerator $urlGen, IConfig $config, AlbumMapper $albumMapper) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->userFolder = $rootFolder->getUserFolder($UserId);
+		$this->rootFolder = $rootFolder;
 		$this->il10n = $il10n;
 		$this->shareMapper = $shareMapper;
+		$this->albumMapper = $albumMapper;
 		$this->urlGen = $urlGen;
 		$this->config = $config;
 	}
@@ -44,16 +47,11 @@ class Api2Controller extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function listAlbums($page = 1) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$arrayAlbum = $albumList->getList();
-		if (is_null($arrayAlbum)) {
-			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
-		}
+		$albums = $this->albumMapper->findAllByUser($this->userId);
 		//return only ids
 		$ret_list = array();
-		for ($i = (ALBUM_LIST_PAGE_SIZE*($page-1)); $i < min(ALBUM_LIST_PAGE_SIZE*$page,count($arrayAlbum)) ; $i++) {
-			$ret_list[] = $arrayAlbum[$i]["id"];
+		for ($i = (ALBUM_LIST_PAGE_SIZE*($page-1)); $i < min(ALBUM_LIST_PAGE_SIZE*$page,count($albums)) ; $i++) {
+			$ret_list[] = $albums[$i]->getAlbumId();
 		}
 		return new JSONResponse($ret_list);
 	}
@@ -68,6 +66,7 @@ class Api2Controller extends ApiController {
 		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
 		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->createAlbum($id);
+		$this->albumMapper->createAlbum($this->userId, $id, $album->getAlbumPath(), 'Just created');
 		if (!is_null($album)) {
 			return new JSONResponse($album->toArray());
 		} else {
@@ -86,9 +85,11 @@ class Api2Controller extends ApiController {
 		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
-			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-			$albumList = AlbumList::getInstance($albumsFolder);
-			$album = $albumList->getAlbum($id);
+			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+			$album_path = $album_db->getPath();
+			if (! is_null($album_path)) {
+				$album = Album::withFolder($this->rootFolder->get($album_path));
+			}
 		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -115,9 +116,11 @@ class Api2Controller extends ApiController {
 		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
-			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-			$albumList = AlbumList::getInstance($albumsFolder);
-			$album = $albumList->getAlbum($id);
+			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+			$album_path = $album_db->getPath();
+			if (! is_null($album_path)) {
+				$album = Album::withFolder($this->rootFolder->get($album_path));
+			}
 		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -149,9 +152,11 @@ class Api2Controller extends ApiController {
 		if ($apath !== null) {
 			$album = Album::withFolder($this->userFolder->get($apath));
 		} else {
-			$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-			$albumList = AlbumList::getInstance($albumsFolder);
-			$album = $albumList->getAlbum($id);
+			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+			$album_path = $album_db->getPath();
+			if (! is_null($album_path)) {
+				$album = Album::withFolder($this->rootFolder->get($album_path));
+			}
 		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
@@ -167,9 +172,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postAlbum($id) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -191,13 +198,16 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function deleteAlbum($id) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
 		if ($album->delete()) {
+			$this->albumMapper->deleteAlbum($this->userId, $id);
 			return new JSONResponse("OK");
 		} else {
 			return new JSONResponse(array(),Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -211,9 +221,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function assetExistsInAlbum($id,$asset_path) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -243,9 +255,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function assetSearch($id,$asset,$asset_name,$asset_size) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -264,9 +278,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function cleanAssets($id) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -284,9 +300,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function createPage($album_id,$page_pos) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($album_id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -310,9 +328,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function DeletePage($album_id,$page_id) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($album_id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -331,9 +351,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postPage($album_id,$page_id) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($album_id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -357,9 +379,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function movePage($album_id,$page_id,$page_pos) {
-		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($album_id);
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
+		$album_path = $album_db->getPath();
+		if (! is_null($album_path)) {
+			$album = Album::withFolder($this->rootFolder->get($album_path));
+		}
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
