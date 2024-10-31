@@ -23,7 +23,7 @@ jobs:
         uses: zorgluf/upload-release-action@v2
         id: attach_to_release
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.PUBLISH_PAT }}
           file: ${{ env.APP_NAME }}/build/artifacts/appstore/${{ env.APP_NAME }}.tar.gz
           asset_name: ${{ env.APP_NAME }}.tar.gz 
           tag: ${{ github.ref }}
