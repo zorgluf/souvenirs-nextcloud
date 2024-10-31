@@ -18,7 +18,7 @@
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/11.png</screenshot>
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/12.png</screenshot>
     <dependencies>
-        <nextcloud min-version="20" max-version="29"/>
+        <nextcloud min-version="20" max-version="30"/>
     </dependencies>
     <navigations>
         <navigation>

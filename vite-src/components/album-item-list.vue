@@ -46,17 +46,18 @@ export default {
     created: function() {
         this.refreshAlbums();
         this.refreshShares();
-        window.onscroll = () => this.loadAlbumPageIfNeeded();
         window.addEventListener("resize", this.resizeEventHandler);
     },
     mounted: function() {
         this.resizeEventHandler(null);
+        document.getElementById("souvenirs-main").onscroll = (event) => this.loadAlbumPageIfNeeded();
     },
     destroyed: function() {
         window.removeEventListener("resize", this.resizeEventHandler);
     },
     watch: {
         loading(newLoading, oldLoading) {
+            //console.log("old : "+oldLoading+" new: "+newLoading);
             if ((newLoading == 0) && (oldLoading != 0)) {
                 this.loadAlbumPageIfNeeded();
             }
@@ -93,13 +94,13 @@ export default {
             this.loadOneAlbumsPage();
         },
         loadAlbumPageIfNeeded: function() {
-            let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 2;
+            let bottomOfWindow = Math.abs(document.getElementById("souvenirs-main").scrollHeight - document.getElementById("souvenirs-main").clientHeight - document.getElementById("souvenirs-main").scrollTop) <= 1;
+            //console.log("bottomOfWindow:"+bottomOfWindow);
             if (bottomOfWindow & (this.loading == 0)) {
                 this.loadOneAlbumsPage();
             }
         },
         loadOneAlbumsPage: function() {
-            //TODO : fix -1 value for loading
             this.loading += 1;
             var that = this;
             fetch("apiv2/album?page="+(that.lastPage+1), {
@@ -123,6 +124,8 @@ export default {
                                 that.loading -= 1;
                             });
                         });
+                    } else {
+                        that.loading -= 1;
                     }
                     that.loading -= 1;
                 })
