@@ -21,8 +21,8 @@ class DbUpdate extends TimedJob {
         parent::__construct($time);
 
         // Run once a day
-        $this->setInterval(3600);
-        //$this->setInterval(3600*24);
+        //$this->setInterval(60);
+        $this->setInterval(3600*24);
         $this->userManager = $userManager;
         $this->rootFolder = $rootFolder;
         $this->config = $config;
@@ -52,12 +52,16 @@ class DbUpdate extends TimedJob {
             foreach ($albumListInDb as $albumDb) {
                 if ($album['id'] === $albumDb->getAlbumId()) {
                     $found = true;
+                    #check if date is ok
+                    if ($album['date'] !== $albumDb->getDate()) {
+                        $this->albumMapper->setDate($user, $album['id'], $album['date']);
+                    }
                     break;
                 }
             }
             if ($found === false) {
                 //add album to db
-                $this->albumMapper->createAlbum($user, $album['id'], $album['path'], $album['name']);
+                $this->albumMapper->createAlbum($user, $album['id'], $album['path'], $album['name'], $album['date']);
             }
         }
         //remove destroyed albums

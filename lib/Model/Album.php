@@ -77,6 +77,10 @@ class Album {
     public function getAlbumImage() {
         return $this->getContent("albumImage");
     }
+    public function getDate() {
+        $date = date_create_from_format("YmdHis", $this->getContent("date"));
+        return $date;
+    }
     public function setId($id) {
         $this->setContent("id",$id);
     }

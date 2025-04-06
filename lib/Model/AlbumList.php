@@ -28,7 +28,7 @@ class AlbumList {
 					if ($node instanceof \OCP\Files\Folder) {
 						if (Album::isAlbum($node)) {
 							$album = Album::withFolder($node);
-							$albumArray[] = array("name" => $album->getName(), "id" => $album->getId(), "path" => $node->getPath());
+							$albumArray[] = array("name" => $album->getName(), "id" => $album->getId(), "path" => $node->getPath(), "date" => $album->getDate());
 						}
 					}
 				}

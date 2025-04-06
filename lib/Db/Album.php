@@ -11,9 +11,14 @@ class Album extends Entity {
     protected $albumId;
     protected $path;
     protected $user;
+    protected $date;
+
+    public function __construct() {
+        $this->addType('date', 'datetime');
+    }
 
     public function toArray() {
-        return array('name' => $this->name, 'albumId' => $this->albumId, 'path' => $this->path, 'user' => $this->user);
+        return array('name' => $this->name, 'albumId' => $this->albumId, 'path' => $this->path, 'user' => $this->user, 'date' => $this->date);
     }
 
 }

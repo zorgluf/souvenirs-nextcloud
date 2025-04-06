@@ -2,6 +2,7 @@
 
 namespace OCA\Souvenirs\Db;
 
+use DateTime;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
@@ -45,12 +46,13 @@ class AlbumMapper extends QBMapper {
            ->from(ALBUM_TABLE)
            ->where(
                $qb->expr()->eq('user', $qb->createNamedParameter($user, IQueryBuilder::PARAM_STR))
-           );
+           )
+           ->orderBy('date','DESC');
         
         return $this->findEntities($qb);
     }
 
-    public function createAlbum(string $user, string $albumId, string $path, string $name) {
+    public function createAlbum(string $user, string $albumId, string $path, string $name, DateTime $date = new DateTime()) {
 
         //check if album exists
         $res = $this->findByAlbumId($user,$albumId);
@@ -64,7 +66,19 @@ class AlbumMapper extends QBMapper {
         $newAlbum->setAlbumId($albumId);
         $newAlbum->setPath($path);
         $newAlbum->setName($name);
+        $newAlbum->setDate($date);
         $this->insert($newAlbum);
+        return true;
+    }
+
+    public function setDate(string $user, string $albumId, DateTime $date) {
+        #get entity
+        $album = $this->findByAlbumId($user,$albumId);
+        if (is_null($album)) {
+            return false;
+        }
+        $album->setDate($date);
+        $this->update($album);
         return true;
     }
 
