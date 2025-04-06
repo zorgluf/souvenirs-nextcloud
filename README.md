@@ -6,6 +6,9 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.11.7:
+* Album list recorded in nextcloud database for more consistancy and speed
+
 v1.9.7:
 * support for margin between elements
 * bug fixes on video format
