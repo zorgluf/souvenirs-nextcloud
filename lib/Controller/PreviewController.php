@@ -11,7 +11,6 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\IPreview;
-use \OCP\ILogger;
 
 use OCA\Souvenirs\Http\ImageResponse;
 use OCA\Souvenirs\Db\ShareMapper;
@@ -25,17 +24,15 @@ class PreviewController extends Controller {
 	private $preview;
 	private $shareMapper;
 	private $rootFolder;
-	private $logger;
 	private $config;
 
-    public function __construct($AppName, ILogger $logger, IRequest $request, $UserId, IRootFolder $rootFolder, 
+    public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, 
 								IPreview $preview, ShareMapper $shareMapper, IConfig $config) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->rootFolder = $rootFolder;
 		$this->preview = $preview;
 		$this->shareMapper = $shareMapper;
-		$this->logger = $logger;
 		$this->config = $config;
     }
 
