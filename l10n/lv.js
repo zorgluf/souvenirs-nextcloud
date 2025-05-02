@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Start slideshow" : "Sākt slīdrādi",
+    "Stop slideshow" : "Apturēt slīdrādi",
+    "Slideshow speed" : "Slīdrādes ātrums",
     "Download" : "Lejupielādēt",
     "Fullscreen" : "Pilnekrāna"
 },
