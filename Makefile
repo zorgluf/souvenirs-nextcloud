@@ -61,9 +61,6 @@ endif
 ifneq (,$(wildcard $(CURDIR)/package.json))
 	make npm
 endif
-ifneq (,$(wildcard $(CURDIR)/vite-src/package.json))
-	make npm
-endif
 
 # Installs and updates the composer dependencies. If composer is not installed
 # a copy is fetched from the web
@@ -84,8 +81,8 @@ endif
 # Installs npm dependencies
 .PHONY: npm
 npm:
-	cd vite-src && npm install
-	cd vite-src && npm run build
+	npm install
+	npm run build
 
 # Removes the appstore build
 .PHONY: clean
@@ -100,8 +97,8 @@ distclean: clean
 	rm -rf node_modules
 	rm -rf js/vendor
 	rm -rf js/node_modules
-	rm -rf vite-src/dist
-	rm -rf vite-src/node_modules
+	rm -rf src/dist
+	rm -rf src/node_modules
 	rm -rf js/vite
 
 # Builds the source and appstore package
@@ -120,8 +117,8 @@ source:
 	--exclude="$(CURDIR)/build" \
 	--exclude="$(CURDIR)/js/node_modules" \
 	--exclude="$(CURDIR)/js/vite" \
-	--exclude="$(CURDIR)/vite-src/node_modules" \
-	--exclude="$(CURDIR)/vite-src/dist" \
+	--exclude="$(CURDIR)/src/node_modules" \
+	--exclude="$(CURDIR)/src/dist" \
 	--exclude="$(CURDIR)/node_modules" \
 	--exclude="$(CURDIR)/*.log" \
 	--exclude="$(CURDIR)/js/*.log" \
@@ -162,7 +159,6 @@ appstore:
 	--exclude="$(CURDIR)/README.md" \
 	--exclude="$(CURDIR)/webpack*" \
 	--exclude="$(CURDIR)/src" \
-	--exclude="$(CURDIR)/vite-src" \
 	--exclude="$(CURDIR)/publish.*" \
 	--exclude="$(CURDIR)/Jenkinsfile" \
 	--exclude="$(CURDIR)/package-lock.json" \

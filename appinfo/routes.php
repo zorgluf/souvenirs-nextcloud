@@ -9,7 +9,7 @@
  */
 return [
     'routes' => [
-	   ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
+	['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
     ['name' => 'preview#get_asset', 'url' => '/asset', 'verb' => 'GET', 'requirements' => array('apath' => '.+', 'file' => '.+') ],

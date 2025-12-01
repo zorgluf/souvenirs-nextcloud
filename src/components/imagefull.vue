@@ -6,8 +6,8 @@
 
 <script>
 
-import { Viewer } from 'photo-sphere-viewer';
-import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import { Viewer } from '@photo-sphere-viewer/core';
+//import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
 
 export default {
     props: {

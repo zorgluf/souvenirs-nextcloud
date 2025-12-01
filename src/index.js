@@ -1,13 +1,10 @@
 import 'vite/modulepreload-polyfill'
-import Vue from 'vue'
+import { createApp } from 'vue'
 import AlbumItemList from './components/album-item-list.vue'
 import Album from './components/album.vue'
 import App from './app.vue'
-import VueRouter from 'vue-router'
-import device from "vue-device-detector-js"
+import { createRouter, createWebHistory } from 'vue-router'
 
-Vue.use(VueRouter)
-Vue.use(device)
 
 const routes = [
   { path: '/', component: AlbumItemList },
@@ -20,20 +17,19 @@ const routes = [
   },
   { 
     path: '/public/:token', 
-    component: Album, 
-    props: {
-      default: true,
-    } 
+    component: Album,   
+    props: route => ({ 
+      token: route.params.token,
+    }) 
   }
 ]
 
-const router = new VueRouter({
+const router = createRouter({
   routes: routes,
+  history: createWebHistory('index.php/apps/souvenirs'),
 })
 
 
-const app = new Vue({
-  router,
-  render: h => h(App),
-}).$mount('#app-vue')
+const app = createApp(App).use(router).mount('#app-vue')
+
 
