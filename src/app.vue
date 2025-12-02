@@ -4,12 +4,15 @@
     </div>
 </template>
 
+<script setup>
+</script>
 
 <style scoped>
 .souvenirs-main {
     background-color: white;
     position: relative;
     width: 100%;
+    height: 100%;
     overflow-y: scroll;
 }
 

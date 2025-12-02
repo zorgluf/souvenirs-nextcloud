@@ -1,0 +1,32 @@
+{
+  "name": "souvenirs",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "~3.5.24",
+    "vue-router": "~4.6.3",
+    "@vue/compiler-sfc": "~3.5.24",
+    "@nextcloud/vue": "~9.3.0",
+    "@nextcloud/router": "~3.1.0",
+    "@nextcloud/vite-config": "~2.5.2",
+    "@photo-sphere-viewer/core": "~5.14.0",
+    "jszip": "~3.10.0",
+    "file-saver": "~2.0.5",
+    "ical.js": "~2.2.1",
+    "uuid": "~13.0.0",
+    "linkifyjs": "~4.3.2",
+    "buffer": "~6.0.3",
+    "vue-device-detector-js": "~1.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "~6.0.1",
+    "vite": "~7.2.4",
+    "vite-plugin-mkcert": "~1.17.9"
+  }
+}

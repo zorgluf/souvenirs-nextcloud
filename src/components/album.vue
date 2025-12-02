@@ -1,15 +1,15 @@
 <template>
 	<div class="s-album" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
     v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
-	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!$device.isMobile"
+	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin">
 	    </page>
-	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!$device.isMobile"
+	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
-        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'" v-if="!$device.isMobile">
+        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'" v-if="!isTouchDevice">
             <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
             v-on:click="showN(index)">
             </div>
@@ -92,6 +92,7 @@ export default {
             "sFullscreen": t("souvenirs","Fullscreen"),
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
             "elementMargin": 1,
+            "isTouchDevice": isTouchDevice(),
         }
     },
     created: function() {
@@ -361,7 +362,11 @@ function getFile(url) {
         request.send(null);
     });
 }
-
+function isTouchDevice() {
+  return (('ontouchstart' in window) ||
+     (navigator.maxTouchPoints > 0) ||
+     (navigator.msMaxTouchPoints > 0));
+}
 function getFirstPageDisplayed(el, isPortrait) {
     if (isPortrait) {
         return Math.ceil(el.scrollTop / el.clientWidth);
@@ -425,6 +430,7 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     position: absolute;
     bottom: 20px;
     height: 20px;
+    z-index: 9;
 }
 
 .progress-portrait {
@@ -433,6 +439,7 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 9;
 }
 
 .s-album {
@@ -551,7 +558,7 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     top: 5px;
     z-index: 6;
 }
-
+ 
 .top-left {
     display: inline-block;
 	position: absolute;

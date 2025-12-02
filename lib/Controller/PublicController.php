@@ -65,7 +65,7 @@ class PublicController extends ApiController {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'File does not exist'));
 		}
 		//create public template
-		$template = new PublicTemplateResponse($this->appName, 'publicshow', $param);
+		$template = new PublicTemplateResponse($this->appName, 'index', $param);
         $template->setHeaderTitle('Public albums');
         $template->setHeaderDetails($album->getName());
 		$template->setFooterVisible(false);

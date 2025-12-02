@@ -5,11 +5,11 @@ $util = new Util();
 
 if ($_['isDev']) {
     emit_script_tag("https://localhost:5173/@vite/client" . '" type="module');
-    emit_script_tag("https://localhost:5173/index.js" . '" type="module');
+    emit_script_tag("https://localhost:5173/src/index.js" . '" type="module');
 } else {
 	function manifest(): array
     {
-        $manifestPath = dirname(__FILE__) . "/../js/vite/manifest.json";
+        $manifestPath = dirname(__FILE__) . "/../js/vite/.vite/manifest.json";
         if (!file_exists($manifestPath)) {
             return [];
         }
@@ -22,15 +22,15 @@ if ($_['isDev']) {
             : [];
     }
     $manifest = manifest();
-	$js_file = $manifest['index.js']['file'];
+	$js_file = $manifest['src/index.js']['file'];
     emit_script_tag($util->linkToAbsolute('souvenirs', 'js/vite/' . $js_file) . '" type="module');
-    if (array_key_exists("css",$manifest["index.js"])) {
-        $css_file = $manifest['index.js']['css'][0];
+    if (array_key_exists("css",$manifest["src/index.js"])) {
+        $css_file = $manifest['src/index.js']['css'][0];
         emit_css_tag($util->linkToAbsolute('souvenirs', 'js/vite/' . $css_file));
     }
     //for imports
-    if (array_key_exists("imports",$manifest['index.js'])) {
-        foreach($manifest['index.js']["imports"] as $import) {
+    if (array_key_exists("imports",$manifest['src/index.js'])) {
+        foreach($manifest['src/index.js']["imports"] as $import) {
             $js_file = $manifest[$import]['file'];
             emit_script_tag($util->linkToAbsolute('souvenirs', 'js/vite/' . $js_file) . '" type="module');
             if (array_key_exists("css",$manifest[$import])) {
@@ -43,6 +43,6 @@ if ($_['isDev']) {
 
 ?>
 
-<div id="app-vue">
+<div id="app-vue" style="width: 100%; height: 100%;">
 </div>
 

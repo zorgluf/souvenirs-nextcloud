@@ -35,8 +35,8 @@ const IMG_ZOOMOFFSET = 2;
 
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
-import { Viewer } from 'photo-sphere-viewer';
-import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import { Viewer } from '@photo-sphere-viewer/core';
+//import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
 import { NcLoadingIcon } from '@nextcloud/vue'
 
 export default {
