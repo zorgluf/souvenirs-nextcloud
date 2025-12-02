@@ -1,0 +1,16 @@
+OC.L10N.register(
+    "souvenirs",
+    {
+    "Souvenirs" : "Ukumbusho",
+    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Vinjari na utazame albamu zako za \"kumbukumbu\" kwenye kiolesura cha wavuti cha nextcloud",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "Tazama na ushiriki albamu zilizoundwa na [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n\\nProgramu hii ni mtazamaji tu. Hakuna vipengele vya kuunda albamu au toleo vinavyopatikana kwa sasa. Utahitaji kuunda albamu kwa kutumia programu ya android na kusawazisha kwa seva yako ya nextcloud.",
+    "Loading album list…" : "Inapakia orodha ya albamu...",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Hakuna albamu inayopatikana. Utahitaji kuzipakia kutoka kwa Zawadi za programu ya Android (https://github.com/zorgluf/souvenirs-android).",
+    "Start slideshow" : "Anza onyesho la slaidi",
+    "Stop slideshow" : "Simamisha onyesho la slaidi",
+    "Slideshow speed" : "Kasi ya onyesho la slaidi",
+    "Download" : "Pakua",
+    "Fullscreen" : "Skrini nzima",
+    "Click to download album in a zip file." : "Bofya ili kupakua albamu katika faili ya zip."
+},
+"nplurals=2; plural=(n != 1);");

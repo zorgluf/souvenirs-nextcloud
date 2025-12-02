@@ -1,5 +1,14 @@
 { "translations": {
+    "Souvenirs" : "Сувеніри",
+    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Переглядайте альбоми \"сувенірів\" у веб-інтерфейсі nextcloud",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "Переглядайте та діліться альбомами, створеними за допомогою [Android-додатку Souvenirs](https://github.com/zorgluf/souvenirs-android).\n\\nЦей додаток є лише переглядачем. Наразі функції створення та редагування альбомів недоступні. Вам потрібно буде створити альбоми за допомогою Android-додатку та синхронізувати їх із сервером Nextcloud.",
+    "Loading album list…" : "Завантаження списку альбомів...",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбом не доступний. Вам потрібно буде завантажити їх з додатку Сувеніри для Android (https://github.com/zorgluf/souvenirs-android).",
+    "Start slideshow" : "Почати показ слайдів",
+    "Stop slideshow" : "Зупинити показ слайдів",
+    "Slideshow speed" : "Швидкість показу слайдів",
     "Download" : "Звантажити",
-    "Fullscreen" : "На весь екран"
+    "Fullscreen" : "На весь екран",
+    "Click to download album in a zip file." : "Натисніть, щоб звантажити архів ZIP з альбомом."
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);"
 }
