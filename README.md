@@ -6,6 +6,9 @@ This application is just a viewer. Edition features are not implemented right no
 
 ## Changelog
 
+v1.12.0:
+* Upgrade to vue3 and refactoring of js code
+
 v1.11.7:
 * Album list recorded in nextcloud database for more consistancy and speed
 
