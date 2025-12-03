@@ -4,6 +4,7 @@ import AlbumItemList from './components/album-item-list.vue'
 import Album from './components/album.vue'
 import App from './app.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import { generateUrl } from '@nextcloud/router'
 
 
 const routes = [
@@ -26,9 +27,8 @@ const routes = [
 
 const router = createRouter({
   routes: routes,
-  history: createWebHistory('index.php/apps/souvenirs'),
+  history: createWebHistory(generateUrl('apps/souvenirs')),
 })
-
 
 const app = createApp(App).use(router).mount('#app-vue')
 
