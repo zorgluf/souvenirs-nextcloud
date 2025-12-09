@@ -6,7 +6,7 @@
     <summary>Browse and view your "souvenirs" albums on nextcloud web interface</summary>
     <description><![CDATA[View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).
     \nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server.]]></description>
-    <version>1.12.0</version>
+    <version>1.12.1</version>
     <licence>agpl</licence>
     <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenirs</namespace>
