@@ -36,8 +36,11 @@ const IMG_ZOOMOFFSET = 2;
 const GOOGLE_PANORAMA_360_MIMETYPE = "application/vnd.google.panorama360+jpg";
 
 import { Viewer } from '@photo-sphere-viewer/core';
-//import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import '@photo-sphere-viewer/core/index.css';
+import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
+import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
 import { NcLoadingIcon } from '@nextcloud/vue'
+import { imagePath } from '@nextcloud/router'
 
 export default {
     props: {
@@ -155,11 +158,14 @@ export default {
                 var pano = new Viewer({
                     panorama: this.imageUrl(true),
                     container: "pano-"+this.sId,
-                    loadingImg: './img/loading.gif', //FIXME : broken
-                    useXmpData: true,
-                    defaultLong: 110,
+                    loadingImg: imagePath('souvenirs','loading.gif'),
                     navbar: [],
-                    autorotateDelay: 1
+                    plugins: [ 
+                        AutorotatePlugin.withConfig(),
+                        VisibleRangePlugin.withConfig({
+                            usePanoData: true,
+                        }),
+                     ],
                 });
             }
         },

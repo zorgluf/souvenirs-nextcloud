@@ -7,7 +7,10 @@
 <script>
 
 import { Viewer } from '@photo-sphere-viewer/core';
-//import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import '@photo-sphere-viewer/core/index.css';
+import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
+import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
+import { imagePath } from '@nextcloud/router'
 
 export default {
     props: {
@@ -19,10 +22,9 @@ export default {
             new Viewer({
                 panorama: this.imageUrl,
                 container: 'image_full',
-                loadingImg: './img/loading.gif',
+                loadingImg: imagePath('souvenirs','loading.gif'),
                 touchmoveTwoFingers: true,
                 mousewheelCtrlKey: true,
-                useXmpData: true,
                 navbar: [
                     {
                         id: 'close-button',
@@ -36,7 +38,12 @@ export default {
                     "autorotate",
                     "zoomRange"
                 ],
-                autorotateDelay: 1
+                plugins: [ 
+                    AutorotatePlugin.withConfig(),
+                    VisibleRangePlugin.withConfig({
+                        usePanoData: true,
+                    }),
+                ],
             });
         }
     },

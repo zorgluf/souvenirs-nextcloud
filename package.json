@@ -16,6 +16,8 @@
     "@nextcloud/router": "~3.1.0",
     "@nextcloud/vite-config": "~2.5.2",
     "@photo-sphere-viewer/core": "~5.14.0",
+    "@photo-sphere-viewer/autorotate-plugin": "~5.14.0", 
+    "@photo-sphere-viewer/visible-range-plugin": "~5.14.0",
     "jszip": "~3.10.0",
     "file-saver": "~2.0.5",
     "ical.js": "~2.2.1",
