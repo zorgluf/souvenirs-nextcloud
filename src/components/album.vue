@@ -26,7 +26,7 @@
             </NcActions>
         </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
-            v-on:click="closeImgFull" v-on:closeimagefull="closeImgFull">
+            v-on:closeimagefull="closeImgFull">
         </imagefull>
         <videofull v-if="videoFullOn" v-bind:videoUrl="videoFullUrl"
             v-on:click="closeVideoFull" v-on:closevideofull="closeVideoFull">
