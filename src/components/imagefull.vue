@@ -7,7 +7,9 @@
 <script>
 
 import { Viewer } from '@photo-sphere-viewer/core';
-//import 'photo-sphere-viewer/dist/photo-sphere-viewer.css'
+import '@photo-sphere-viewer/core/index.css';
+import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
+import { imagePath } from '@nextcloud/router'
 
 export default {
     props: {
@@ -19,24 +21,27 @@ export default {
             new Viewer({
                 panorama: this.imageUrl,
                 container: 'image_full',
-                loadingImg: './img/loading.gif',
+                loadingImg: imagePath('souvenirs','loading.gif'),
                 touchmoveTwoFingers: true,
                 mousewheelCtrlKey: true,
-                useXmpData: true,
                 navbar: [
+                   "zoom",
+                   "move",  
                     {
-                        id: 'close-button',
-                        content: '<svg version="1.1" viewBox="0 0 20.699 21.479" xmlns="http://www.w3.org/2000/svg"><g transform="translate(1.632 1.6339)" label="Layer 1"><path d="m-2.5783e-4 -0.0014681 17.436 18.214" fill="#000000" stroke="#000000" stroke-linecap="round" stroke-width="4"/><path d="m-2.5783e-4 18.212 17.436-18.214" fill="#000000" stroke="#000000" stroke-linecap="round" stroke-width="4"/><title>Layer 1</title></g></svg>',
-                        title: 'Close',
-                        className: 'custom-button',
-                        onClick: () => {
-                            this.closeImgFull();
-                        },
+                       id: 'close-button',
+                       content: '<svg version="1.1" viewBox="0 0 20.699 21.479" xmlns="http://www.w3.org/2000/svg"><g transform="translate(1.632 1.6339)" label="Layer 1"><path d="m-2.5783e-4 -0.0014681 17.436 18.214" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="4"/><path d="m-2.5783e-4 18.212 17.436-18.214" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="4"/><title>Layer 1</title></g></svg>',
+                       title: 'Close',
+                       className: 'custom-button',
+                       onClick: () => {
+                           this.closeImgFull();
+                       },
                     },
-                    "autorotate",
-                    "zoomRange"
                 ],
-                autorotateDelay: 1
+                plugins: [ 
+                    VisibleRangePlugin.withConfig({
+                        usePanoData: true,
+                    }),
+                ],
             });
         }
     },
@@ -54,9 +59,9 @@ export default {
 
 <style scoped>
 
-.image-full {
-    height: 100%;
-    width: 100%;
+.image-full { 
+    height: 100vh;
+    width: 100vw;
     position: fixed;
     z-index: 100;
     left: 0;
@@ -65,6 +70,10 @@ export default {
     background-color: rgba(0,0,0, 0.9);
     overflow-x: hidden;
     transition: 0.5s;
+}
+
+#image_full * {
+    box-sizing: unset;
 }
 
 .image-full-sphere {
