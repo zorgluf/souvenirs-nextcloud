@@ -1,14 +1,14 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Browse and view your \"souvenirs\" albums on nextcloud web interface",
-    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server.",
-    "Loading album list…" : "Loading album list…",
-    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android).",
-    "Start slideshow" : "Start slideshow",
-    "Stop slideshow" : "Stop slideshow",
-    "Slideshow speed" : "Slideshow speed",
+    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "مرور و مشاهده آلبوم‌های \"souvenirs\" خود در رابط وب Nextcloud",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is just a viewer. No album creation or edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "آلبوم‌های ساخته‌شده با [برنامه اندروید Souvenirs](https://github.com/zorgluf/souvenirs-android) را مشاهده و به اشتراک بگذارید.\n    \\nاین برنامه فقط یک نمایشگر است. در حال حاضر هیچ امکانی برای ساخت یا ویرایش آلبوم وجود ندارد. باید آلبوم‌ها را با برنامه اندروید بسازید و آن‌ها را با سرور Nextcloud خود همگام‌سازی کنید.",
+    "Loading album list…" : "در حال بارگذاری فهرست آلبوم‌ها…",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "هیچ آلبومی موجود نیست. باید آن‌ها را از برنامه اندروید Souvenirs (https://github.com/zorgluf/souvenirs-android) بارگذاری کنید.",
+    "Start slideshow" : "شروع نمایش اسلایدی",
+    "Stop slideshow" : "توقف نمایش اسلایدی",
+    "Slideshow speed" : "سرعت نمایش اسلایدی",
     "Download" : "بارگیری",
     "Fullscreen" : "تمام‌صفحه",
-    "Click to download album in a zip file." : "Click to download album in a zip file."
+    "Click to download album in a zip file." : "برای بارگیری آلبوم در یک پرونده zip کلیک کنید."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
