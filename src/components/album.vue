@@ -1,11 +1,12 @@
 <template>
-	<div class="s-album" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
+	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
     v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
-            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin">
+            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
+            v-bind:edit-mode="editMode" v-on:edit-text="onEditText">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -14,8 +15,17 @@
             v-on:click="showN(index)">
             </div>
         </div>
+        <div v-if="editMode" class="edit-badge">{{ sEditing }}</div>
         <div class="top-right">
             <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
+                <NcActionButton v-if="canEdit" @click="toggleEdit" :close-after-click="true">
+                    <template #icon>
+                        <PencilOff v-if="editMode" :size="20"/>
+                        <Pencil v-else :size="20"/>
+                    </template>
+                    {{ editMode ? sFinishEdit : sEdit }}
+                </NcActionButton>
+                <NcActionSeparator v-if="canEdit"/>
                 <NcActionButton icon="icon-fullscreen" @click="fullscreen">{{ sFullscreen }}</NcActionButton>
                 <NcActionSeparator/>
                 <NcActionButton icon="icon-play" @click="diaporama(true)" v-if="!diaporamaMode">{{ sStartSh }}</NcActionButton>
@@ -53,6 +63,10 @@ import AudioPlayer from './audio_player.vue'
 import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import { setElementText } from '../utils/albumEdit.js'
+import { updatePage } from '../api/albumApi.js'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
+import PencilOff from 'vue-material-design-icons/PencilOff.vue'
 
 export default {
     props: {
@@ -74,6 +88,8 @@ export default {
             "videoFullOn": false,
             "videoFullUrl": "",
             "sName": "",
+            "albumId": "",
+            "editMode": false,
             "pages": [],
             "loading": true,
             "downloadModal": false,
@@ -91,6 +107,9 @@ export default {
             "sDownload": t("souvenirs","Download"),
             "sFullscreen": t("souvenirs","Fullscreen"),
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
+            "sEdit": t("souvenirs","Edit"),
+            "sFinishEdit": t("souvenirs","Finish editing"),
+            "sEditing": t("souvenirs","Editing"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
         }
@@ -127,6 +146,10 @@ export default {
         }
     },
     computed: {
+        'canEdit': function() {
+            // Editing is only available in the authenticated (non-public) view.
+            return (this.token == "");
+        },
         'aLeftVisible': function() {
             return (this.displayedPage != 0);
         },
@@ -300,6 +323,7 @@ export default {
                     response.json().then(data => {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
+                        that.albumId = data.id;
                         that.pages = data.pages;
                         that.elementMargin = data.elementMargin ??= 0;
                         that.loading = false;
@@ -308,6 +332,22 @@ export default {
                     console.log("Error in refresh album.");
                 });
             }
+        },
+        toggleEdit: function() {
+            this.editMode = !this.editMode;
+        },
+        onEditText: function(pageId, elementId, newText) {
+            // Locate the page, patch only the changed caption (preserving every
+            // other album/page/element field), then persist that page.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = setElementText(this.pages[index], elementId, newText);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                console.log("Error saving album page edit.");
+            });
         },
         resizeEventHandler: function(e) {
             if (window.innerHeight > window.innerWidth) {
@@ -336,6 +376,8 @@ export default {
         NcActionInput,
         NcActionSeparator,
         NcLoadingIcon,
+        Pencil,
+        PencilOff,
     },
 }
 
@@ -557,6 +599,26 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     right: 5px;
     top: 5px;
     z-index: 6;
+}
+
+.s-album.editing {
+    /* Make it unmistakable that the album is in edit mode. */
+    outline: 4px solid var(--color-primary-element, #0082c9);
+    outline-offset: -4px;
+}
+
+.edit-badge {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    z-index: 7;
+    padding: 4px 10px;
+    border-radius: var(--border-radius-pill, 14px);
+    background-color: var(--color-primary-element, #0082c9);
+    color: var(--color-primary-element-text, #ffffff);
+    font-weight: bold;
+    font-size: 13px;
+    pointer-events: none;
 }
  
 .top-left {

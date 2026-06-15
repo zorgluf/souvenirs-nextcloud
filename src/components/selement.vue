@@ -2,7 +2,9 @@
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
     v-bind:id="sId"
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
-		<div class="s-element-text resize" v-if="(sText)">{{sText}}</div>
+		<EditableText v-if="sText || editMode" class="s-element-text resize"
+			:value="sText" :editable="editMode" :auto-fit="true"
+			@save="onTextSave" />
         <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', sZoom == 100 ? 'centercrop' : 'fill' ]" 
             loop="true" preload="auto" :key="videoUrlSrc"
@@ -41,10 +43,12 @@ import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
 import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
 import { NcLoadingIcon } from '@nextcloud/vue'
 import { imagePath } from '@nextcloud/router'
+import EditableText from './EditableText.vue'
 
 export default {
     props: {
       "sId": String,
+      "editMode": Boolean,
       "sTop": Number,
       "sBottom": Number,
       "sLeft": Number,
@@ -75,6 +79,7 @@ export default {
     },
     components: {
         NcLoadingIcon,
+        EditableText,
     },
     watch: {
         "preload": function(newPreload, oldPreload) {
@@ -193,6 +198,11 @@ export default {
             document.getElementById(this.sId+"video").pause();
             this.$emit("videofull",this.videoUrl);
         },
+        onTextSave: function(newText) {
+            // Bubble the caption change up with this element's id so the album
+            // can patch and persist it (sId is the element id here).
+            this.$emit("edit-text", this.sId, newText);
+        },
         waitingVideo: function() {
             this.isVideoLoading = true;
         },
@@ -256,10 +266,6 @@ function basename(path) {
 	justify-content: center;
 	text-align: center;
     white-space: pre-wrap;
-}
-
-:fullscreen .s-element-text {
-    color: white;
 }
 
 center {

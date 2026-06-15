@@ -8,5 +8,22 @@
             "name": "Zorgluf"
         }
     ],
-    "require": {}
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "nextcloud/ocp": "^31.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "OCA\\Souvenirs\\": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OCA\\Souvenirs\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
 }
