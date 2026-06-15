@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "vue": "~3.5.24",
@@ -24,11 +26,15 @@
     "uuid": "~13.0.0",
     "linkifyjs": "~4.3.2",
     "buffer": "~6.0.3",
-    "vue-device-detector-js": "~1.0.2"
+    "vue-device-detector-js": "~1.0.2",
+    "vue-material-design-icons": "~5.3.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "~6.0.1",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^15.11.7",
     "vite": "~7.2.4",
-    "vite-plugin-mkcert": "~1.17.9"
+    "vite-plugin-mkcert": "~1.17.9",
+    "vitest": "^3.2.4"
   }
 }

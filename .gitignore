@@ -11,3 +11,5 @@ publish.private
 .vscode
 souvenirs.key
 souvenirs.sign
+CLAUDE.md
+.phpunit.cache

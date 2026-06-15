@@ -167,5 +167,6 @@ appstore:
 
 .PHONY: test
 test: composer
-	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.xml
-	$(CURDIR)/vendor/phpunit/phpunit/phpunit -c phpunit.integration.xml
+	$(CURDIR)/vendor/bin/phpunit -c phpunit.xml
+	npm install
+	npm run test

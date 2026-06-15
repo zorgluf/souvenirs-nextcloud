@@ -12,6 +12,7 @@
                 v-bind:s-class="element.class"
                 v-bind:s-video="element.video" v-bind:is-focus="isFocus"
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
+                v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
                 v-bind:element-margin="elementMargin">
 	</selement>
     </div>
@@ -31,6 +32,7 @@ export default {
       "token": String,
       "isWinPortrait": Boolean,
       "elementMargin": Number,
+      "editMode": Boolean,
     },
     data: function() {
         return {
@@ -70,6 +72,10 @@ export default {
       },
       openVideoFull: function(videoUrl) {
         this.$emit("videofull",videoUrl);
+      },
+      onEditText: function(elementId, newText) {
+        // Re-emit with this page's id (sId) so the album can locate the element.
+        this.$emit("edit-text", this.sId, elementId, newText);
       }
     },
     mounted: function() {
