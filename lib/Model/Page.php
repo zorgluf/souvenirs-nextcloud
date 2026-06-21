@@ -26,6 +26,16 @@ class Page {
         $this->contentArray[$name] = $value;
     }
 
+    /**
+     * stamp the page with the current edit date (format YmdHis),
+     * overwriting any existing value, and return it
+     */
+    public function setLastEditDate() {
+        $lastEditDate = date('YmdHis');
+        $this->setContent("lastEditDate",$lastEditDate);
+        return $lastEditDate;
+    }
+
     public function setValues($valuesArray) {
         if (is_array($valuesArray)) {
             foreach ($valuesArray as $key => $value) {

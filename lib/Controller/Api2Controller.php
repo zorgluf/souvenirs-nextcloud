@@ -186,9 +186,10 @@ class Api2Controller extends ApiController {
 		unset($albumValues["shareToken"]);
 		//set values to model
 		$album->setValues($albumValues);
+		$lastEditDate = $album->setLastEditDate();
 		$album->save();
 		$albumArray = $album->toArray();
-		return new JSONResponse("OK");
+		return new JSONResponse(array("lastEditDate" => $lastEditDate));
 	}
 
 	/**
@@ -312,10 +313,12 @@ class Api2Controller extends ApiController {
 		unset($pageArray["album_id"]);
 		unset($pageArray["page_pos"]);
 		$page = new Page($pageArray);
+		$lastEditDate = $page->setLastEditDate();
 		$res = $album->insertPage($page,$page_pos);
 		if ($res) {
+			$pageLastEditDate = $album->setPageLastEditDate();
 			$album->save();
-			return new JSONResponse("OK");
+			return new JSONResponse(array("lastEditDate" => $lastEditDate, "pageLastEditDate" => $pageLastEditDate));
 		} else {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -337,8 +340,9 @@ class Api2Controller extends ApiController {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
 		if ($album->deletePage($page_id)) {
+			$pageLastEditDate = $album->setPageLastEditDate();
 			$album->save();
-			return new JSONResponse("OK");
+			return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
 		} else {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
@@ -365,9 +369,10 @@ class Api2Controller extends ApiController {
 			unset($pageArray["album_id"]);
 			unset($pageArray["page_id"]);
 			$page->setValues($pageArray);
+			$lastEditDate = $page->setLastEditDate();
 			$album->updatePage($page);
 			$album->save();
-			return new JSONResponse("OK");
+			return new JSONResponse(array("lastEditDate" => $lastEditDate));
 		}
 		return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 	}
@@ -390,8 +395,9 @@ class Api2Controller extends ApiController {
 		$page = $album->getPage($page_id);
 		if (!is_null($page)) {
 			if ($album->movePage($page,$page_pos)) {
+				$pageLastEditDate = $album->setPageLastEditDate();
 				$album->save();
-				return new JSONResponse("OK");
+				return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
 			} else {
 				return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 			}
