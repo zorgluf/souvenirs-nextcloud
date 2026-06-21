@@ -29,6 +29,8 @@ class Album {
         $album = new self();
         $album->setAlbumNode($albumNode);
         $album->setId($id);
+        $album->setLastEditDate();
+        $album->setPageLastEditDate();
         $album->save();
         //create the data dir
         $albumNode->newFolder(DATA_DIR);
@@ -66,6 +68,28 @@ class Album {
         } else {
             return NULL;
         }
+    }
+
+    /**
+     * stamp the album with the current edit date (format YmdHis),
+     * overwriting any existing value, and return it. To be called every
+     * time album data (excluding pages) is modified.
+     */
+    public function setLastEditDate() {
+        $lastEditDate = date('YmdHis');
+        $this->setContent("lastEditDate",$lastEditDate);
+        return $lastEditDate;
+    }
+
+    /**
+     * stamp the album with the current page edit date (format YmdHis),
+     * overwriting any existing value, and return it. To be called every
+     * time a page is created, moved or deleted.
+     */
+    public function setPageLastEditDate() {
+        $pageLastEditDate = date('YmdHis');
+        $this->setContent("pageLastEditDate",$pageLastEditDate);
+        return $pageLastEditDate;
     }
 
     public function getName() {
