@@ -2,9 +2,13 @@
 
 View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
 
-This application is just a viewer. Edition features are not implemented right now on the nextcloud interface.
+This application is mainly a viewer. Edition features will be implemented step by step.
 
 ## Changelog
+
+v2.0.0:
+* Breaking change in synchronisation (better support of conflicts) with android app : need v3+ on android
+* Start editing features : only texts for the momemnt, more coming soon
 
 v1.12.0:
 * Upgrade to vue3 and refactoring of js code
