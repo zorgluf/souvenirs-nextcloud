@@ -5,6 +5,8 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
 
 env:
   APP_NAME: souvenirs
@@ -19,19 +21,15 @@ jobs:
           path: ${{ env.APP_NAME }}
       - name: Run build
         run: cd ${{ env.APP_NAME }} && make && make appstore
-      - name: Upload app tarball to release
-        uses: zorgluf/upload-release-action@v2
-        id: attach_to_release
+      - name: Create release and upload tarball
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
-          repo_token: ${{ secrets.PUBLISH_PAT }}
-          file: ${{ env.APP_NAME }}/build/artifacts/appstore/${{ env.APP_NAME }}.tar.gz
-          asset_name: ${{ env.APP_NAME }}.tar.gz 
-          tag: ${{ github.ref }}
-          overwrite: true
+          files: ${{ env.APP_NAME }}/build/artifacts/appstore/${{ env.APP_NAME }}.tar.gz
+          tag_name: ${{ github.ref_name }}
       - name: Upload app to Nextcloud appstore
         uses: zorgluf/nextcloud-appstore-push-action@v1
         with:
           app_name: ${{ env.APP_NAME }}
           appstore_token: ${{ secrets.APPSTORE_TOKEN }}
-          download_url: ${{ steps.attach_to_release.outputs.browser_download_url }}
+          download_url: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ env.APP_NAME }}.tar.gz
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
