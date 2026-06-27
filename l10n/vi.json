@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "Tải xuống",
-    "Fullscreen" : "Toàn màn hình"
+    "Fullscreen" : "Toàn màn hình",
+    "Edit" : "Chỉnh sửa",
+    "Editing" : "Chỉnh sửa"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

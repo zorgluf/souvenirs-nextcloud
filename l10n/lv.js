@@ -5,6 +5,8 @@ OC.L10N.register(
     "Stop slideshow" : "Apturēt slīdrādi",
     "Slideshow speed" : "Slīdrādes ātrums",
     "Download" : "Lejupielādēt",
-    "Fullscreen" : "Pilnekrāna"
+    "Fullscreen" : "Pilnekrāna",
+    "Edit" : "Labot",
+    "Editing" : "Labošana"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

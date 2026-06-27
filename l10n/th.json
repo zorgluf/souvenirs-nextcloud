@@ -1,4 +1,6 @@
 { "translations": {
-    "Download" : "ดาวน์โหลด"
+    "Download" : "ดาวน์โหลด",
+    "Edit" : "แก้ไข",
+    "Editing" : "กำลังแก้ไข"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

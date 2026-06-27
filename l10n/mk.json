@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "Преземи",
-    "Fullscreen" : "Цел екран"
+    "Fullscreen" : "Цел екран",
+    "Edit" : "Уреди",
+    "Editing" : "Уредување"
 },"pluralForm" :"nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;"
 }

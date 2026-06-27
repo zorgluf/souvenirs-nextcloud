@@ -5,6 +5,8 @@ OC.L10N.register(
     "Stop slideshow" : "Zastaviť prehliadku",
     "Slideshow speed" : "Rýchlosť prehliadky",
     "Download" : "Sťahovanie",
-    "Fullscreen" : "Na celú obrazovku"
+    "Fullscreen" : "Na celú obrazovku",
+    "Edit" : "Upraviť",
+    "Editing" : "Úprava"
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");

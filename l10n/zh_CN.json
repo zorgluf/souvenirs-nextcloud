@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "下载",
-    "Fullscreen" : "全屏"
+    "Fullscreen" : "全屏",
+    "Edit" : "编辑",
+    "Editing" : "编辑"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

@@ -1,4 +1,6 @@
 { "translations": {
-    "Download" : "Download"
+    "Download" : "Download",
+    "Edit" : "Edit",
+    "Editing" : "Editing"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

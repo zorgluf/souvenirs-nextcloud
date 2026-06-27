@@ -1,4 +1,5 @@
 { "translations": {
-    "Download" : "Last ned"
+    "Download" : "Last ned",
+    "Edit" : "Rediger"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

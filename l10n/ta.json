@@ -1,4 +1,5 @@
 { "translations": {
-    "Download" : "பதிவிறக்குக"
+    "Download" : "பதிவிறக்குக",
+    "Edit" : "தொகுக்க"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

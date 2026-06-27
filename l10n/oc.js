@@ -6,6 +6,8 @@ OC.L10N.register(
     "Stop slideshow" : "Arrestar lo diaporama",
     "Slideshow speed" : "Velocitat del diaporama",
     "Download" : "Telecargar",
-    "Fullscreen" : "Ecran complèt"
+    "Fullscreen" : "Ecran complèt",
+    "Edit" : "Modificar",
+    "Editing" : "Edicion"
 },
 "nplurals=2; plural=(n > 1);");

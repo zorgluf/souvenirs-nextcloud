@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "Sider",
-    "Fullscreen" : "Plein écran"
+    "Fullscreen" : "Plein écran",
+    "Edit" : "Ẓreg",
+    "Editing" : "Asiẓreg"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

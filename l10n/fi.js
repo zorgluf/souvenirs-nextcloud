@@ -6,6 +6,8 @@ OC.L10N.register(
     "Slideshow speed" : "Diaesityksen nopeus",
     "Download" : "Lataa",
     "Fullscreen" : "Koko näyttö",
-    "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona."
+    "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona.",
+    "Edit" : "Muokkaa",
+    "Editing" : "Muokkaaminen"
 },
 "nplurals=2; plural=(n != 1);");

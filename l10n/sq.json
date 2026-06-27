@@ -1,5 +1,6 @@
 { "translations": {
     "Download" : "Shkarko",
-    "Fullscreen" : "I gjithë ekrani"
+    "Fullscreen" : "I gjithë ekrani",
+    "Edit" : "Përpuno"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

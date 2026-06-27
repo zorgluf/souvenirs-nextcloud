@@ -1,5 +1,6 @@
 { "translations": {
     "Download" : "Discargar",
-    "Fullscreen" : "Schermo plen"
+    "Fullscreen" : "Schermo plen",
+    "Edit" : "Modificar"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

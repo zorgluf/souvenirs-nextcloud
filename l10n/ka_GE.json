@@ -1,5 +1,6 @@
 { "translations": {
     "Download" : "ჩამოტვირთვა",
-    "Fullscreen" : "მთელი ეკრანი"
+    "Fullscreen" : "მთელი ეკრანი",
+    "Edit" : "შეცვლა"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

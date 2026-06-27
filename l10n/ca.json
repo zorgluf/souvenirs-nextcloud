@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "Baixada",
-    "Fullscreen" : "Pantalla completa"
+    "Fullscreen" : "Pantalla completa",
+    "Edit" : "Edició",
+    "Editing" : "Edició"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

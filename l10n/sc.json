@@ -1,5 +1,6 @@
 { "translations": {
     "Download" : "Iscàrriga",
-    "Fullscreen" : "Totu ischermu"
+    "Fullscreen" : "Totu ischermu",
+    "Edit" : "Modìfica"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

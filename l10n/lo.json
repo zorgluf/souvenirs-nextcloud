@@ -1,4 +1,6 @@
 { "translations": {
-    "Download" : "ດາວໂຫລດ"
+    "Download" : "ດາວໂຫລດ",
+    "Edit" : "ແກ້ໄຂ",
+    "Editing" : "Editing"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
