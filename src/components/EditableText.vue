@@ -105,26 +105,34 @@ export default {
 </script>
 
 <style scoped>
-.editable-text--editing {
+.editable-text {
+    background-color: rgba(255, 255, 255, 0);
+    /* Suppress the global 1px border on the field; the editing affordance below
+       re-adds its own dashed border (and wins via specificity). */
+    border: none;
+    opacity: 1;
+}
+
+/* Doubled class so this wins over the `.editable-text` reset above regardless of
+   source order, while leaving view mode (no --editing) borderless. */
+.editable-text.editable-text--editing {
     /* Make the caption interactive (its container sets pointer-events:none). */
     pointer-events: auto;
     cursor: text;
-    outline: 2px dashed var(--color-primary-element, #0082c9);
-    outline-offset: 2px;
-    background-color: rgba(0, 130, 201, 0.08);
-    /* Guarantee a clickable area even when the caption is empty. */
-    min-width: 1em;
-    min-height: 1em;
+    /* Use an inset border, not an outline: the element fills its cell and the
+       cell has overflow:hidden, which would clip an (offset) outline on the
+       sides that fall outside the cell. */
+    box-sizing: border-box;
+    border: 2px dashed var(--color-primary-element, #0082c9);
+    /* Guarantee a clickable area even when the caption is empty. Use a fixed
+       size, not 1em: the caption font-size can be enormous (auto-fit starts at
+       1000px), so 1em would blow the box past its cell and clip the border. */
+    min-width: 1.5rem;
+    min-height: 1.5rem;
 }
 
-.editable-text--editing:focus {
-    outline-style: solid;
-}
-
-.editable-text {
-    background-color: rgba(255, 255, 255, 0);
-    border: none;
-    opacity: 1;
+.editable-text.editable-text--editing:focus {
+    border-style: solid;
 }
 
 /* When the album is shown fullscreen (black background) the caption text must

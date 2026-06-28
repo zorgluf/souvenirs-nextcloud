@@ -8,7 +8,7 @@
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
             v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
-            v-on:cycle-layout="onCycleLayout">
+            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -65,7 +65,7 @@ import AudioPlayer from './audio_player.vue'
 import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, removeElement, buildImageElement, addElement } from '../utils/albumEdit.js'
+import { setElementText, removeElement, buildImageElement, buildTextElement, addElement } from '../utils/albumEdit.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets } from '../api/albumApi.js'
 import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
@@ -382,6 +382,18 @@ export default {
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not change the layout."));
+            });
+        },
+        onAddText: function(pageId) {
+            // Add a new empty text element and re-lay-out the page, then persist.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = addElement(this.pages[index], buildTextElement());
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not add the text."));
             });
         },
         onAddImage: async function(pageId) {

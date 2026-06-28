@@ -2,7 +2,7 @@
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
     v-bind:id="sId"
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
-		<button v-if="editMode && isRemovable" class="s-element-delete" :title="sRemoveTitle" v-on:click.stop="onRemove">
+		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
 		</button>
 		<EditableText v-if="sText || editMode" class="s-element-text resize"
@@ -79,7 +79,6 @@ export default {
             "loadingImage": null,
             "imageStyle": {},
             "isVideoLoading": false,
-            "sRemoveTitle": t("souvenirs","Remove image"),
         }
     },
     components: {
@@ -158,10 +157,16 @@ export default {
             return [this.sTop, this.sBottom, this.sLeft, this.sRight].join(',');
         },
         'isRemovable': function() {
-            // Only media tiles (image / video / paint) can be removed from a page.
+            // Media tiles (image / video / paint) and text elements can be removed.
             return this.sClass != null && (this.sClass.endsWith('ImageElement')
                 || this.sClass.endsWith('VideoElement')
-                || this.sClass.endsWith('PaintElement'));
+                || this.sClass.endsWith('PaintElement')
+                || this.sClass.endsWith('TextElement'));
+        },
+        'removeTitle': function() {
+            return (this.sClass != null && this.sClass.endsWith('TextElement'))
+                ? t("souvenirs","Remove text")
+                : t("souvenirs","Remove image");
         },
         'videoUrl': function() {
             if (this.sVideo != null) {
@@ -322,6 +327,12 @@ function basename(path) {
 
 .s-element-text {
 	font-size: 1000px;
+	/* Fill the cell directly: as a flex item of .s-element, width/height:100%
+	   gets shrunk/grown unreliably, which mis-sized the editable box and clipped
+	   its border. Absolute positioning with explicit 100% size matches the cell. */
+	position: absolute;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
 	hyphens: auto;

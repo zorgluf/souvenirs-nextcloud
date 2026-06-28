@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, relayoutElements, removeElement, buildImageElement, addElement } from '../albumEdit.js'
+import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, addElement } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -205,6 +205,26 @@ describe('buildImageElement', () => {
         const b = buildImageElement({ name: 'x.jpg', size: 1, mime: 'image/jpeg' })
         expect(a.id).not.toBe(b.id)
         expect(a.image).not.toBe(b.image)
+    })
+})
+
+describe('buildTextElement', () => {
+    it('builds an empty TextElement matching the on-disk schema', () => {
+        const el = buildTextElement()
+        expect(el.class).toBe('TextElement')
+        expect(el.text).toBe('')
+        expect(el.id).toBeTruthy()
+        expect(el).toMatchObject({ transformType: 0, zoom: 0, offsetX: 0, offsetY: 0, size: 0, stop: false })
+    })
+
+    it('has no image/asset fields', () => {
+        const el = buildTextElement()
+        expect(el.image).toBeUndefined()
+        expect(el.mime).toBeUndefined()
+    })
+
+    it('gives each call a distinct id', () => {
+        expect(buildTextElement().id).not.toBe(buildTextElement().id)
     })
 })
 

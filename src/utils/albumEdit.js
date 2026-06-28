@@ -68,6 +68,32 @@ export function buildImageElement({ name, size, mime }) {
 }
 
 /**
+ * Build a fresh, empty TextElement following the on-disk format produced by the
+ * Android app. Geometry is left at full-page; the caller runs it through
+ * `addElement` (which re-lays-out the page). The caption is filled in afterwards
+ * via the inline EditableText in edit mode.
+ *
+ * @returns {object} a new TextElement object (not yet placed in a page)
+ */
+export function buildTextElement() {
+    return {
+        class: 'TextElement',
+        id: uuidv4(),
+        text: '',
+        offsetX: 0,
+        offsetY: 0,
+        size: 0,
+        stop: false,
+        transformType: 0,
+        zoom: 0,
+        top: 0,
+        left: 0,
+        right: 100,
+        bottom: 100,
+    }
+}
+
+/**
  * Return a copy of `page` with `element` appended and the page re-laid-out with the
  * default style for the new element count. All other page/element fields are preserved.
  *

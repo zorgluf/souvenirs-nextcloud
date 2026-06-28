@@ -23,6 +23,12 @@
                 </template>
                 {{ sAddImage }}
             </NcButton>
+            <NcButton type="primary" v-on:click="onAddText">
+                <template #icon>
+                    <TextBoxPlusOutline :size="20" />
+                </template>
+                {{ sAddText }}
+            </NcButton>
             <NcButton v-if="canCycle" type="secondary" v-on:click="onCycleLayout">
                 <template #icon>
                     <ViewDashboardVariantOutline :size="20" />
@@ -38,6 +44,7 @@
 import Selement from "./selement.vue"
 import { NcButton } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import TextBoxPlusOutline from 'vue-material-design-icons/TextBoxPlusOutline.vue'
 import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
 import { canCycleLayout } from '../utils/tilePageLayout.js'
 
@@ -58,6 +65,7 @@ export default {
             "isFocus": false,
             "preloadScope": 5,
             "sAddImage": t("souvenirs","Add image"),
+            "sAddText": t("souvenirs","Add text"),
             "sChangeLayout": t("souvenirs","Change layout"),
         }
     },
@@ -91,6 +99,7 @@ export default {
         "selement": Selement,
         NcButton,
         Plus,
+        TextBoxPlusOutline,
         ViewDashboardVariantOutline,
     },
     methods: {
@@ -111,6 +120,10 @@ export default {
       onAddImage: function() {
         // Ask the album to run the file picker and add an image to this page.
         this.$emit("add-image", this.sId);
+      },
+      onAddText: function() {
+        // Ask the album to add a new (empty) text element to this page.
+        this.$emit("add-text", this.sId);
       },
       onCycleLayout: function() {
         // Ask the album to switch this page to the next available layout.
