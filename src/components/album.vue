@@ -7,8 +7,10 @@
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+            v-bind:is-last="index === pages.length - 1"
             v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
-            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout">
+            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
+            v-on:add-page="onAddPage" v-on:move-page="onMovePage">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -65,9 +67,9 @@ import AudioPlayer from './audio_player.vue'
 import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, removeElement, buildImageElement, buildTextElement, addElement } from '../utils/albumEdit.js'
+import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../utils/albumEdit.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
-import { updatePage, searchAsset, cleanAssets } from '../api/albumApi.js'
+import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../api/albumApi.js'
 import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
 import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
@@ -361,7 +363,25 @@ export default {
             if (index < 0) {
                 return;
             }
+            var that = this;
             var updatedPage = removeElement(this.pages[index], elementId);
+            // Removing the last element of a page deletes the page itself - unless
+            // it is the only page left, which we keep (empty) so the album is not
+            // left with no pages and no way to add one.
+            if (updatedPage.elements.length === 0 && this.pages.length > 1) {
+                deletePage(this.albumId, pageId)
+                    .then(() => {
+                        that.pages.splice(index, 1);
+                        if (that.displayedPage >= that.pages.length) {
+                            that.displayedPage = that.pages.length - 1;
+                        }
+                        cleanAssets(that.albumId).catch(() => {});
+                    })
+                    .catch(error => {
+                        showError(t("souvenirs","Could not delete the page."));
+                    });
+                return;
+            }
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage)
                 .then(() => {
@@ -382,6 +402,40 @@ export default {
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not change the layout."));
+            });
+        },
+        onMovePage: function(index, dir) {
+            // Reorder a page one step left (dir -1) or right (dir +1), keeping the
+            // view focused on the moved page. Optimistic local move, reverted on error.
+            var newIndex = index + dir;
+            if (newIndex < 0 || newIndex >= this.pages.length) {
+                return;
+            }
+            var that = this;
+            var page = this.pages[index];
+            // Backend Album::movePage removes-then-reinserts, so the position to send
+            // is index-1 (left) / index+2 (right), not the final index.
+            var pos = (dir < 0) ? (index - 1) : (index + 2);
+            this.pages.splice(index, 1);
+            this.pages.splice(newIndex, 0, page);
+            this.$nextTick(() => { that.showN(newIndex); });
+            movePage(this.albumId, page.id, pos).catch(error => {
+                // Revert the optimistic move.
+                that.pages.splice(newIndex, 1);
+                that.pages.splice(index, 0, page);
+                that.$nextTick(() => { that.showN(index); });
+                showError(t("souvenirs","Could not move the page."));
+            });
+        },
+        onAddPage: function(pos) {
+            // Create a new empty page at `pos`, insert it locally, and navigate to it.
+            var that = this;
+            var page = buildPage();
+            createPage(this.albumId, pos, page).then(() => {
+                that.pages.splice(pos, 0, page);
+                that.$nextTick(() => { that.showN(pos); });
+            }).catch(error => {
+                showError(t("souvenirs","Could not create the page."));
             });
         },
         onAddText: function(pageId) {

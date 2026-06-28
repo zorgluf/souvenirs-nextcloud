@@ -16,6 +16,28 @@
                 v-on:remove-element="onRemoveElement"
                 v-bind:element-margin="elementMargin">
 	</selement>
+        <div v-if="editMode" class="page-insert page-insert--before" v-on:click="onAddPageBefore" :title="sAddPage">
+            <button class="page-insert__btn"><Plus :size="20" /></button>
+            <div class="page-insert__line"></div>
+        </div>
+        <div v-if="editMode && isLast" class="page-insert page-insert--after" v-on:click="onAddPageAfter" :title="sAddPage">
+            <button class="page-insert__btn"><Plus :size="20" /></button>
+            <div class="page-insert__line"></div>
+        </div>
+        <div v-if="editMode && sNum > 0" class="page-move page-move--left">
+            <NcButton type="primary" :aria-label="sMoveLeft" :title="sMoveLeft" v-on:click="onMoveLeft">
+                <template #icon>
+                    <ChevronLeft :size="20" />
+                </template>
+            </NcButton>
+        </div>
+        <div v-if="editMode && !isLast" class="page-move page-move--right">
+            <NcButton type="primary" :aria-label="sMoveRight" :title="sMoveRight" v-on:click="onMoveRight">
+                <template #icon>
+                    <ChevronRight :size="20" />
+                </template>
+            </NcButton>
+        </div>
         <div v-if="editMode" class="page-edit-toolbar">
             <NcButton type="primary" v-on:click="onAddImage">
                 <template #icon>
@@ -46,6 +68,8 @@ import { NcButton } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TextBoxPlusOutline from 'vue-material-design-icons/TextBoxPlusOutline.vue'
 import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
+import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
+import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
 import { canCycleLayout } from '../utils/tilePageLayout.js'
 
 export default {
@@ -59,6 +83,7 @@ export default {
       "isWinPortrait": Boolean,
       "elementMargin": Number,
       "editMode": Boolean,
+      "isLast": Boolean,
     },
     data: function() {
         return {
@@ -67,6 +92,9 @@ export default {
             "sAddImage": t("souvenirs","Add image"),
             "sAddText": t("souvenirs","Add text"),
             "sChangeLayout": t("souvenirs","Change layout"),
+            "sAddPage": t("souvenirs","Add page"),
+            "sMoveLeft": t("souvenirs","Move page left"),
+            "sMoveRight": t("souvenirs","Move page right"),
         }
     },
     computed: {
@@ -101,6 +129,8 @@ export default {
         Plus,
         TextBoxPlusOutline,
         ViewDashboardVariantOutline,
+        ChevronLeft,
+        ChevronRight,
     },
     methods: {
       openImgFull: function(imageUrl,isPhotosphere) {
@@ -128,6 +158,20 @@ export default {
       onCycleLayout: function() {
         // Ask the album to switch this page to the next available layout.
         this.$emit("cycle-layout", this.sId);
+      },
+      onAddPageBefore: function() {
+        // Insert a new page at this page's position (i.e. just before it).
+        this.$emit("add-page", this.sNum);
+      },
+      onAddPageAfter: function() {
+        // Insert a new page right after this (last) page.
+        this.$emit("add-page", this.sNum + 1);
+      },
+      onMoveLeft: function() {
+        this.$emit("move-page", this.sNum, -1);
+      },
+      onMoveRight: function() {
+        this.$emit("move-page", this.sNum, 1);
       }
     },
     mounted: function() {
@@ -183,5 +227,65 @@ function isFullyVisible(el) {
   left: 50%;
   transform: translateX(-50%);
   z-index: 8;
+}
+
+/* Insert-page affordance: a "+" button at the top of a vertical line that sits
+   on the seam between two pages. Zero width so it does not affect page layout;
+   children opt back into pointer events. */
+.page-insert {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 9;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+.page-insert--before { left: 0; }
+.page-insert--after { right: 0; }
+
+/* Move-page arrows (NcButton), in the bottom corners of the page. */
+.page-move {
+  position: absolute;
+  bottom: 16px;
+  z-index: 9;
+}
+
+.page-move--left { left: 16px; }
+.page-move--right { right: 16px; }
+
+.page-insert__btn {
+  pointer-events: all;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-primary-element-text, #ffffff);
+  background-color: var(--color-primary-element, #0082c9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.page-insert:hover .page-insert__btn,
+.page-insert:hover .page-insert__line {
+  filter: brightness(0.9);
+}
+
+.page-insert__line {
+  pointer-events: all;
+  flex: 1 1 auto;
+  width: 3px;
+  background-color: var(--color-primary-element, #0082c9);
+  opacity: 0.85;
 }
 </style>

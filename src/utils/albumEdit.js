@@ -94,6 +94,18 @@ export function buildTextElement() {
 }
 
 /**
+ * Build a fresh, empty page. The backend stamps its lastEditDate on creation.
+ *
+ * @returns {object} a new page object `{ id, elements: [] }`
+ */
+export function buildPage() {
+    return {
+        id: uuidv4(),
+        elements: [],
+    }
+}
+
+/**
  * Return a copy of `page` with `element` appended and the page re-laid-out with the
  * default style for the new element count. All other page/element fields are preserved.
  *

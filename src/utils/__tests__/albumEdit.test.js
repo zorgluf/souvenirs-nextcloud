@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, addElement } from '../albumEdit.js'
+import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -225,6 +225,18 @@ describe('buildTextElement', () => {
 
     it('gives each call a distinct id', () => {
         expect(buildTextElement().id).not.toBe(buildTextElement().id)
+    })
+})
+
+describe('buildPage', () => {
+    it('builds an empty page with a uuid id', () => {
+        const p = buildPage()
+        expect(p.elements).toEqual([])
+        expect(p.id).toBeTruthy()
+    })
+
+    it('gives each call a distinct id', () => {
+        expect(buildPage().id).not.toBe(buildPage().id)
     })
 })
 

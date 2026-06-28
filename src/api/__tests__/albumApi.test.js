@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { updatePage, updateAlbum, searchAsset, cleanAssets } from '../albumApi.js'
+import { updatePage, updateAlbum, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../albumApi.js'
 
 describe('albumApi', () => {
     beforeEach(() => {
@@ -78,6 +78,53 @@ describe('albumApi', () => {
         it('rejects on an error status', async () => {
             globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404 }))
             await expect(searchAsset('a', 'data/x.jpg', 'x.jpg', 1)).rejects.toThrow()
+        })
+    })
+
+    describe('createPage', () => {
+        it('PUTs the new page to the position endpoint', async () => {
+            const page = { id: 'p9', elements: [] }
+            await createPage('album-3', 2, page)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album-3/page/2')
+            expect(options.method).toBe('PUT')
+            expect(JSON.parse(options.body)).toEqual(page)
+            expect(options.headers.requesttoken).toBe('test-token')
+        })
+
+        it('rejects on an error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 }))
+            await expect(createPage('a', 0, { id: 'x', elements: [] })).rejects.toThrow()
+        })
+    })
+
+    describe('movePage', () => {
+        it('POSTs to the page position endpoint', async () => {
+            await movePage('album-3', 'page-7', 4)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album-3/page/page-7/pos/4')
+            expect(options.method).toBe('POST')
+            expect(options.headers.requesttoken).toBe('test-token')
+        })
+
+        it('rejects on an error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 }))
+            await expect(movePage('a', 'p', 1)).rejects.toThrow()
+        })
+    })
+
+    describe('deletePage', () => {
+        it('DELETEs the page endpoint', async () => {
+            await deletePage('album-3', 'page-7')
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album-3/page/page-7')
+            expect(options.method).toBe('DELETE')
+            expect(options.headers.requesttoken).toBe('test-token')
+        })
+
+        it('rejects on an error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 }))
+            await expect(deletePage('a', 'p')).rejects.toThrow()
         })
     })
 

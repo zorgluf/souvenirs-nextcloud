@@ -73,6 +73,56 @@ export function updateAlbum(albumId, fields) {
 }
 
 /**
+ * Create a new page in an album at a given position (Api2Controller::createPage).
+ * The backend inserts the page at `pos` (0 = start, pages.length = append) and
+ * stamps its lastEditDate.
+ *
+ * @param {string} albumId - the album id
+ * @param {number} pos - the insert index
+ * @param {object} page - the new page, e.g. `{ id, elements: [] }`
+ * @returns {Promise<Response>}
+ */
+export function createPage(albumId, pos, page) {
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/page/' + encodeURIComponent(pos), {
+        method: 'PUT',
+        headers: jsonHeaders(),
+        body: JSON.stringify(page),
+    }).then(ensureOk)
+}
+
+/**
+ * Move a page to a new position (Api2Controller::movePage). The backend's
+ * Album::movePage removes the page first, then re-inserts it, so the `pos` to
+ * pass is not the final index: to move the page at index `i`, pass `i - 1` to
+ * move it left and `i + 2` to move it right.
+ *
+ * @param {string} albumId - the album id
+ * @param {string} pageId - the page id
+ * @param {number} pos - the backend position argument (see above)
+ * @returns {Promise<Response>}
+ */
+export function movePage(albumId, pageId, pos) {
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/page/' + encodeURIComponent(pageId) + '/pos/' + encodeURIComponent(pos), {
+        method: 'POST',
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk)
+}
+
+/**
+ * Delete a page from an album (Api2Controller::DeletePage).
+ *
+ * @param {string} albumId - the album id
+ * @param {string} pageId - the page id
+ * @returns {Promise<Response>}
+ */
+export function deletePage(albumId, pageId) {
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/page/' + encodeURIComponent(pageId), {
+        method: 'DELETE',
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk)
+}
+
+/**
  * Ask the backend to link an existing Nextcloud file into the album as an asset
  * (Api2Controller::assetSearch). The server searches the user's files for one
  * matching `name` and `size`, and on a match writes a `<asset>.lnk` pointer in
