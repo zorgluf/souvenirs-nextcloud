@@ -6,7 +6,9 @@
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
-            v-bind:edit-mode="editMode" v-on:edit-text="onEditText">
+            v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+            v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
+            v-on:cycle-layout="onCycleLayout">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -63,8 +65,11 @@ import AudioPlayer from './audio_player.vue'
 import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText } from '../utils/albumEdit.js'
-import { updatePage } from '../api/albumApi.js'
+import { setElementText, removeElement, buildImageElement, addElement } from '../utils/albumEdit.js'
+import { cycleLayout } from '../utils/tilePageLayout.js'
+import { updatePage, searchAsset, cleanAssets } from '../api/albumApi.js'
+import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
+import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
 
@@ -347,6 +352,91 @@ export default {
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage).catch(error => {
                 console.log("Error saving album page edit.");
+            });
+        },
+        onRemoveElement: function(pageId, elementId) {
+            // Drop the element, re-grid the page so nothing overlaps, persist,
+            // then best-effort GC the now-unreferenced asset on disk.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = removeElement(this.pages[index], elementId);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage)
+                .then(() => {
+                    cleanAssets(this.albumId).catch(() => {});
+                })
+                .catch(error => {
+                    showError(t("souvenirs","Could not remove the image."));
+                });
+        },
+        onCycleLayout: function(pageId) {
+            // Switch the page to the next layout available for its element count.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var page = this.pages[index];
+            var updatedPage = { ...page, elements: cycleLayout(page.elements) };
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not change the layout."));
+            });
+        },
+        onAddImage: async function(pageId) {
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            // Browse the user's existing Nextcloud files and pick one image.
+            var node;
+            try {
+                const picker = getFilePickerBuilder(t("souvenirs","Choose an image"))
+                    .setMimeTypeFilter(["image/png","image/jpeg","image/gif","image/webp","image/bmp","image/tiff","image/svg+xml"])
+                    .setMultiSelect(false)
+                    .allowDirectories(false)
+                    // Without an explicit confirm button the picker shows no way to
+                    // validate a selection, so pickNodes() would never resolve.
+                    .setButtonFactory((nodes) => [{
+                        label: t("souvenirs","Choose"),
+                        variant: "primary",
+                        disabled: nodes.length === 0,
+                        callback: () => {},
+                    }])
+                    .build();
+                const nodes = await picker.pickNodes();
+                node = Array.isArray(nodes) ? nodes[0] : nodes;
+            } catch (e) {
+                // The picker rejects when closed without a selection: ignore.
+                return;
+            }
+            if (node == null) {
+                return;
+            }
+            const file = { name: node.basename, size: node.size, mime: node.mime };
+            if (!file.size) {
+                showError(t("souvenirs","Could not read the selected file."));
+                return;
+            }
+            // Build the element first so we know the in-album asset path to link,
+            // then ask the backend to link the picked file to it (no copy/upload).
+            const element = buildImageElement(file);
+            var res;
+            try {
+                res = await searchAsset(this.albumId, element.image, file.name, file.size);
+            } catch (e) {
+                showError(t("souvenirs","Could not add the image."));
+                return;
+            }
+            if (res == null || res.status !== "found") {
+                showError(t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+                return;
+            }
+            const updatedPage = addElement(this.pages[index], element);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not save the added image."));
             });
         },
         resizeEventHandler: function(e) {

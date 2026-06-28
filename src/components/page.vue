@@ -13,14 +13,33 @@
                 v-bind:s-video="element.video" v-bind:is-focus="isFocus"
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
                 v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+                v-on:remove-element="onRemoveElement"
                 v-bind:element-margin="elementMargin">
 	</selement>
+        <div v-if="editMode" class="page-edit-toolbar">
+            <NcButton type="primary" v-on:click="onAddImage">
+                <template #icon>
+                    <Plus :size="20" />
+                </template>
+                {{ sAddImage }}
+            </NcButton>
+            <NcButton v-if="canCycle" type="secondary" v-on:click="onCycleLayout">
+                <template #icon>
+                    <ViewDashboardVariantOutline :size="20" />
+                </template>
+                {{ sChangeLayout }}
+            </NcButton>
+        </div>
     </div>
 </template>
 
 <script>
 
 import Selement from "./selement.vue"
+import { NcButton } from '@nextcloud/vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
+import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
+import { canCycleLayout } from '../utils/tilePageLayout.js'
 
 export default {
     props: {
@@ -38,6 +57,8 @@ export default {
         return {
             "isFocus": false,
             "preloadScope": 5,
+            "sAddImage": t("souvenirs","Add image"),
+            "sChangeLayout": t("souvenirs","Change layout"),
         }
     },
     computed: {
@@ -47,6 +68,9 @@ export default {
           } else {
             return false;
           }
+        },
+        "canCycle": function() {
+          return canCycleLayout(this.elements);
         }
     },
     watch: {
@@ -65,6 +89,9 @@ export default {
     },
     components: {
         "selement": Selement,
+        NcButton,
+        Plus,
+        ViewDashboardVariantOutline,
     },
     methods: {
       openImgFull: function(imageUrl,isPhotosphere) {
@@ -76,6 +103,18 @@ export default {
       onEditText: function(elementId, newText) {
         // Re-emit with this page's id (sId) so the album can locate the element.
         this.$emit("edit-text", this.sId, elementId, newText);
+      },
+      onRemoveElement: function(elementId) {
+        // Re-emit with this page's id (sId) so the album can locate the element.
+        this.$emit("remove-element", this.sId, elementId);
+      },
+      onAddImage: function() {
+        // Ask the album to run the file picker and add an image to this page.
+        this.$emit("add-image", this.sId);
+      },
+      onCycleLayout: function() {
+        // Ask the album to switch this page to the next available layout.
+        this.$emit("cycle-layout", this.sId);
       }
     },
     mounted: function() {
@@ -123,5 +162,13 @@ function isFullyVisible(el) {
   height: 100%;
   aspect-ratio: 1 / 1;
   position: relative;
+}
+
+.page-edit-toolbar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
 }
 </style>

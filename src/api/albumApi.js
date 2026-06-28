@@ -71,3 +71,45 @@ export function updateAlbum(albumId, fields) {
         body: JSON.stringify(fields),
     }).then(ensureOk)
 }
+
+/**
+ * Ask the backend to link an existing Nextcloud file into the album as an asset
+ * (Api2Controller::assetSearch). The server searches the user's files for one
+ * matching `name` and `size`, and on a match writes a `<asset>.lnk` pointer in
+ * the album's data folder (no copy/upload). The element's `image` can then point
+ * at `asset` and the preview endpoint resolves it through that link.
+ *
+ * Caveats inherited from the backend: matching is by name+size (not exact path),
+ * and files located inside the Souvenirs albums root are skipped.
+ *
+ * @param {string} albumId - the album id
+ * @param {string} asset - the in-album asset path to create, e.g. "data/<uuid>.jpg"
+ * @param {string} name - the original file name to search for
+ * @param {number} size - the original file size in bytes (must match)
+ * @returns {Promise<object>} the parsed JSON, `{ status: "found" | "notfound" }`
+ */
+export function searchAsset(albumId, asset, name, size) {
+    const params = new URLSearchParams({
+        asset: asset,
+        asset_name: name,
+        asset_size: String(size),
+    })
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/assetsearch?' + params.toString(), {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk).then(response => response.json())
+}
+
+/**
+ * Ask the backend to garbage-collect unused assets of an album
+ * (Api2Controller::cleanAssets): data files no longer referenced by any element
+ * are deleted, and remaining ones are de-duplicated against the user's files.
+ * Used after removing an element so its orphaned asset does not linger on disk.
+ *
+ * @param {string} albumId - the album id
+ * @returns {Promise<Response>}
+ */
+export function cleanAssets(albumId) {
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/clean', {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk)
+}
