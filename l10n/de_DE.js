@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Souvenirs" : "Souvenirs",
     "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Durchsuchen und sehen Sie sich Ihre \"Andenken\"-Alben auf der Nextcloud-Weboberfläche an",
+    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is mainly a viewer. Very light album edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "Zeigen Sie Alben an und teilen diese, die von der [Souvenirs-Android-Anwendung] (https://github.com/zorgluf/souvenirs-android) erstellt wurden.\n    \\nDiese Anwendung ist ein Betrachter. Derzeit sind nur sehr begrenzte Funktionen der Album-Edition verfügbar. Sie müssen Alben mit der Android-App erstellen und sie mit Ihrem Nextcloud-Server synchronisieren.",
     "Loading album list…" : "Lade Alben-Liste…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Kein Album verfügbar. Sie müssen Alben über die Android-App Souvenirs (https://github.com/zorgluf/souvenirs-android) hochladen.",
     "Start slideshow" : "Diashow starten",
@@ -12,6 +13,7 @@ OC.L10N.register(
     "Fullscreen" : "Vollbild",
     "Click to download album in a zip file." : "Hier klicken, um das Album in einer ZIP-Datei herunterzuladen.",
     "Edit" : "Bearbeiten",
+    "Finish editing" : "Bearbeitung beenden",
     "Editing" : "Bearbeitung"
 },
 "nplurals=2; plural=(n != 1);");
