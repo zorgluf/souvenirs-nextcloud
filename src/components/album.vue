@@ -1,6 +1,7 @@
 <template>
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
-    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
+    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)"
+    v-on:keydown.e="onEditKey">
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
@@ -342,6 +343,20 @@ export default {
         },
         toggleEdit: function() {
             this.editMode = !this.editMode;
+        },
+        onEditKey: function(event) {
+            // "e" toggles edit mode, but not while typing in a caption (or with a
+            // modifier, e.g. Ctrl+E), and only where editing is allowed.
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+                return;
+            }
+            var el = event.target;
+            if (el && (el.isContentEditable || el.tagName === "INPUT" || el.tagName === "TEXTAREA")) {
+                return;
+            }
+            if (this.canEdit) {
+                this.toggleEdit();
+            }
         },
         onEditText: function(pageId, elementId, newText) {
             // Locate the page, patch only the changed caption (preserving every
