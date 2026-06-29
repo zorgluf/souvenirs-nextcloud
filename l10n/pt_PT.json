@@ -1,7 +1,10 @@
 { "translations": {
+    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Navegue e veja seus álbuns de \"souvenirs\" na interface web do nextcloud",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nenhum álbum disponível. Você precisará fazer upload das fotos do aplicativo Souvenirs para Android (https://github.com/zorgluf/souvenirs-android).",
     "Download" : "Transferir",
     "Fullscreen" : "Ecrã completo",
     "Edit" : "Editar",
+    "Finish editing" : "Concluir a edição",
     "Editing" : "A editar"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

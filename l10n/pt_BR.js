@@ -13,7 +13,7 @@ OC.L10N.register(
     "Fullscreen" : "Tela inteira",
     "Click to download album in a zip file." : "Clique para baixar o álbum em um arquivo zip.",
     "Edit" : "Editar",
-    "Finish editing" : "Concluir a edição",
+    "Finish editing" : "Concluir edição",
     "Editing" : "Editando"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
