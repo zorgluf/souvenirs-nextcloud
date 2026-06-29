@@ -16,13 +16,32 @@
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
+        <NcButton variant="primary" class="create-album-fab" :aria-label="sNewAlbum" :title="sNewAlbum" v-on:click="openCreate">
+            <template #icon>
+                <Plus :size="24" />
+            </template>
+        </NcButton>
+        <NcModal v-if="showCreate" size="small" v-on:close="closeCreate">
+            <div class="create-album-dialog">
+                <h2>{{ sNewAlbum }}</h2>
+                <NcTextField :label="sAlbumName" v-model="newAlbumName" v-on:keydown.enter="doCreateAlbum" />
+                <NcDateTimePickerNative type="date" :label="sAlbumDate" v-model="newAlbumDate" />
+                <NcButton type="primary" :disabled="creating || newAlbumName.trim() === ''" v-on:click="doCreateAlbum">
+                    {{ sCreate }}
+                </NcButton>
+            </div>
+        </NcModal>
     </div>
 </template>
 
 <script>
 
 import AlbumItem from './album-item.vue'
-import { NcLoadingIcon } from '@nextcloud/vue'
+import { NcLoadingIcon, NcModal, NcButton, NcTextField, NcDateTimePickerNative } from '@nextcloud/vue'
+import { showError } from '@nextcloud/dialogs'
+import Plus from 'vue-material-design-icons/Plus.vue'
+import { v4 as uuidv4 } from 'uuid'
+import { createAlbum, updateAlbum } from '../api/albumApi.js'
 
 export default {
     props: {
@@ -37,11 +56,24 @@ export default {
             "isWinPortrait": false,
             "sLoading": t("souvenirs","Loading album list…"),
             "sNoAblum": t("souvenirs","No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
+            "showCreate": false,
+            "newAlbumName": "",
+            "newAlbumDate": new Date(),
+            "creating": false,
+            "sNewAlbum": t("souvenirs","New album"),
+            "sAlbumName": t("souvenirs","Album name"),
+            "sAlbumDate": t("souvenirs","Date"),
+            "sCreate": t("souvenirs","Create"),
         }
     },
     components: {
         'album-item': AlbumItem,
         NcLoadingIcon,
+        NcModal,
+        NcButton,
+        NcTextField,
+        NcDateTimePickerNative,
+        Plus,
     },
     created: function() {
         this.refreshAlbums();
@@ -150,7 +182,44 @@ export default {
                 }
             }
         },
+        openCreate: function() {
+            this.newAlbumName = "";
+            this.newAlbumDate = new Date();
+            this.showCreate = true;
+        },
+        closeCreate: function() {
+            this.showCreate = false;
+        },
+        doCreateAlbum: function() {
+            var name = this.newAlbumName.trim();
+            if (this.creating || name === "") {
+                return;
+            }
+            this.creating = true;
+            var that = this;
+            // Blank album with a generated id, then set its name and date.
+            var id = uuidv4();
+            createAlbum(id)
+                .then(() => updateAlbum(id, { name: name, date: formatAlbumDate(that.newAlbumDate) }))
+                .then(() => {
+                    that.creating = false;
+                    that.showCreate = false;
+                    that.refreshAlbums();
+                })
+                .catch(error => {
+                    that.creating = false;
+                    showError(t("souvenirs","Could not create the album."));
+                });
+        },
     }
+}
+
+function formatAlbumDate(d) {
+    // album.json stores the date as a YYYYMMDDHHMMSS string.
+    var date = (d instanceof Date && !isNaN(d)) ? d : new Date();
+    var pad = function(n) { return String(n).padStart(2, "0"); };
+    return "" + date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate())
+        + pad(date.getHours()) + pad(date.getMinutes()) + pad(date.getSeconds());
 }
 </script>
 
@@ -158,6 +227,31 @@ export default {
 
 .albumlist-portrait {
     width: 100vw;
+}
+
+.create-album-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100;
+    /* Round "+" button, like the album options menu button. */
+    border-radius: 50% !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.create-album-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.create-album-dialog h2 {
+    margin: 0;
+}
+
+.create-album-dialog > .button-vue {
+    align-self: flex-end;
 }
 
 #snackbar {

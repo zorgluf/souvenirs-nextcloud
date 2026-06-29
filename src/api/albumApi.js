@@ -73,6 +73,21 @@ export function updateAlbum(albumId, fields) {
 }
 
 /**
+ * Create a new, blank album with the given id (Api2Controller::createAlbum). The
+ * backend names the album folder after the current timestamp; `name`/`date` are
+ * set afterwards with updateAlbum. Rejects (409) if the id already exists.
+ *
+ * @param {string} albumId - the new album's id (a generated uuid)
+ * @returns {Promise<Response>}
+ */
+export function createAlbum(albumId) {
+    return fetch('apiv2/album/' + encodeURIComponent(albumId), {
+        method: 'PUT',
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk)
+}
+
+/**
  * Create a new page in an album at a given position (Api2Controller::createPage).
  * The backend inserts the page at `pos` (0 = start, pages.length = append) and
  * stamps its lastEditDate.

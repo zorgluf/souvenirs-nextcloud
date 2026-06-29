@@ -51,6 +51,14 @@
             <NcLoadingIcon :size="64">
             </NcLoadingIcon>
         </div>
+        <div v-if="canEdit && !loading && pages.length === 0" class="empty-album">
+            <NcButton type="primary" v-on:click="onAddFirstPage">
+                <template #icon>
+                    <Plus :size="20" />
+                </template>
+                {{ sAddPage }}
+            </NcButton>
+        </div>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
@@ -65,7 +73,8 @@ import Page from './page.vue'
 import Imagefull from './imagefull.vue'
 import Videofull from './videofull.vue'
 import AudioPlayer from './audio_player.vue'
-import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
+import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator, NcButton } from '@nextcloud/vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../utils/albumEdit.js'
@@ -118,6 +127,7 @@ export default {
             "sEdit": t("souvenirs","Edit"),
             "sFinishEdit": t("souvenirs","Finish editing"),
             "sEditing": t("souvenirs","Editing"),
+            "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
         }
@@ -315,11 +325,12 @@ export default {
                     response.json().then(data => {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
-                        that.pages = data.pages;
+                        that.pages = data.pages || [];
                         that.loading = false;
                     })
                 }).catch(error => {
                     console.log("Error in refresh album.");
+                    that.loading = false;
                 });
             } else {
                 fetch("apiv2/album/unknown/full?apath="+this.path, {
@@ -332,12 +343,13 @@ export default {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
                         that.albumId = data.id;
-                        that.pages = data.pages;
+                        that.pages = data.pages || [];
                         that.elementMargin = data.elementMargin ??= 0;
                         that.loading = false;
                     })
                 }).catch(error => {
                     console.log("Error in refresh album.");
+                    that.loading = false;
                 });
             }
         },
@@ -441,6 +453,11 @@ export default {
                 that.$nextTick(() => { that.showN(index); });
                 showError(t("souvenirs","Could not move the page."));
             });
+        },
+        onAddFirstPage: function() {
+            // Bootstrap an empty album: enter edit mode and create the first page.
+            this.editMode = true;
+            this.onAddPage(0);
         },
         onAddPage: function(pos) {
             // Create a new empty page at `pos`, insert it locally, and navigate to it.
@@ -547,6 +564,8 @@ export default {
         NcActionInput,
         NcActionSeparator,
         NcLoadingIcon,
+        NcButton,
+        Plus,
         Pencil,
         PencilOff,
     },
@@ -803,6 +822,14 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
   position: fixed;
   top: 50%;
   left: 50%;
+}
+
+.empty-album {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
 }
 
 p.center {
