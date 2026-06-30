@@ -2,9 +2,10 @@
     <div v-bind:class="isWinPortrait ? 'albumlist-portrait': ''">
         <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]'
         v-bind:album-image-path='("albumImage" in album) ? album["albumImage"] : ""'
-        v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares' 
+        v-bind:name='album["name"]' v-bind:album-id='album["id"]' v-bind:date='album["date"]' v-bind:shares='shares'
         v-bind:is-win-portrait="isWinPortrait"
-        v-on:refresh-shares="refreshShares" v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums">
+        v-on:refresh-shares="refreshShares" v-on:snackbar="activateSnackbar" v-on:refresh-albums="refreshAlbums"
+        v-on:edit-album="openEdit">
         </album-item>
         <div v-if="(loading <= 0) && (unsortedAlbumList.length == 0)" class="center">
             <div class="icon-folder"></div>
@@ -23,11 +24,11 @@
         </NcButton>
         <NcModal v-if="showCreate" size="small" v-on:close="closeCreate">
             <div class="create-album-dialog">
-                <h2>{{ sNewAlbum }}</h2>
-                <NcTextField :label="sAlbumName" v-model="newAlbumName" v-on:keydown.enter="doCreateAlbum" />
+                <h2>{{ editingAlbumId ? sEditAlbum : sNewAlbum }}</h2>
+                <NcTextField :label="sAlbumName" v-model="newAlbumName" v-on:keydown.enter="doSaveAlbum" />
                 <NcDateTimePickerNative type="date" :label="sAlbumDate" v-model="newAlbumDate" />
-                <NcButton type="primary" :disabled="creating || newAlbumName.trim() === ''" v-on:click="doCreateAlbum">
-                    {{ sCreate }}
+                <NcButton variant="primary" :disabled="creating || newAlbumName.trim() === ''" v-on:click="doSaveAlbum">
+                    {{ editingAlbumId ? sSave : sCreate }}
                 </NcButton>
             </div>
         </NcModal>
@@ -57,13 +58,16 @@ export default {
             "sLoading": t("souvenirs","Loading album list…"),
             "sNoAblum": t("souvenirs","No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)."),
             "showCreate": false,
+            "editingAlbumId": null,
             "newAlbumName": "",
             "newAlbumDate": new Date(),
             "creating": false,
             "sNewAlbum": t("souvenirs","New album"),
+            "sEditAlbum": t("souvenirs","Edit album"),
             "sAlbumName": t("souvenirs","Album name"),
             "sAlbumDate": t("souvenirs","Date"),
             "sCreate": t("souvenirs","Create"),
+            "sSave": t("souvenirs","Save"),
         }
     },
     components: {
@@ -183,24 +187,39 @@ export default {
             }
         },
         openCreate: function() {
+            this.editingAlbumId = null;
             this.newAlbumName = "";
             this.newAlbumDate = new Date();
+            this.showCreate = true;
+        },
+        openEdit: function(album) {
+            // Reuse the create dialog, prefilled, to edit an album's name and date.
+            this.editingAlbumId = album.albumId;
+            this.newAlbumName = album.name || "";
+            this.newAlbumDate = parseAlbumDate(album.date);
             this.showCreate = true;
         },
         closeCreate: function() {
             this.showCreate = false;
         },
-        doCreateAlbum: function() {
+        doSaveAlbum: function() {
             var name = this.newAlbumName.trim();
             if (this.creating || name === "") {
                 return;
             }
             this.creating = true;
             var that = this;
-            // Blank album with a generated id, then set its name and date.
-            var id = uuidv4();
-            createAlbum(id)
-                .then(() => updateAlbum(id, { name: name, date: formatAlbumDate(that.newAlbumDate) }))
+            var fields = { name: name, date: formatAlbumDate(this.newAlbumDate) };
+            var saved;
+            if (this.editingAlbumId) {
+                // Edit existing album metadata.
+                saved = updateAlbum(this.editingAlbumId, fields);
+            } else {
+                // Blank album with a generated id, then set its name and date.
+                var id = uuidv4();
+                saved = createAlbum(id).then(() => updateAlbum(id, fields));
+            }
+            saved
                 .then(() => {
                     that.creating = false;
                     that.showCreate = false;
@@ -208,7 +227,9 @@ export default {
                 })
                 .catch(error => {
                     that.creating = false;
-                    showError(t("souvenirs","Could not create the album."));
+                    showError(that.editingAlbumId
+                        ? t("souvenirs","Could not save the album.")
+                        : t("souvenirs","Could not create the album."));
                 });
         },
     }
@@ -220,6 +241,16 @@ function formatAlbumDate(d) {
     var pad = function(n) { return String(n).padStart(2, "0"); };
     return "" + date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate())
         + pad(date.getHours()) + pad(date.getMinutes()) + pad(date.getSeconds());
+}
+
+function parseAlbumDate(s) {
+    // Inverse of formatAlbumDate: YYYYMMDDHHMMSS string -> Date (fallback today).
+    if (typeof s !== "string" || s.length < 8) {
+        return new Date();
+    }
+    var date = new Date(+s.slice(0, 4), (+s.slice(4, 6)) - 1, +s.slice(6, 8),
+        +s.slice(8, 10) || 0, +s.slice(10, 12) || 0, +s.slice(12, 14) || 0);
+    return isNaN(date) ? new Date() : date;
 }
 </script>
 

@@ -20,6 +20,11 @@
             <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
             <NcActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</NcActionButton>
         </NcActions>
+        <NcButton variant="tertiary" :aria-label="sEditAlbum" :title="sEditAlbum" v-on:click="onEditInfo">
+            <template #icon>
+                <Pencil :size="20" />
+            </template>
+        </NcButton>
         <NcActions default-icon="icon-delete" :force-menu="true">
             <NcActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</NcActionButton>
         </NcActions>
@@ -32,8 +37,9 @@
 
 <script>
 
-import { NcActionLink, NcActionButton, NcActions } from '@nextcloud/vue'
+import { NcActionLink, NcActionButton, NcActions, NcButton } from '@nextcloud/vue'
 import { generateUrl, imagePath } from '@nextcloud/router'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 export default {
     props: {
@@ -45,10 +51,17 @@ export default {
         'albumId': String,
         'isWinPortrait': Boolean,
     },
+    data: function() {
+        return {
+            "sEditAlbum": t("souvenirs","Edit album"),
+        }
+    },
     components: {
         NcActions,
         NcActionButton,
-        NcActionLink
+        NcActionLink,
+        NcButton,
+        Pencil,
     },
     computed: {
         "isShared": function() {
@@ -83,6 +96,10 @@ export default {
         }
     },
     methods: {
+        'onEditInfo': function() {
+            // Ask the list to open the album-info dialog prefilled for editing.
+            this.$emit("edit-album", { albumId: this.albumId, name: this.name, date: this.date });
+        },
         'deleteAlbum': function() {
             var that = this;
             fetch("apiv2/album/"+this.albumId, {
@@ -249,12 +266,15 @@ export default {
 }
 
 .s-action-menu {
-    display: inline;
+    display: flex;
+    align-items: center;
     z-index: 1;
     position: relative;
 }
 
 .s-action-menu-portrait {
+    display: flex;
+    align-items: center;
     z-index: 1;
     position: absolute;
     right: 0px;
