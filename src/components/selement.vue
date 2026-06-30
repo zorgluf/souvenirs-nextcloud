@@ -2,6 +2,9 @@
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
     v-bind:id="sId"
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
+		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
+			<Delete :size="20" />
+		</button>
 		<EditableText v-if="sText || editMode" class="s-element-text resize"
 			:value="sText" :editable="editMode" :auto-fit="true"
 			@save="onTextSave" />
@@ -44,6 +47,7 @@ import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
 import { NcLoadingIcon } from '@nextcloud/vue'
 import { imagePath } from '@nextcloud/router'
 import EditableText from './EditableText.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
 
 export default {
     props: {
@@ -80,8 +84,24 @@ export default {
     components: {
         NcLoadingIcon,
         EditableText,
+        Delete,
     },
     watch: {
+        "geometryKey": function() {
+            // The page can be re-laid-out (e.g. after adding/removing an image),
+            // which resizes this element's box. A zoom/offset cover-fit is computed
+            // from the box size at load time, so recompute it on resize, otherwise
+            // the image would keep a stale transform and letterbox in its new cell.
+            if (this.loadingImage != null && this.loadingImage.complete
+                && (this.sClass == 'ImageElement' || this.sClass == 'VideoElement')
+                && this.sTransformType == IMG_ZOOMOFFSET) {
+                this.$nextTick(() => {
+                    this.imageStyle = getImageZoomOffsetStyle(this.sZoom, this.sOffsetX, this.sOffsetY,
+                        this.$refs.eldiv.clientWidth, this.$refs.eldiv.clientHeight,
+                        this.loadingImage.width, this.loadingImage.height);
+                });
+            }
+        },
         "preload": function(newPreload, oldPreload) {
             if (newPreload != oldPreload) {
                 if (this.preload && this.loadingImage==null) {
@@ -132,6 +152,21 @@ export default {
         },
         'isImgFill': function() {
             return (this.sTransformType == IMG_FILL);
+        },
+        'geometryKey': function() {
+            return [this.sTop, this.sBottom, this.sLeft, this.sRight].join(',');
+        },
+        'isRemovable': function() {
+            // Media tiles (image / video / paint) and text elements can be removed.
+            return this.sClass != null && (this.sClass.endsWith('ImageElement')
+                || this.sClass.endsWith('VideoElement')
+                || this.sClass.endsWith('PaintElement')
+                || this.sClass.endsWith('TextElement'));
+        },
+        'removeTitle': function() {
+            return (this.sClass != null && this.sClass.endsWith('TextElement'))
+                ? t("souvenirs","Remove text")
+                : t("souvenirs","Remove image");
         },
         'videoUrl': function() {
             if (this.sVideo != null) {
@@ -203,6 +238,10 @@ export default {
             // can patch and persist it (sId is the element id here).
             this.$emit("edit-text", this.sId, newText);
         },
+        onRemove: function() {
+            // Bubble the removal up with this element's id (sId).
+            this.$emit("remove-element", this.sId);
+        },
         waitingVideo: function() {
             this.isVideoLoading = true;
         },
@@ -256,8 +295,44 @@ function basename(path) {
     overflow: hidden;
 }
 
+.s-element-delete {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	z-index: 8;
+	/* The element wrapper disables pointer events; the button must opt back in. */
+	pointer-events: all;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	color: #ffffff;
+	/* Solid red: the theme's --color-error is a pale background tint (#FFE7E7),
+	   not a bold red, so it is intentionally not used here. */
+	background-color: #e9322d;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+	/* Slightly translucent so it reads as a subtle overlay; full strength on hover. */
+	opacity: 0.8;
+}
+
+.s-element-delete:hover {
+	background-color: #c4231d;
+	opacity: 1;
+}
+
 .s-element-text {
 	font-size: 1000px;
+	/* Fill the cell directly: as a flex item of .s-element, width/height:100%
+	   gets shrunk/grown unreliably, which mis-sized the editable box and clipped
+	   its border. Absolute positioning with explicit 100% size matches the cell. */
+	position: absolute;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
 	hyphens: auto;

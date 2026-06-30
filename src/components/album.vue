@@ -1,12 +1,17 @@
 <template>
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
-    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)">
+    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)"
+    v-on:keydown.e="onEditKey">
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
-            v-bind:edit-mode="editMode" v-on:edit-text="onEditText">
+            v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+            v-bind:is-last="index === pages.length - 1"
+            v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
+            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
+            v-on:add-page="onAddPage" v-on:move-page="onMovePage">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -46,6 +51,14 @@
             <NcLoadingIcon :size="64">
             </NcLoadingIcon>
         </div>
+        <div v-if="canEdit && !loading && pages.length === 0" class="empty-album">
+            <NcButton type="primary" v-on:click="onAddFirstPage">
+                <template #icon>
+                    <Plus :size="20" />
+                </template>
+                {{ sAddPage }}
+            </NcButton>
+        </div>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
@@ -60,11 +73,15 @@ import Page from './page.vue'
 import Imagefull from './imagefull.vue'
 import Videofull from './videofull.vue'
 import AudioPlayer from './audio_player.vue'
-import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator } from '@nextcloud/vue'
+import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator, NcButton } from '@nextcloud/vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText } from '../utils/albumEdit.js'
-import { updatePage } from '../api/albumApi.js'
+import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../utils/albumEdit.js'
+import { cycleLayout } from '../utils/tilePageLayout.js'
+import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../api/albumApi.js'
+import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
+import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
 
@@ -110,6 +127,7 @@ export default {
             "sEdit": t("souvenirs","Edit"),
             "sFinishEdit": t("souvenirs","Finish editing"),
             "sEditing": t("souvenirs","Editing"),
+            "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
         }
@@ -307,11 +325,12 @@ export default {
                     response.json().then(data => {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
-                        that.pages = data.pages;
+                        that.pages = data.pages || [];
                         that.loading = false;
                     })
                 }).catch(error => {
                     console.log("Error in refresh album.");
+                    that.loading = false;
                 });
             } else {
                 fetch("apiv2/album/unknown/full?apath="+this.path, {
@@ -324,17 +343,32 @@ export default {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
                         that.albumId = data.id;
-                        that.pages = data.pages;
+                        that.pages = data.pages || [];
                         that.elementMargin = data.elementMargin ??= 0;
                         that.loading = false;
                     })
                 }).catch(error => {
                     console.log("Error in refresh album.");
+                    that.loading = false;
                 });
             }
         },
         toggleEdit: function() {
             this.editMode = !this.editMode;
+        },
+        onEditKey: function(event) {
+            // "e" toggles edit mode, but not while typing in a caption (or with a
+            // modifier, e.g. Ctrl+E), and only where editing is allowed.
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+                return;
+            }
+            var el = event.target;
+            if (el && (el.isContentEditable || el.tagName === "INPUT" || el.tagName === "TEXTAREA")) {
+                return;
+            }
+            if (this.canEdit) {
+                this.toggleEdit();
+            }
         },
         onEditText: function(pageId, elementId, newText) {
             // Locate the page, patch only the changed caption (preserving every
@@ -347,6 +381,160 @@ export default {
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage).catch(error => {
                 console.log("Error saving album page edit.");
+            });
+        },
+        onRemoveElement: function(pageId, elementId) {
+            // Drop the element, re-grid the page so nothing overlaps, persist,
+            // then best-effort GC the now-unreferenced asset on disk.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var that = this;
+            var updatedPage = removeElement(this.pages[index], elementId);
+            // Removing the last element of a page deletes the page itself - unless
+            // it is the only page left, which we keep (empty) so the album is not
+            // left with no pages and no way to add one.
+            if (updatedPage.elements.length === 0 && this.pages.length > 1) {
+                deletePage(this.albumId, pageId)
+                    .then(() => {
+                        that.pages.splice(index, 1);
+                        if (that.displayedPage >= that.pages.length) {
+                            that.displayedPage = that.pages.length - 1;
+                        }
+                        cleanAssets(that.albumId).catch(() => {});
+                    })
+                    .catch(error => {
+                        showError(t("souvenirs","Could not delete the page."));
+                    });
+                return;
+            }
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage)
+                .then(() => {
+                    cleanAssets(this.albumId).catch(() => {});
+                })
+                .catch(error => {
+                    showError(t("souvenirs","Could not remove the image."));
+                });
+        },
+        onCycleLayout: function(pageId) {
+            // Switch the page to the next layout available for its element count.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var page = this.pages[index];
+            var updatedPage = { ...page, elements: cycleLayout(page.elements) };
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not change the layout."));
+            });
+        },
+        onMovePage: function(index, dir) {
+            // Reorder a page one step left (dir -1) or right (dir +1), keeping the
+            // view focused on the moved page. Optimistic local move, reverted on error.
+            var newIndex = index + dir;
+            if (newIndex < 0 || newIndex >= this.pages.length) {
+                return;
+            }
+            var that = this;
+            var page = this.pages[index];
+            // Backend Album::movePage removes-then-reinserts, so the position to send
+            // is index-1 (left) / index+2 (right), not the final index.
+            var pos = (dir < 0) ? (index - 1) : (index + 2);
+            this.pages.splice(index, 1);
+            this.pages.splice(newIndex, 0, page);
+            this.$nextTick(() => { that.showN(newIndex); });
+            movePage(this.albumId, page.id, pos).catch(error => {
+                // Revert the optimistic move.
+                that.pages.splice(newIndex, 1);
+                that.pages.splice(index, 0, page);
+                that.$nextTick(() => { that.showN(index); });
+                showError(t("souvenirs","Could not move the page."));
+            });
+        },
+        onAddFirstPage: function() {
+            // Bootstrap an empty album: enter edit mode and create the first page.
+            this.editMode = true;
+            this.onAddPage(0);
+        },
+        onAddPage: function(pos) {
+            // Create a new empty page at `pos`, insert it locally, and navigate to it.
+            var that = this;
+            var page = buildPage();
+            createPage(this.albumId, pos, page).then(() => {
+                that.pages.splice(pos, 0, page);
+                that.$nextTick(() => { that.showN(pos); });
+            }).catch(error => {
+                showError(t("souvenirs","Could not create the page."));
+            });
+        },
+        onAddText: function(pageId) {
+            // Add a new empty text element and re-lay-out the page, then persist.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = addElement(this.pages[index], buildTextElement());
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not add the text."));
+            });
+        },
+        onAddImage: async function(pageId) {
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            // Browse the user's existing Nextcloud files and pick one image.
+            var node;
+            try {
+                const picker = getFilePickerBuilder(t("souvenirs","Choose an image"))
+                    .setMimeTypeFilter(["image/png","image/jpeg","image/gif","image/webp","image/bmp","image/tiff","image/svg+xml"])
+                    .setMultiSelect(false)
+                    .allowDirectories(false)
+                    // Without an explicit confirm button the picker shows no way to
+                    // validate a selection, so pickNodes() would never resolve.
+                    .setButtonFactory((nodes) => [{
+                        label: t("souvenirs","Choose"),
+                        variant: "primary",
+                        disabled: nodes.length === 0,
+                        callback: () => {},
+                    }])
+                    .build();
+                const nodes = await picker.pickNodes();
+                node = Array.isArray(nodes) ? nodes[0] : nodes;
+            } catch (e) {
+                // The picker rejects when closed without a selection: ignore.
+                return;
+            }
+            if (node == null) {
+                return;
+            }
+            const file = { name: node.basename, size: node.size, mime: node.mime };
+            if (!file.size) {
+                showError(t("souvenirs","Could not read the selected file."));
+                return;
+            }
+            // Build the element first so we know the in-album asset path to link,
+            // then ask the backend to link the picked file to it (no copy/upload).
+            const element = buildImageElement(file);
+            var res;
+            try {
+                res = await searchAsset(this.albumId, element.image, file.name, file.size);
+            } catch (e) {
+                showError(t("souvenirs","Could not add the image."));
+                return;
+            }
+            if (res == null || res.status !== "found") {
+                showError(t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+                return;
+            }
+            const updatedPage = addElement(this.pages[index], element);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not save the added image."));
             });
         },
         resizeEventHandler: function(e) {
@@ -376,6 +564,8 @@ export default {
         NcActionInput,
         NcActionSeparator,
         NcLoadingIcon,
+        NcButton,
+        Plus,
         Pencil,
         PencilOff,
     },
@@ -632,6 +822,14 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
   position: fixed;
   top: 50%;
   left: 50%;
+}
+
+.empty-album {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
 }
 
 p.center {

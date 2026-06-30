@@ -99,7 +99,7 @@ class AlbumMapper extends QBMapper {
                     $qb->expr()->eq('user', $qb->createNamedParameter($user, IQueryBuilder::PARAM_STR))
                 )
             );
-        $qb->execute();
+        $qb->executeStatement();
         return true;
     }
 
