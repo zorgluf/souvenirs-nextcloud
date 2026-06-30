@@ -3,10 +3,9 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>souvenirs</id>
     <name>Souvenirs</name>
-    <summary>Browse and view your "souvenirs" albums on nextcloud web interface</summary>
-    <description><![CDATA[View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).
-    \nThis application is mainly a viewer. Very light album edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server.]]></description>
-    <version>2.0.1</version>
+    <summary>Create, Display and Share "old school" albums for your photos, videos and panoramics, on your Nextcloud server.</summary>
+    <description><![CDATA[Create, Display and Share "old school" albums for your photos, videos and panoramics.\nBetter on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)]]></description>
+    <version>2.1.0</version>
     <licence>agpl</licence>
     <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenirs</namespace>

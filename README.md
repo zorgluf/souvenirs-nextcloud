@@ -1,10 +1,13 @@
 # Souvenirs on Nextcloud
 
-View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
+Create, Display and Share "old school" albums for your photos, videos and panoramics.
 
-This application is mainly a viewer. Edition features will be implemented step by step.
+Better on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
 
 ## Changelog
+
+v2.1.0:
+* First full set of album edition features
 
 v2.0.0:
 * Breaking change in synchronisation (better support of conflicts) with android app : need v3+ on android
