@@ -2,9 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenýry",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Procházejte a zobrazte si svá alba „suvenýrů“ ve webovém rozhraní Nextcloud",
     "Loading album list…" : "Načítání seznamu alb …",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Není k dispozici žádné album. Je třeba je nahrát z Android aplikace Suvenýry (https://github.com/zorgluf/souvenirs-android).",
+    "Create" : "Vytvářet",
     "Start slideshow" : "Spustit promítání",
     "Stop slideshow" : "Zastavit promítání",
     "Slideshow speed" : "Rychlost promítání",

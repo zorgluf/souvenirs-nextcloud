@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Date" : "Dato",
     "Download" : "Elŝuti",
     "Edit" : "Modifi"
 },

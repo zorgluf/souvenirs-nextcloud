@@ -2,7 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Αναμνηστικά",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Περιηγηθείτε και δείτε τα \"αναμνηστικά\" άλμπουμ σας στη διεπαφή ιστού του nextcloud",
+    "Album name" : "Όνομα άλμπουμ",
+    "Date" : "Ημερομηνία",
+    "Create" : "Δημιουργία",
     "Start slideshow" : "Έναρξη παρουσίασης",
     "Stop slideshow" : "Διακοπή παρουσίασης",
     "Slideshow speed" : "Ταχύτητα παρουσίασης",

@@ -2,9 +2,12 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Jelajahi dan lihat album \"souvenirs\" Anda di antarmuka web Nextcloud",
     "Loading album list…" : "Memuat daftar album…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Tidak ada album yang tersedia. Anda perlu mengunggahnya dari aplikasi Android Souvenirs (https://github.com/zorgluf/souvenirs-android).",
+    "New album" : "Album baru",
+    "Date" : "Tanggal",
+    "Create" : "Buat",
+    "Save" : "Save",
     "Start slideshow" : "Mulai slideshow",
     "Stop slideshow" : "Hentikan slideshow",
     "Slideshow speed" : "Kecepatan slideshow",
@@ -12,6 +15,8 @@ OC.L10N.register(
     "Fullscreen" : "Layar penuh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Edit" : "Edit",
-    "Editing" : "Pengeditan"
+    "Editing" : "Pengeditan",
+    "Choose" : "Pilih",
+    "Remove image" : "Hapus gambar"
 },
 "nplurals=1; plural=0;");

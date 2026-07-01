@@ -1,8 +1,9 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Explora y visualiza tus álbumes de \"Souvenirs\" en la interfaz web de Nextcloud",
     "Loading album list…" : "Cargando lista de álbumes...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No hay álbumes disponibles. Deberás subirlos desde la aplicación de Android Souvenirs (https://github.com/zorgluf/souvenirs-android).",
+    "Create" : "Crear",
+    "Save" : "Save",
     "Start slideshow" : "Iniciar presentación de diapositivas",
     "Stop slideshow" : "Detener presentación de diapositivas",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",

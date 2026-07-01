@@ -1,7 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Save" : "Save",
     "Download" : "Eroflueden",
-    "Edit" : "Änneren"
+    "Edit" : "Änneren",
+    "Choose" : "Auswielen"
 },
 "nplurals=2; plural=(n != 1);");

@@ -1,5 +1,8 @@
 { "translations": {
+    "Create" : "Dörediň",
+    "Save" : "Save",
     "Download" : "Göçürip almak",
-    "Edit" : "Redaktirläň"
+    "Edit" : "Redaktirläň",
+    "Choose" : "saýlamak"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

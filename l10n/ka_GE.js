@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Save" : "Save",
     "Download" : "ჩამოტვირთვა",
     "Fullscreen" : "მთელი ეკრანი",
-    "Edit" : "შეცვლა"
+    "Edit" : "შეცვლა",
+    "Choose" : "აირჩიეთ",
+    "Remove image" : "სურათის წაშლა"
 },
 "nplurals=2; plural=(n!=1);");

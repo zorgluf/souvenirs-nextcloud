@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Date" : "Fecha",
+    "Save" : "Save",
     "Download" : "Descargar",
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Editar"

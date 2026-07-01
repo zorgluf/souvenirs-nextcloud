@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Download" : "ښکته کول"
+    "Save" : "Save",
+    "Download" : "ښکته کول",
+    "Choose" : "غوره کړئ"
 },
 "nplurals=2; plural=(n != 1);");

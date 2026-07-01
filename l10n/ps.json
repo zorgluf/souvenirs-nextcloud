@@ -1,4 +1,6 @@
 { "translations": {
-    "Download" : "ښکته کول"
+    "Save" : "Save",
+    "Download" : "ښکته کول",
+    "Choose" : "غوره کړئ"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

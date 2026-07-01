@@ -2,7 +2,6 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "تذكارات souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "إستعرض ألبومات \"تذكارات\" souvenirs على واجهة الويب لنكست كلاود",
     "Loading album list…" : "تحميل قائمة الألبوم ...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "لا يتوافر أي ألبوم. يتوجب تحميلها من تطبيق الأندرويد \"تذكارات\"souvenirs. \n(https://github.com/zorgluf/souvenirs-android)",
     "Start slideshow" : "بدء عرض الشرائح",

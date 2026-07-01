@@ -2,9 +2,13 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Bla gjennom og se dine \"suvenirer\" album på Nextcloud-webgrensesnitt",
     "Loading album list…" : "Laster albumliste...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Ingen album tilgjengelig. Du må laste dem opp fra Android-appen Suvenirer (https://github.com/zorgluf/souvenirs-android).",
+    "New album" : "Nytt album",
+    "Album name" : "Albumnavn",
+    "Date" : "Dato",
+    "Create" : "Opprett",
+    "Save" : "Save",
     "Start slideshow" : "Start lysbildefremvisning",
     "Stop slideshow" : "Stopp lysbildefremvisning",
     "Slideshow speed" : "Hastighet på lysbildefremvisning",
@@ -12,6 +16,9 @@ OC.L10N.register(
     "Fullscreen" : "Fullskjerm",
     "Click to download album in a zip file." : "Klikk for å laste ned album i en zip-fil.",
     "Edit" : "Rediger",
-    "Editing" : "Rediger"
+    "Editing" : "Rediger",
+    "Choose" : "Velg",
+    "Change layout" : "Endre utforming",
+    "Remove image" : "Fjern bilde"
 },
 "nplurals=2; plural=(n != 1);");

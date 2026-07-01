@@ -1,4 +1,9 @@
 { "translations": {
+    "New album" : "Uusi albumi",
+    "Album name" : "Albumin nimi",
+    "Date" : "Päivä",
+    "Create" : "Luo",
+    "Save" : "Save",
     "Start slideshow" : "Aloita diaesitys",
     "Stop slideshow" : "Pysäytä diaesistys",
     "Slideshow speed" : "Diaesityksen nopeus",
@@ -6,6 +11,10 @@
     "Fullscreen" : "Koko näyttö",
     "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona.",
     "Edit" : "Muokkaa",
-    "Editing" : "Muokkaaminen"
+    "Editing" : "Muokkaaminen",
+    "Choose" : "Valitse",
+    "Add image" : "Lisää kuva",
+    "Change layout" : "Vaihda asettelua",
+    "Remove image" : "Poista kuva"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

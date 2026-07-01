@@ -2,9 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Navegue y vea sus Álbumes \"souvernir\" en la interfaz web de nextcloud",
     "Loading album list…" : "Cargando lista de álbumes…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No hay álbum disponible. Tendrá que subirlos desde la app Android Souvernirs (https://github.com/zorgluf/souvenirs-android).",
+    "Album name" : "Nombre del álbum",
+    "Date" : "Fecha",
+    "Create" : "Crear",
     "Start slideshow" : "Iniciar presentación de diapositivas",
     "Stop slideshow" : "Detener presentación de diapositivas",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",

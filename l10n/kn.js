@@ -1,7 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Save" : "Save",
     "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
-    "Edit" : "ಸಂಪಾದಿಸು"
+    "Edit" : "ಸಂಪಾದಿಸು",
+    "Choose" : "﻿ಆಯ್ಕೆ"
 },
 "nplurals=2; plural=(n > 1);");

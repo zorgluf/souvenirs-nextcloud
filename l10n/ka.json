@@ -1,6 +1,10 @@
 { "translations": {
+    "Date" : "თარიღი",
+    "Create" : "Create",
+    "Save" : "Save",
     "Download" : "Download",
     "Edit" : "Edit",
-    "Editing" : "Editing"
+    "Editing" : "Editing",
+    "Choose" : "არჩევა"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Date" : "Dato",
+    "Create" : "Opret",
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
     "Edit" : "Redigér",

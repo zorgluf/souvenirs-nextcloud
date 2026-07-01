@@ -2,9 +2,13 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Hediyelikler",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Nextcloud site arayüzünde \"hediyelikler\" albümlerinize göz atın ve görüntüleyin",
     "Loading album list…" : "Albüm listesi yükleniyor…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Kullanılabilecek bir albüm yok. Souvenirs Android uygulamasından yüklemelisiniz (https://github.com/zorgluf/souvenirs-android).",
+    "New album" : "Yeni albüm",
+    "Album name" : "Albüm adı",
+    "Date" : "Tarih",
+    "Create" : "Oluştur",
+    "Save" : "Kaydet",
     "Start slideshow" : "Slayt sunumunu başlat",
     "Stop slideshow" : "Slayt sunumunu durdur",
     "Slideshow speed" : "Slayt sunumu hızı",
@@ -12,6 +16,10 @@ OC.L10N.register(
     "Fullscreen" : "Tam ekran",
     "Click to download album in a zip file." : "Albümü zip dosyası olarak indirmek için tıklayın.",
     "Edit" : "Düzenle",
-    "Editing" : "Düzenleme"
+    "Editing" : "Düzenleme",
+    "Choose" : "Seçin",
+    "Add image" : "Görsel ekle",
+    "Change layout" : "Yerleşimi değiştir",
+    "Remove image" : "Görseli kaldır"
 },
 "nplurals=2; plural=(n > 1);");

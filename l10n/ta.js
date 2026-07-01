@@ -1,7 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Date" : "Date",
+    "Save" : "Save",
     "Download" : "பதிவிறக்குக",
-    "Edit" : "தொகுக்க"
+    "Edit" : "தொகுக்க",
+    "Choose" : "தெரிவுசெய்க "
 },
 "nplurals=2; plural=(n != 1);");

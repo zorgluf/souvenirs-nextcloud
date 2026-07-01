@@ -1,9 +1,12 @@
 { "translations": {
     "Souvenirs" : "Meenutused",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Sirvi ja vaata oma „meenutuste“ albumeid Nextcloudi veebiliideses",
-    "View and share albums made by the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android).\n    \\nThis application is mainly a viewer. Very light album edition features are available for the moment. You will need to create albums using the android app and sync them to your nextcloud server." : "Vaata ja jaga albumeid, mis on tehtud [Androidi rakendusega Mälestused | Souvenirs](https://github.com/zorgluf/souvenirs-android). \n\\nSee rakendus on mõeldud vaid vaatamiseks. Albumi haldamise osas on hetkel saadaval vaid lihtsamad funktsionaalsused. Palun koosta albumid nimetatud Androidi rakenduses ja sünkrooni loodud albumid oma Nextcloudi serverisse.",
     "Loading album list…" : "Laadin albumite loendit…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Ühtegi albumit pole saadaval. palun laadi nad üles Androidi rakendusest Meenutusest (Souvenirs https://github.com/zorgluf/souvenirs-android).",
+    "New album" : "Uus album",
+    "Album name" : "Albumi nimi",
+    "Date" : "Kuupäev",
+    "Create" : "Koosta",
+    "Save" : "Salvesta",
     "Start slideshow" : "Käivita slaidiesitlus",
     "Stop slideshow" : "Seiska slaidiesitlus",
     "Slideshow speed" : "Slaidiesitluse kiirus",
@@ -12,6 +15,10 @@
     "Click to download album in a zip file." : "Klõpsa, et laadida album alla zip-failina.",
     "Edit" : "Muuda",
     "Finish editing" : "Lõpeta muutmine",
-    "Editing" : "Muutmisel"
+    "Editing" : "Muutmisel",
+    "Choose" : "Vali",
+    "Add image" : "Lisa pilt",
+    "Change layout" : "Muuda küljendust",
+    "Remove image" : "Eemalda pilt"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

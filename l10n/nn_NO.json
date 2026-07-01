@@ -1,5 +1,9 @@
 { "translations": {
+    "Date" : "Dato",
+    "Save" : "Save",
     "Download" : "Last ned",
-    "Edit" : "Rediger"
+    "Edit" : "Rediger",
+    "Choose" : "Vel",
+    "Remove image" : "Fjern bilete"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

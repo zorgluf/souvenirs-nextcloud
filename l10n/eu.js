@@ -2,7 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Oroigarriak",
-    "Browse and view your \"souvenirs\" albums on nextcloud web interface" : "Arakatu eta ikusi zure \"oroigarriak\" albumak nextcloud web interfazean",
+    "New album" : "Album berria",
+    "Album name" : "Albumaren izena",
+    "Date" : "Data",
+    "Create" : "Sortu",
+    "Save" : "Save",
     "Start slideshow" : "Hasi diapositiba-aurkezpena",
     "Stop slideshow" : "Gelditu diapositiba-aurkezpena",
     "Slideshow speed" : "Diapositiba-aurkezpenaren abiadura",
@@ -10,6 +14,9 @@ OC.L10N.register(
     "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
     "Edit" : "Editatu",
-    "Editing" : "Edizioa"
+    "Editing" : "Edizioa",
+    "Choose" : "Aukeratu",
+    "Change layout" : "Aldatu diseinua",
+    "Remove image" : "Kendu irudia"
 },
 "nplurals=2; plural=(n != 1);");

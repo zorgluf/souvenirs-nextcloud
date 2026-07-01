@@ -1,5 +1,7 @@
 { "translations": {
+    "Save" : "Save",
     "Download" : "Eroflueden",
-    "Edit" : "Änneren"
+    "Edit" : "Änneren",
+    "Choose" : "Auswielen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

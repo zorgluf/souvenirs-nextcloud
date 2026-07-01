@@ -1,6 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "New album" : "Uusi albumi",
+    "Album name" : "Albumin nimi",
+    "Date" : "Päivä",
+    "Create" : "Luo",
+    "Save" : "Save",
     "Start slideshow" : "Aloita diaesitys",
     "Stop slideshow" : "Pysäytä diaesistys",
     "Slideshow speed" : "Diaesityksen nopeus",
@@ -8,6 +13,10 @@ OC.L10N.register(
     "Fullscreen" : "Koko näyttö",
     "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona.",
     "Edit" : "Muokkaa",
-    "Editing" : "Muokkaaminen"
+    "Editing" : "Muokkaaminen",
+    "Choose" : "Valitse",
+    "Add image" : "Lisää kuva",
+    "Change layout" : "Vaihda asettelua",
+    "Remove image" : "Poista kuva"
 },
 "nplurals=2; plural=(n != 1);");
