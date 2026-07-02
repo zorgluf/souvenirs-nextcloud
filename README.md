@@ -6,6 +6,8 @@ Better on device album edition with the [Souvenirs android application](https://
 
 ## Changelog
 
+Starting from v2.1.0, the changelogs will be included inside the [github release](https://github.com/zorgluf/souvenirs-nextcloud/releases) instead of this file.
+
 v2.1.0:
 * First full set of album edition features
 
