@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "New album" : "Nuevo álbum",
     "Date" : "Fecha",
     "Create" : "Crear",
     "Save" : "Save",
@@ -8,6 +9,8 @@ OC.L10N.register(
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Editar",
     "Editing" : "Editando",
-    "Change layout" : "Cambiar diseño"
+    "Choose" : "Elegir",
+    "Change layout" : "Cambiar diseño",
+    "Remove image" : "Eliminar imagen"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

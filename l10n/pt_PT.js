@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
     "Loading album list…" : "Carregando lista de álbuns…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nenhum álbum disponível. Você precisará fazer upload das fotos do aplicativo Souvenirs para Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Novo álbum",
@@ -8,15 +9,22 @@ OC.L10N.register(
     "Date" : "Data",
     "Create" : "Criar",
     "Save" : "Save",
+    "Could not save the album." : "Não foi possível salvar o álbum.",
+    "Stop slideshow" : "Parar apresentação de slides",
     "Slideshow speed" : "Velocidade da apresentação de slides",
     "Download" : "Transferir",
     "Fullscreen" : "Ecrã completo",
     "Edit" : "Editar",
     "Finish editing" : "Concluir a edição",
     "Editing" : "A editar",
+    "Could not delete the page." : "Não foi possível excluir a página.",
+    "Could not create the page." : "Não foi possível criar a página.",
     "Choose" : "Escolher",
+    "Could not read the selected file." : "Não foi possível ler o arquivo selecionado.",
+    "Could not save the added image." : "Não foi possível salvar a imagem adicionada.",
     "Add image" : "Adicionar imagem",
     "Change layout" : "Alterar esquema",
+    "Remove text" : "Remover texto",
     "Remove image" : "Remover imagem"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

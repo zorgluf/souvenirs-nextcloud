@@ -4,9 +4,11 @@ OC.L10N.register(
     "Souvenirs" : "Souvenirs",
     "Loading album list…" : "Loading album list…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android).",
+    "New album" : "New album",
     "Album name" : "Album name",
     "Date" : "Date",
     "Create" : "Create",
+    "Save" : "Save",
     "Start slideshow" : "Start slideshow",
     "Stop slideshow" : "Stop slideshow",
     "Slideshow speed" : "Slideshow speed",
@@ -15,6 +17,9 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Click to download album in a zip file.",
     "Edit" : "Edit",
     "Finish editing" : "Finish editing",
-    "Editing" : "Editing"
+    "Editing" : "Editing",
+    "Choose" : "Choose",
+    "Change layout" : "Change layout",
+    "Remove image" : "Remove image"
 },
 "nplurals=2; plural=(n != 1);");

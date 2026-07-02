@@ -1,7 +1,7 @@
 { "translations": {
-    "Create" : "Crear",
     "Save" : "Save",
-    "Download" : "Escargar",
-    "Choose" : "Eslechir"
+    "Download" : "Laai af",
+    "Choose" : "Kies",
+    "Remove image" : "Verwyder beeld"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

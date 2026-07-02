@@ -2,11 +2,16 @@ OC.L10N.register(
     "souvenirs",
     {
     "Loading album list…" : "Cargando la llista d'álbumes…",
+    "New album" : "Álbum nuevu",
+    "Date" : "Data",
+    "Create" : "Crear",
+    "Save" : "Save",
     "Start slideshow" : "Aniciar la proyeición",
     "Stop slideshow" : "Parar la proyeición",
     "Slideshow speed" : "Velocidá de la proyeición",
     "Download" : "Baxar",
     "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
-    "Edit" : "Editar"
+    "Edit" : "Editar",
+    "Choose" : "Escoyer"
 },
 "nplurals=2; plural=(n != 1);");

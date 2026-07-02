@@ -1,6 +1,9 @@
 { "translations": {
     "Date" : "Dato",
+    "Save" : "Save",
     "Download" : "Elŝuti",
-    "Edit" : "Modifi"
+    "Edit" : "Modifi",
+    "Choose" : "Elekti",
+    "Remove image" : "Forigi bildon"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

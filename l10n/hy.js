@@ -1,9 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Create" : "Crear",
     "Save" : "Save",
-    "Download" : "Escargar",
-    "Choose" : "Eslechir"
+    "Download" : "Ներբեռնել",
+    "Edit" : "մշակել",
+    "Choose" : "Ընտրել"
 },
 "nplurals=2; plural=(n != 1);");
