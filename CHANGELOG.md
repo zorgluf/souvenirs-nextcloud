@@ -1,3 +1,7 @@
+## 2.1.1 - 2026-07-02
+### Changed
+- Better changelog handling and app description [#17](https://github.com/zorgluf/souvenirs-nextcloud/pull/17)
+
 ## 2.1.0 – 2026-06-30
 ### Added
 - First full set of album edition features
