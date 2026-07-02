@@ -4,8 +4,25 @@
     <id>souvenirs</id>
     <name>Souvenirs</name>
     <summary>Create, Display and Share "old school" albums for your photos, videos and panoramics, on your Nextcloud server.</summary>
-    <description><![CDATA[Create, Display and Share "old school" albums for your photos, videos and panoramics.\nBetter on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)]]></description>
-    <version>2.1.0</version>
+    <description><![CDATA[
+Relive your memories the way you used to with paper albums: page after page, story after story.
+
+**Souvenirs** lets you craft "old school" albums from the photos and videos already stored on your Nextcloud — and share them with the people who matter.
+
+### ✨ What you can do
+
+- 📖 **Browse albums like a book** — turn pages instead of scrolling through photo grids
+- 🎨 **Create and edit albums** right from the web interface: pick your photos, arrange your pages, give each album a name and a date
+- 🎬 **Mix media freely** — photos, videos, audio recordings and even 360° panoramas on the same page
+- 🌐 **Explore panoramas** interactively thanks to the integrated 360° viewer
+- 🔗 **Share with a simple link** — family and friends can enjoy your albums without a Nextcloud account
+- 📱 **Pair with the [Souvenirs Android app](https://github.com/zorgluf/souvenirs-android)** to build albums on the go and sync them with your server
+- ♻️ **Save space** — media already on your server is reused, not duplicated
+
+### 🔒 Your souvenirs, your server
+
+Albums are stored as plain folders and files on your own Nextcloud. No third-party service, no lock-in: your souvenirs stay yours.]]></description>
+    <version>2.1.1</version>
     <licence>agpl</licence>
     <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenirs</namespace>
