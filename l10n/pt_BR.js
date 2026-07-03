@@ -3,7 +3,6 @@ OC.L10N.register(
     {
     "Souvenirs" : "Souvenirs",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
-    "Create, Display and Share \"old school\" albums for your photos, videos and panoramics.\\nBetter on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)" : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas.\\nEdição de álbuns aprimorada no dispositivo com o [aplicativo Souvenirs para Android](https://github.com/zorgluf/souvenirs-android)",
     "Loading album list…" : "Carregando lista de álbuns…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nenhum álbum disponível. Você precisará fazer upload das fotos do aplicativo Souvenirs para Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Novo álbum",
@@ -30,7 +29,7 @@ OC.L10N.register(
     "Could not move the page." : "Não foi possível mover a página.",
     "Could not create the page." : "Não foi possível criar a página.",
     "Could not add the text." : "Não foi possível adicionar o texto.",
-    "Choose an image" : "Escolher uma imagem",
+    "Choose an image" : "Escolha uma imagem",
     "Choose" : "Escolher",
     "Could not read the selected file." : "Não foi possível ler o arquivo selecionado.",
     "Could not add the image." : "Não foi possível adicionar a imagem.",

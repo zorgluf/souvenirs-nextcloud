@@ -5,6 +5,7 @@ OC.L10N.register(
     "Download" : "Descargar",
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Editar",
+    "Choose" : "Seleccionar",
     "Remove image" : "Eliminar imagen"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

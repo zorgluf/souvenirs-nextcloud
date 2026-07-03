@@ -1,7 +1,6 @@
 { "translations": {
     "Souvenirs" : "Meenutused",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Koosta, vaata ja jaga oma Nextcloud-serveris „vanakooli“ albumeid oma fotodest, videotest ja panoraamfotodest.",
-    "Create, Display and Share \"old school\" albums for your photos, videos and panoramics.\\nBetter on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)" : "Koosta, vaata ja jaga „vanakooli“ albumeid oma fotodest, videotest ja panoraamfotodest.\\nMugavad võimalused albumi muutmiseks nutiseadmes [Androidile tehtud Suveniirirakendusega](https://github.com/zorgluf/souvenirs-android)",
     "Loading album list…" : "Laadin albumite loendit…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Ühtegi albumit pole saadaval. palun laadi nad üles Androidi rakendusest Meenutusest (Souvenirs https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Uus album",
