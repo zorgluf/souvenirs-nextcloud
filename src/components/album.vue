@@ -2,26 +2,6 @@
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
     v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)"
     v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver">
-	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
-            v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
-        <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
-            v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
-            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
-            v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
-            v-bind:is-last="index === pages.length - 1"
-            v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
-            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
-            v-on:add-page="onAddPage" v-on:move-page="onMovePage"
-            v-on:element-drop="onElementDrop">
-	    </page>
-	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
-            v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
-        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'" v-if="!isTouchDevice">
-            <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
-            v-on:click="showN(index)">
-            </div>
-        </div>
-        <div v-if="editMode" class="edit-badge">{{ sEditing }}</div>
         <div class="top-right">
             <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
                 <NcActionButton v-if="canEdit" @click="toggleEdit" :close-after-click="true">
@@ -40,6 +20,25 @@
                 <NcActionSeparator/>
                 <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">{{ sDownload }}</NcActionButton>
             </NcActions>
+        </div>
+	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
+            v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
+        <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
+            v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
+            v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
+            v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+            v-bind:is-last="index === pages.length - 1"
+            v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
+            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
+            v-on:add-page="onAddPage" v-on:move-page="onMovePage"
+            v-on:element-drop="onElementDrop">
+	    </page>
+	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
+            v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
+        <div v-bind:class="isWinPortrait ? 'progress-portrait': 'progress'" v-if="!isTouchDevice">
+            <div v-bind:class=" [ isWinPortrait ? 'progress-item-portrait': 'progress-item', index == displayedPage ? 'progress-item-full' : 'progress-item-empty']" v-for="(page, index) in pages" v-bind:key="index"
+            v-on:click="showN(index)">
+            </div>
         </div>
         <imagefull v-if="imageFullOn" v-bind:imageUrl="imageFullUrl" v-bind:isPhotosphere="imageFullIsPhotosphere"
             v-on:closeimagefull="closeImgFull">
@@ -128,7 +127,6 @@ export default {
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
             "sEdit": t("souvenirs","Edit"),
             "sFinishEdit": t("souvenirs","Finish editing"),
-            "sEditing": t("souvenirs","Editing"),
             "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
@@ -875,27 +873,15 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
 	position: absolute;
     right: 5px;
     top: 5px;
-    z-index: 6;
+    /* Above every in-page control (element delete/drag handles are 8, page
+       insert/move and progress are 9), so the menu stays reachable in edit mode. */
+    z-index: 10;
 }
 
 .s-album.editing {
     /* Make it unmistakable that the album is in edit mode. */
     outline: 4px solid var(--color-primary-element, #0082c9);
     outline-offset: -4px;
-}
-
-.edit-badge {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    z-index: 7;
-    padding: 4px 10px;
-    border-radius: var(--border-radius-pill, 14px);
-    background-color: var(--color-primary-element, #0082c9);
-    color: var(--color-primary-element-text, #ffffff);
-    font-weight: bold;
-    font-size: 13px;
-    pointer-events: none;
 }
  
 .top-left {
