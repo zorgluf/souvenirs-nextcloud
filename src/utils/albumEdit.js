@@ -122,6 +122,38 @@ export function addElement(page, element) {
 }
 
 /**
+ * Return a copy of `page` in which the elements identified by `elementIdA` and
+ * `elementIdB` have exchanged places: each takes the other's geometry
+ * (top/left/right/bottom) AND the other's slot in the elements array. Swapping
+ * the array slots too keeps the visual order and the persisted order in sync,
+ * so a later re-layout (e.g. adding an element) does not undo the swap.
+ * Everything else (zoom/offset, captions, unknown fields, ...) is preserved.
+ *
+ * If either id is missing, or both are the same element, the page is returned
+ * unchanged (as a copy).
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @param {string} elementIdA - the `id` of the first element
+ * @param {string} elementIdB - the `id` of the second element
+ * @returns {object} a new page object with the two elements swapped
+ */
+export function swapElements(page, elementIdA, elementIdB) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    const swapped = elements.map(element => ({ ...element }))
+    const indexA = elements.findIndex(element => element.id === elementIdA)
+    const indexB = elements.findIndex(element => element.id === elementIdB)
+    if (indexA >= 0 && indexB >= 0 && indexA !== indexB) {
+        const geometry = ({ top, left, right, bottom }) => ({ top, left, right, bottom })
+        swapped[indexA] = { ...elements[indexB], ...geometry(elements[indexA]) }
+        swapped[indexB] = { ...elements[indexA], ...geometry(elements[indexB]) }
+    }
+    return {
+        ...page,
+        elements: swapped,
+    }
+}
+
+/**
  * Return a copy of `page` in which the element identified by `elementId` has its
  * `text` set to `newText`. All other fields of the page and of every element
  * (including ones this app does not know about) are preserved untouched.

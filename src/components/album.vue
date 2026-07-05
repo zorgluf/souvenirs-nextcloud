@@ -1,7 +1,7 @@
 <template>
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
     v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)"
-    v-on:keydown.e="onEditKey">
+    v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver">
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
@@ -11,7 +11,8 @@
             v-bind:is-last="index === pages.length - 1"
             v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
             v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
-            v-on:add-page="onAddPage" v-on:move-page="onMovePage">
+            v-on:add-page="onAddPage" v-on:move-page="onMovePage"
+            v-on:element-drop="onElementDrop">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -77,7 +78,8 @@ import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar,
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../utils/albumEdit.js'
+import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../utils/albumEdit.js'
+import { isElementDrag } from '../utils/elementDrag.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../api/albumApi.js'
 import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
@@ -130,6 +132,9 @@ export default {
             "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
+            // Timestamp of the last page turn triggered by dragging an element
+            // near the album edge (throttles the edge navigation).
+            "dragNavLast": 0,
         }
     },
     created: function() {
@@ -453,6 +458,88 @@ export default {
                 that.$nextTick(() => { that.showN(index); });
                 showError(t("souvenirs","Could not move the page."));
             });
+        },
+        onElementDrop: function(srcPageId, srcElementId, destPageId, destElementId) {
+            if (srcPageId === destPageId) {
+                // Same page: swap the two elements' positions. Dropping on the
+                // page background or on itself is a no-op.
+                if (destElementId == null || destElementId === srcElementId) {
+                    return;
+                }
+                var index = this.pages.findIndex(p => p.id === destPageId);
+                if (index < 0) {
+                    return;
+                }
+                var updatedPage = swapElements(this.pages[index], srcElementId, destElementId);
+                this.pages.splice(index, 1, updatedPage);
+                updatePage(this.albumId, updatedPage).catch(error => {
+                    showError(t("souvenirs","Could not move the element."));
+                });
+                return;
+            }
+            // Other page: move the element there, with the same re-layout logic
+            // as adding a new element (issue #18).
+            var srcIndex = this.pages.findIndex(p => p.id === srcPageId);
+            var destIndex = this.pages.findIndex(p => p.id === destPageId);
+            if (srcIndex < 0 || destIndex < 0) {
+                return;
+            }
+            var element = (this.pages[srcIndex].elements || []).find(e => e.id === srcElementId);
+            if (element == null) {
+                return;
+            }
+            var that = this;
+            var updatedDest = addElement(this.pages[destIndex], element);
+            var updatedSrc = removeElement(this.pages[srcIndex], srcElementId);
+            this.pages.splice(destIndex, 1, updatedDest);
+            // Persist the destination first: if the source update then fails,
+            // the element at worst exists on both pages instead of being lost.
+            updatePage(this.albumId, updatedDest)
+                .then(() => {
+                    // Moving the last element away deletes the emptied page (same
+                    // rule as onRemoveElement), unless it is the only page left.
+                    if (updatedSrc.elements.length === 0 && that.pages.length > 1) {
+                        return deletePage(that.albumId, srcPageId).then(() => {
+                            var i = that.pages.findIndex(p => p.id === srcPageId);
+                            if (i >= 0) {
+                                that.pages.splice(i, 1);
+                            }
+                            if (that.displayedPage >= that.pages.length) {
+                                that.displayedPage = that.pages.length - 1;
+                            }
+                        });
+                    }
+                    var i = that.pages.findIndex(p => p.id === srcPageId);
+                    if (i >= 0) {
+                        that.pages.splice(i, 1, updatedSrc);
+                    }
+                    return updatePage(that.albumId, updatedSrc);
+                })
+                .catch(error => {
+                    showError(t("souvenirs","Could not move the element."));
+                });
+        },
+        onAlbumDragOver: function(event) {
+            // Dragging an element near the album edge turns the page, so the
+            // element can be dropped on a page that is not currently visible.
+            if (!this.editMode || !isElementDrag(event)) {
+                return;
+            }
+            var now = Date.now();
+            if (now - this.dragNavLast < 800) {
+                return;
+            }
+            var rect = document.querySelector(".s-album").getBoundingClientRect();
+            var zone = 80;
+            var toStart = this.isWinPortrait ? (event.clientY - rect.top) : (event.clientX - rect.left);
+            var toEnd = this.isWinPortrait ? (rect.bottom - event.clientY) : (rect.right - event.clientX);
+            if (toStart < zone) {
+                this.dragNavLast = now;
+                this.showPrev();
+            } else if (toEnd < zone) {
+                this.dragNavLast = now;
+                this.showNext();
+            }
         },
         onAddFirstPage: function() {
             // Bootstrap an empty album: enter edit mode and create the first page.

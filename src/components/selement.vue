@@ -1,6 +1,11 @@
 <template>
-    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '']" 
+    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '',
+    { 's-element--draggable': isDraggable, 's-element--dragging': isDragging, 's-element--dragover': isDragOver }]"
     v-bind:id="sId"
+    v-bind:draggable="isDraggable"
+    v-on:dragstart="onDragStart" v-on:dragend="onDragEnd"
+    v-on:dragenter="onDragEnter" v-on:dragleave="onDragLeave"
+    v-on:dragover="onDragOver" v-on:drop="onDrop"
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
 		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
@@ -19,9 +24,9 @@
         </div>
         
 		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
-        v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))" 
-        v-bind:src="sImageSrc" v-on:click="openImgFull" />
-        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc"/>
+        v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))"
+        v-bind:src="sImageSrc" v-on:click="openImgFull" v-bind:draggable="!editMode" />
+        <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc" v-bind:draggable="!editMode"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
         <div v-bind:id="'pano-'+sId" style="position:absolute;top:0;left:0;width: 100%;height: 100%;"/>
@@ -48,10 +53,13 @@ import { NcLoadingIcon } from '@nextcloud/vue'
 import { imagePath } from '@nextcloud/router'
 import EditableText from './EditableText.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
+import { setElementDragData, isElementDrag, getElementDragData } from '../utils/elementDrag.js'
 
 export default {
     props: {
       "sId": String,
+      // Id of the page hosting this element, needed as the drag payload source.
+      "sPageId": String,
       "editMode": Boolean,
       "sTop": Number,
       "sBottom": Number,
@@ -79,6 +87,11 @@ export default {
             "loadingImage": null,
             "imageStyle": {},
             "isVideoLoading": false,
+            "isDragging": false,
+            "isDragOver": false,
+            // dragenter/dragleave also fire when moving over children, so the
+            // drag-over highlight is tracked with an enter/leave counter.
+            "dragOverCount": 0,
         }
     },
     components: {
@@ -163,6 +176,11 @@ export default {
                 || this.sClass.endsWith('PaintElement')
                 || this.sClass.endsWith('TextElement'));
         },
+        'isDraggable': function() {
+            // The same visible tiles that can be removed can be dragged (Audio
+            // and unknown elements have no visual box to grab).
+            return this.editMode && this.isRemovable;
+        },
         'removeTitle': function() {
             return (this.sClass != null && this.sClass.endsWith('TextElement'))
                 ? t("souvenirs","Remove text")
@@ -242,6 +260,63 @@ export default {
             // Bubble the removal up with this element's id (sId).
             this.$emit("remove-element", this.sId);
         },
+        onDragStart: function(event) {
+            if (!this.isDraggable) {
+                event.preventDefault();
+                return;
+            }
+            // A drag starting inside the caption editor is the browser dragging
+            // selected text: leave it to the native behavior (our drop targets
+            // ignore it, as it does not carry the element payload).
+            if (event.target && event.target.isContentEditable) {
+                return;
+            }
+            setElementDragData(event, this.sPageId, this.sId);
+            this.isDragging = true;
+        },
+        onDragEnd: function() {
+            this.isDragging = false;
+        },
+        onDragEnter: function(event) {
+            if (!this.editMode || !isElementDrag(event)) {
+                return;
+            }
+            this.dragOverCount += 1;
+            this.isDragOver = !this.isDragging;
+        },
+        onDragLeave: function(event) {
+            if (!this.editMode || !isElementDrag(event)) {
+                return;
+            }
+            this.dragOverCount -= 1;
+            if (this.dragOverCount <= 0) {
+                this.dragOverCount = 0;
+                this.isDragOver = false;
+            }
+        },
+        onDragOver: function(event) {
+            // preventDefault marks this element as a valid drop target.
+            if (this.editMode && isElementDrag(event)) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+            }
+        },
+        onDrop: function(event) {
+            this.dragOverCount = 0;
+            this.isDragOver = false;
+            if (!this.editMode || !isElementDrag(event)) {
+                return;
+            }
+            event.preventDefault();
+            // Do not let the page treat this as a drop on its background.
+            event.stopPropagation();
+            var data = getElementDragData(event);
+            if (data == null) {
+                return;
+            }
+            // Bubble up: source (page, element) + this element as drop target.
+            this.$emit("element-drop", data.pageId, data.elementId, this.sId);
+        },
         waitingVideo: function() {
             this.isVideoLoading = true;
         },
@@ -293,6 +368,25 @@ function basename(path) {
 	justify-content: center;
     pointer-events: none;
     overflow: hidden;
+}
+
+/* Draggable tiles (edit mode) must receive pointer/drag events; the base
+   .s-element disables them (children normally opt back in). */
+.s-element--draggable {
+	pointer-events: all;
+	cursor: grab;
+}
+
+/* The tile being dragged: ghost it so the user sees it is in flight. */
+.s-element--dragging {
+	opacity: 0.4;
+}
+
+/* Valid drop target under the dragged tile. Inset dashed frame (the tile clips
+   its overflow, so an offset outline would be cut on the page edges). */
+.s-element--dragover {
+	outline: 3px dashed var(--color-primary-element, #0082c9);
+	outline-offset: -3px;
 }
 
 .s-element-delete {

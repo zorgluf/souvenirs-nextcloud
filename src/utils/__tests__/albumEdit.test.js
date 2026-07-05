@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement } from '../albumEdit.js'
+import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -237,6 +237,61 @@ describe('buildPage', () => {
 
     it('gives each call a distinct id', () => {
         expect(buildPage().id).not.toBe(buildPage().id)
+    })
+})
+
+describe('swapElements', () => {
+    const makePage = () => ({
+        id: 'page-1',
+        customPageField: 'keep-me',
+        elements: [
+            { id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', zoom: 120, offsetX: 5, androidOnlyField: 42, top: 0, left: 0, right: 100, bottom: 50 },
+            { id: 'el-2', class: 'TextElement', text: 'hi', top: 50, left: 0, right: 100, bottom: 100 },
+            { id: 'el-3', class: 'AudioElement', audio: 'data/x.mp3' },
+        ],
+    })
+
+    it('exchanges the geometry of the two elements', () => {
+        const result = swapElements(makePage(), 'el-1', 'el-2')
+        const image = result.elements.find(e => e.id === 'el-1')
+        const text = result.elements.find(e => e.id === 'el-2')
+        expect(image).toMatchObject({ top: 50, left: 0, right: 100, bottom: 100 })
+        expect(text).toMatchObject({ top: 0, left: 0, right: 100, bottom: 50 })
+    })
+
+    it('exchanges the array slots too, so a later re-layout keeps the swap', () => {
+        const result = swapElements(makePage(), 'el-1', 'el-2')
+        expect(result.elements.map(e => e.id)).toEqual(['el-2', 'el-1', 'el-3'])
+    })
+
+    it('keeps the per-slot geometry sequence (layout detection still matches)', () => {
+        const result = swapElements(makePage(), 'el-1', 'el-2')
+        expect(result.elements[0]).toMatchObject({ top: 0, bottom: 50 })
+        expect(result.elements[1]).toMatchObject({ top: 50, bottom: 100 })
+    })
+
+    it('preserves all non-geometry fields, including unknown ones', () => {
+        const result = swapElements(makePage(), 'el-1', 'el-2')
+        const image = result.elements.find(e => e.id === 'el-1')
+        expect(image).toMatchObject({ image: 'data/a.jpg', zoom: 120, offsetX: 5, androidOnlyField: 42 })
+        expect(result.customPageField).toBe('keep-me')
+    })
+
+    it('is a no-op when either id is missing or both are the same', () => {
+        const before = makePage().elements
+        expect(swapElements(makePage(), 'el-1', 'missing').elements).toEqual(before)
+        expect(swapElements(makePage(), 'missing', 'el-2').elements).toEqual(before)
+        expect(swapElements(makePage(), 'el-1', 'el-1').elements).toEqual(before)
+    })
+
+    it('does not mutate the original page', () => {
+        const page = makePage()
+        swapElements(page, 'el-1', 'el-2')
+        expect(page.elements[0]).toMatchObject({ id: 'el-1', top: 0 })
+    })
+
+    it('tolerates a page without an elements array', () => {
+        expect(swapElements({ id: 'p' }, 'a', 'b').elements).toEqual([])
     })
 })
 

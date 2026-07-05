@@ -1,5 +1,6 @@
 <template>
-    <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId">
+    <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId"
+        v-on:dragover="onPageDragOver" v-on:drop="onPageDrop">
 	<selement v-for="element in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
@@ -14,6 +15,7 @@
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
                 v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
                 v-on:remove-element="onRemoveElement"
+                v-bind:s-page-id="sId" v-on:element-drop="onElementDrop"
                 v-bind:element-margin="elementMargin">
 	</selement>
         <div v-if="editMode" class="page-insert page-insert--before" v-on:click="onAddPageBefore" :title="sAddPage">
@@ -71,6 +73,7 @@ import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboard
 import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
 import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
 import { canCycleLayout } from '../utils/tilePageLayout.js'
+import { isElementDrag, getElementDragData } from '../utils/elementDrag.js'
 
 export default {
     props: {
@@ -146,6 +149,31 @@ export default {
       onRemoveElement: function(elementId) {
         // Re-emit with this page's id (sId) so the album can locate the element.
         this.$emit("remove-element", this.sId, elementId);
+      },
+      onElementDrop: function(srcPageId, srcElementId, destElementId) {
+        // Drop landed on one of this page's elements: re-emit with this page as
+        // the destination so the album can swap (same page) or move (other page).
+        this.$emit("element-drop", srcPageId, srcElementId, this.sId, destElementId);
+      },
+      onPageDragOver: function(event) {
+        // preventDefault marks the page background as a valid drop target.
+        if (this.editMode && isElementDrag(event)) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+        }
+      },
+      onPageDrop: function(event) {
+        // Drop on the page background (not on an element — those stop
+        // propagation): move the element onto this page.
+        if (!this.editMode || !isElementDrag(event)) {
+          return;
+        }
+        event.preventDefault();
+        var data = getElementDragData(event);
+        if (data == null) {
+          return;
+        }
+        this.$emit("element-drop", data.pageId, data.elementId, this.sId, null);
       },
       onAddImage: function() {
         // Ask the album to run the file picker and add an image to this page.
