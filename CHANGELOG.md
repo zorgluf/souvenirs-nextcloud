@@ -1,3 +1,10 @@
+## 2.2.0 - 2026-07-05
+### Added
+- Drag and drop elements in edit mode [#18](https://github.com/zorgluf/souvenirs-nextcloud/pull/18)
+
+### Changed
+- Fix DE translation on app name [#16](https://github.com/zorgluf/souvenirs-nextcloud/issues/16)
+
 ## 2.1.1 - 2026-07-02
 ### Changed
 - Better changelog handling and app description [#17](https://github.com/zorgluf/souvenirs-nextcloud/pull/17)
