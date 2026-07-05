@@ -33,7 +33,10 @@
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc" v-bind:draggable="!editMode"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
-        <div v-bind:id="'pano-'+sId" style="position:absolute;top:0;left:0;width: 100%;height: 100%;"/>
+        <!-- In edit mode the tile takes pointer-events:all (drag and drop), which
+             would make this whole-tile overlay swallow clicks meant for the
+             caption editor below it: keep it click-through while editing. -->
+        <div v-bind:id="'pano-'+sId" v-bind:style="'position:absolute;top:0;left:0;width: 100%;height: 100%;' + (editMode ? 'pointer-events:none;' : '')"/>
         <div v-if="isVideoLoading" class="center">
             <NcLoadingIcon :size="64">
             </NcLoadingIcon>
@@ -422,14 +425,15 @@ function basename(path) {
 	border: none;
 	border-radius: 50%;
 	cursor: grab;
+	/* Same face as the primary NcButtons (e.g. "Add image"): full-strength
+	   primary color, no translucency. */
 	color: var(--color-primary-element-text, #ffffff);
 	background-color: var(--color-primary-element, #0082c9);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-	opacity: 0.8;
 }
 
 .s-element-drag-handle:hover {
-	opacity: 1;
+	background-color: var(--color-primary-element-hover, #198bce);
 }
 
 /* Valid drop target under the dragged tile. Inset dashed frame (the tile clips
