@@ -2,13 +2,17 @@
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '',
     { 's-element--draggable': isDraggable, 's-element--dragging': isDragging, 's-element--dragover': isDragOver }]"
     v-bind:id="sId"
-    v-bind:draggable="isDraggable"
+    v-bind:draggable="isDraggable && !dragSuppressed"
+    v-on:mousedown="onRootMouseDown"
     v-on:dragstart="onDragStart" v-on:dragend="onDragEnd"
     v-on:dragenter="onDragEnter" v-on:dragleave="onDragLeave"
     v-on:dragover="onDragOver" v-on:drop="onDrop"
     v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
 		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
+		</button>
+		<button v-if="isDraggable" class="s-element-drag-handle" :title="sDragToMove">
+			<CursorMove :size="20" />
 		</button>
 		<EditableText v-if="sText || editMode" class="s-element-text resize"
 			:value="sText" :editable="editMode" :auto-fit="true"
@@ -53,6 +57,7 @@ import { NcLoadingIcon } from '@nextcloud/vue'
 import { imagePath } from '@nextcloud/router'
 import EditableText from './EditableText.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
+import CursorMove from 'vue-material-design-icons/CursorMove.vue'
 import { setElementDragData, isElementDrag, getElementDragData } from '../utils/elementDrag.js'
 
 export default {
@@ -89,6 +94,11 @@ export default {
             "isVideoLoading": false,
             "isDragging": false,
             "isDragOver": false,
+            // True while the current press started inside the caption editor:
+            // the tile must not be draggable then, otherwise the browser
+            // suppresses caret placement / text selection in the contenteditable.
+            "dragSuppressed": false,
+            "sDragToMove": t("souvenirs","Drag to move"),
             // dragenter/dragleave also fire when moving over children, so the
             // drag-over highlight is tracked with an enter/leave counter.
             "dragOverCount": 0,
@@ -98,6 +108,7 @@ export default {
         NcLoadingIcon,
         EditableText,
         Delete,
+        CursorMove,
     },
     watch: {
         "geometryKey": function() {
@@ -260,8 +271,19 @@ export default {
             // Bubble the removal up with this element's id (sId).
             this.$emit("remove-element", this.sId);
         },
+        onRootMouseDown: function(event) {
+            // Decide per-press whether the tile is draggable: a press inside the
+            // caption editor must edit text, not start a drag. The browser makes
+            // the selection-vs-drag call during this very mousedown's default
+            // action, before Vue's async attribute patch would land, so the
+            // attribute is also updated synchronously here.
+            this.dragSuppressed = !!(event.target && event.target.isContentEditable);
+            if (this.$refs.eldiv) {
+                this.$refs.eldiv.setAttribute("draggable", String(this.isDraggable && !this.dragSuppressed));
+            }
+        },
         onDragStart: function(event) {
-            if (!this.isDraggable) {
+            if (!this.isDraggable || this.dragSuppressed) {
                 event.preventDefault();
                 return;
             }
@@ -380,6 +402,34 @@ function basename(path) {
 /* The tile being dragged: ghost it so the user sees it is in flight. */
 .s-element--dragging {
 	opacity: 0.4;
+}
+
+/* Grab handle, mirroring the delete button in the opposite corner. It floats
+   above the caption editor (which fills the whole cell on text tiles), so text
+   elements stay draggable even though a press inside the editor never drags. */
+.s-element-drag-handle {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	z-index: 8;
+	pointer-events: all;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	cursor: grab;
+	color: var(--color-primary-element-text, #ffffff);
+	background-color: var(--color-primary-element, #0082c9);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+	opacity: 0.8;
+}
+
+.s-element-drag-handle:hover {
+	opacity: 1;
 }
 
 /* Valid drop target under the dragged tile. Inset dashed frame (the tile clips
