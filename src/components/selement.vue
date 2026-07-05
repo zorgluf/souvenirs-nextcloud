@@ -11,9 +11,12 @@
 		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
 		</button>
-		<button v-if="isDraggable" class="s-element-drag-handle" :title="sDragToMove">
-			<CursorMove :size="20" />
-		</button>
+		<NcButton v-if="isDraggable" class="s-element-drag-handle" type="primary"
+			:aria-label="sDragToMove" :title="sDragToMove">
+			<template #icon>
+				<CursorMove :size="20" />
+			</template>
+		</NcButton>
 		<EditableText v-if="sText || editMode" class="s-element-text resize"
 			:value="sText" :editable="editMode" :auto-fit="true"
 			@save="onTextSave" />
@@ -56,7 +59,7 @@ import { Viewer } from '@photo-sphere-viewer/core';
 import '@photo-sphere-viewer/core/index.css';
 import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
 import { VisibleRangePlugin } from '@photo-sphere-viewer/visible-range-plugin';
-import { NcLoadingIcon } from '@nextcloud/vue'
+import { NcLoadingIcon, NcButton } from '@nextcloud/vue'
 import { imagePath } from '@nextcloud/router'
 import EditableText from './EditableText.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -109,6 +112,7 @@ export default {
     },
     components: {
         NcLoadingIcon,
+        NcButton,
         EditableText,
         Delete,
         CursorMove,
@@ -409,31 +413,20 @@ function basename(path) {
 
 /* Grab handle, mirroring the delete button in the opposite corner. It floats
    above the caption editor (which fills the whole cell on text tiles), so text
-   elements stay draggable even though a press inside the editor never drags. */
+   elements stay draggable even though a press inside the editor never drags.
+   It is a primary NcButton so its face (color, hover) is exactly the one of the
+   other edit buttons ("Add image", ...); only placement is set here. */
 .s-element-drag-handle {
 	position: absolute;
 	top: 6px;
 	left: 6px;
 	z-index: 8;
 	pointer-events: all;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-	padding: 0;
-	border: none;
-	border-radius: 50%;
-	cursor: grab;
-	/* Same face as the primary NcButtons (e.g. "Add image"): full-strength
-	   primary color, no translucency. */
-	color: var(--color-primary-element-text, #ffffff);
-	background-color: var(--color-primary-element, #0082c9);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-.s-element-drag-handle:hover {
-	background-color: var(--color-primary-element-hover, #198bce);
+.s-element-drag-handle,
+.s-element-drag-handle :deep(*) {
+	cursor: grab;
 }
 
 /* Valid drop target under the dragged tile. Inset dashed frame (the tile clips
