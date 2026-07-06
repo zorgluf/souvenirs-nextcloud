@@ -7,7 +7,6 @@ OC.L10N.register(
     "Download" : "Tải xuống",
     "Fullscreen" : "Toàn màn hình",
     "Edit" : "Chỉnh sửa",
-    "Editing" : "Chỉnh sửa",
     "Choose" : "Chọn",
     "Remove image" : "Xóa "
 },

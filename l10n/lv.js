@@ -11,7 +11,6 @@ OC.L10N.register(
     "Download" : "Lejupielādēt",
     "Fullscreen" : "Pilnekrāna",
     "Edit" : "Labot",
-    "Editing" : "Labošana",
     "Choose" : "Izvēlēties",
     "Remove image" : "Novākt attēlu"
 },

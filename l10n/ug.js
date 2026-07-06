@@ -16,8 +16,8 @@ OC.L10N.register(
     "Fullscreen" : "تولۇق ئېكران",
     "Click to download album in a zip file." : "Zip ھۆججىتىدىكى پىلاستىنكىنى چۈشۈرۈش ئۈچۈن چېكىڭ.",
     "Edit" : "تەھرىر",
-    "Editing" : "تەھرىرلەش",
     "Choose" : "تاللاڭ",
-    "Change layout" : "ئورۇنلاشتۇرۇش"
+    "Change layout" : "ئورۇنلاشتۇرۇش",
+    "Drag to move" : "سۆرەپ يۆتكىڭ"
 },
 "nplurals=2; plural=(n != 1);");

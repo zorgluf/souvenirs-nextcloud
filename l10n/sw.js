@@ -15,7 +15,6 @@ OC.L10N.register(
     "Fullscreen" : "Skrini nzima",
     "Click to download album in a zip file." : "Bofya ili kupakua albamu katika faili ya zip.",
     "Edit" : "Hariri",
-    "Editing" : "Inahariri",
     "Choose" : "Chagua",
     "Change layout" : "Badilisha mpangilio"
 },

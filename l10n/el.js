@@ -14,7 +14,6 @@ OC.L10N.register(
     "Fullscreen" : "Πλήρης οθόνη",
     "Click to download album in a zip file." : "Κάντε κλικ για λήψη του άλμπουμ σε ένα αρχείο zip.",
     "Edit" : "Επεξεργασία",
-    "Editing" : "Επεξεργασία",
     "Choose" : "Επιλογή",
     "Change layout" : "Αλλαγή διάταξης",
     "Remove image" : "Αφαίρεση εικόνας"

@@ -8,7 +8,6 @@ OC.L10N.register(
     "Download" : "Prejmi",
     "Fullscreen" : "Celozaslonski način",
     "Edit" : "Uredi",
-    "Editing" : "Urejanje",
     "Choose" : "Izbor",
     "Remove image" : "Odstrani sliko"
 },

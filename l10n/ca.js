@@ -8,7 +8,6 @@ OC.L10N.register(
     "Download" : "Baixada",
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Edició",
-    "Editing" : "Edició",
     "Choose" : "Tria",
     "Change layout" : "Canviar diseny",
     "Remove image" : "Suprimir imatge"

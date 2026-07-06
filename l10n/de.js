@@ -22,7 +22,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Hier klicken, um das Album in einer ZIP-Datei herunterzuladen.",
     "Edit" : "Bearbeiten",
     "Finish editing" : "Bearbeitung beenden",
-    "Editing" : "Bearbeitung",
     "Add page" : "Seite hinzufügen",
     "Could not delete the page." : "Seite konnte nicht gelöscht werden",
     "Could not remove the image." : "Bild konnte nicht gelöscht werden",

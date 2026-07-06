@@ -22,7 +22,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Cliceáil chun albam a íoslódáil i gcomhad zip.",
     "Edit" : "Cuir in eagar",
     "Finish editing" : "Críochnaigh an eagarthóireacht",
-    "Editing" : "Eagarthóireacht",
     "Add page" : "Cuir leathanach leis",
     "Could not delete the page." : "Níorbh fhéidir an leathanach a scriosadh.",
     "Could not remove the image." : "Níorbh fhéidir an íomhá a bhaint.",
@@ -41,6 +40,7 @@ OC.L10N.register(
     "Change layout" : "Athraigh leagan amach",
     "Move page left" : "Bog an leathanach ar chlé",
     "Move page right" : "Bog an leathanach ar dheis",
+    "Drag to move" : "Tarraing le bogadh",
     "Remove text" : "Bain téacs",
     "Remove image" : "Bain íomhá"
 },

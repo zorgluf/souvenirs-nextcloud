@@ -8,7 +8,6 @@ OC.L10N.register(
     "Download" : "Sækja",
     "Fullscreen" : "Fylla skjáinn",
     "Edit" : "Breyta",
-    "Editing" : "Breytingar",
     "Choose" : "Velja",
     "Remove image" : "Fjarlægja mynd"
 },

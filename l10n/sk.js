@@ -12,7 +12,6 @@ OC.L10N.register(
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku",
     "Edit" : "Upraviť",
-    "Editing" : "Úprava",
     "Choose" : "Vybrať",
     "Change layout" : "Zmeniť rozloženie",
     "Remove image" : "Zmazať obrázok"

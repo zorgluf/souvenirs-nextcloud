@@ -22,7 +22,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "點擊以下載相簿為 zip 檔案。",
     "Edit" : "編輯",
     "Finish editing" : "結束編輯",
-    "Editing" : "編輯",
     "Add page" : "新增頁面",
     "Could not delete the page." : "無法刪除頁面。",
     "Could not remove the image." : "無法移除影像。",
@@ -41,6 +40,7 @@ OC.L10N.register(
     "Change layout" : "變更佈局",
     "Move page left" : "向左移動頁面",
     "Move page right" : "向右移動頁面",
+    "Drag to move" : "拖曳以移動",
     "Remove text" : "移除文字",
     "Remove image" : "移除圖片"
 },

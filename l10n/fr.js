@@ -16,9 +16,9 @@ OC.L10N.register(
     "Fullscreen" : "Plein écran",
     "Click to download album in a zip file." : "Cliquez pour télécharger l'album en fichier zip",
     "Edit" : "Modifier",
-    "Editing" : "Éditer",
     "Choose" : "Choisir",
     "Change layout" : "Modifier la disposition",
+    "Drag to move" : "Faites glisser pour déplacer",
     "Remove image" : "Supprimer la photo"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

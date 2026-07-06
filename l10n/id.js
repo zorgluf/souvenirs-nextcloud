@@ -15,8 +15,8 @@ OC.L10N.register(
     "Fullscreen" : "Layar penuh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Edit" : "Edit",
-    "Editing" : "Pengeditan",
     "Choose" : "Pilih",
+    "Drag to move" : "Seret untuk memindahkan",
     "Remove image" : "Hapus gambar"
 },
 "nplurals=1; plural=0;");

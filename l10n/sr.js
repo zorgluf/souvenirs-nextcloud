@@ -16,7 +16,6 @@ OC.L10N.register(
     "Fullscreen" : "Цео екран",
     "Click to download album in a zip file." : "Кликните да преузмете албум у zip фајлу.",
     "Edit" : "Измени",
-    "Editing" : "Уређивање",
     "Choose" : "Изаберите",
     "Change layout" : "Промени распоред",
     "Remove image" : "Уклони слику"

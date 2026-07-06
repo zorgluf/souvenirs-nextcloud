@@ -9,7 +9,6 @@ OC.L10N.register(
     "Download" : "다운로드",
     "Fullscreen" : "전체 화면",
     "Edit" : "편집",
-    "Editing" : "글 수정",
     "Choose" : "선택",
     "Remove image" : "그림 삭제"
 },

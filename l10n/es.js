@@ -16,7 +16,6 @@ OC.L10N.register(
     "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Pulse para descargar el álbum en un archivo zip.",
     "Edit" : "Editar",
-    "Editing" : "Editando",
     "Choose" : "Seleccione",
     "Change layout" : "Cambiar diseño",
     "Remove image" : "Borrar imagen"

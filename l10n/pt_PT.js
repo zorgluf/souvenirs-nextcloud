@@ -19,7 +19,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Clique para baixar o álbum em um arquivo zip.",
     "Edit" : "Editar",
     "Finish editing" : "Concluir a edição",
-    "Editing" : "A editar",
     "Could not delete the page." : "Não foi possível excluir a página.",
     "Could not remove the image." : "Não foi possível remover a imagem.",
     "Could not change the layout." : "Não foi possível alterar o leiaute.",
@@ -35,6 +34,7 @@ OC.L10N.register(
     "Change layout" : "Alterar esquema",
     "Move page left" : "Mover a página para a esquerda",
     "Move page right" : "Mover a página para a direita",
+    "Drag to move" : "Arraste para mover",
     "Remove text" : "Remover texto",
     "Remove image" : "Remover imagem"
 },

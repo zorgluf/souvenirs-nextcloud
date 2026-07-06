@@ -16,10 +16,10 @@ OC.L10N.register(
     "Fullscreen" : "تمام‌صفحه",
     "Click to download album in a zip file." : "برای دانلود آلبوم به صورت فایل فشرده کلیک کنید",
     "Edit" : "ویرایش",
-    "Editing" : "ویرایش",
     "Choose" : "انتخاب",
     "Add image" : "تصویر اضافه کنید",
     "Change layout" : "تغییر چیدمان",
+    "Drag to move" : "کشیدن برای جابجایی",
     "Remove image" : "تصویر پاک شود"
 },
 "nplurals=2; plural=(n > 1);");

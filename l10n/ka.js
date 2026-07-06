@@ -6,7 +6,6 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Download",
     "Edit" : "Edit",
-    "Editing" : "Editing",
     "Choose" : "არჩევა"
 },
 "nplurals=2; plural=(n!=1);");

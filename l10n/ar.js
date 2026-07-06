@@ -16,7 +16,6 @@ OC.L10N.register(
     "Fullscreen" : "وضع ملء الشاشة",
     "Click to download album in a zip file." : "إضغط لتنزيل الألبوم في ملف zip.",
     "Edit" : "تحرير",
-    "Editing" : "جارِ التعديل",
     "Choose" : "إختر",
     "Change layout" : "غيِّر مُخطّط العرض",
     "Remove image" : "إزالة الصورة"

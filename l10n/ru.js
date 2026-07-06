@@ -14,7 +14,6 @@ OC.L10N.register(
     "Fullscreen" : "Полный экран",
     "Click to download album in a zip file." : "Нажмите чтобы скачать альбом в виде zip файла.",
     "Edit" : "Редактировать",
-    "Editing" : "Редактирование",
     "Choose" : "Выберите",
     "Change layout" : "Изменить макет",
     "Remove image" : "Удалить"

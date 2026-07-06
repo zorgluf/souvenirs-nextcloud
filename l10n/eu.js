@@ -14,7 +14,6 @@ OC.L10N.register(
     "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
     "Edit" : "Editatu",
-    "Editing" : "Edizioa",
     "Choose" : "Aukeratu",
     "Change layout" : "Aldatu diseinua",
     "Remove image" : "Kendu irudia"

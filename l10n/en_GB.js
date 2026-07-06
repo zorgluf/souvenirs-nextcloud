@@ -17,7 +17,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Click to download album in a zip file.",
     "Edit" : "Edit",
     "Finish editing" : "Finish editing",
-    "Editing" : "Editing",
     "Choose" : "Choose",
     "Change layout" : "Change layout",
     "Remove image" : "Remove image"

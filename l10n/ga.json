@@ -20,7 +20,6 @@
     "Click to download album in a zip file." : "Cliceáil chun albam a íoslódáil i gcomhad zip.",
     "Edit" : "Cuir in eagar",
     "Finish editing" : "Críochnaigh an eagarthóireacht",
-    "Editing" : "Eagarthóireacht",
     "Add page" : "Cuir leathanach leis",
     "Could not delete the page." : "Níorbh fhéidir an leathanach a scriosadh.",
     "Could not remove the image." : "Níorbh fhéidir an íomhá a bhaint.",
@@ -39,6 +38,7 @@
     "Change layout" : "Athraigh leagan amach",
     "Move page left" : "Bog an leathanach ar chlé",
     "Move page right" : "Bog an leathanach ar dheis",
+    "Drag to move" : "Tarraing le bogadh",
     "Remove text" : "Bain téacs",
     "Remove image" : "Bain íomhá"
 },"pluralForm" :"nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);"

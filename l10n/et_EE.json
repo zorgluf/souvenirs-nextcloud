@@ -20,7 +20,6 @@
     "Click to download album in a zip file." : "Klõpsa, et laadida album alla zip-failina.",
     "Edit" : "Muuda",
     "Finish editing" : "Lõpeta muutmine",
-    "Editing" : "Muutmisel",
     "Add page" : "Lisa leht",
     "Could not delete the page." : "Selle lehe kustutamine ei õnnestunud.",
     "Could not remove the image." : "Selle pildi eemaldamine ei õnnestunud",
@@ -39,6 +38,7 @@
     "Change layout" : "Muuda küljendust",
     "Move page left" : "Tõsta leht vasakule",
     "Move page right" : "Tõsta leht paremale",
+    "Drag to move" : "Teisaldamiseks lohista",
     "Remove text" : "Eemalda tekst",
     "Remove image" : "Eemalda pilt"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

@@ -8,8 +8,8 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "ດາວໂຫລດ",
     "Edit" : "ແກ້ໄຂ",
-    "Editing" : "Editing",
     "Choose" : "ເລືອກ",
-    "Change layout" : "ປ່ຽນໂຄງຮ່າງ"
+    "Change layout" : "ປ່ຽນໂຄງຮ່າງ",
+    "Drag to move" : "ລາກເພື່ອຍ້າຍ"
 },
 "nplurals=1; plural=0;");

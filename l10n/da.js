@@ -8,7 +8,6 @@ OC.L10N.register(
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
     "Edit" : "Redigér",
-    "Editing" : "Redigering",
     "Choose" : "Vælg",
     "Change layout" : "Ændre layout",
     "Remove image" : "Fjern billede"

@@ -16,9 +16,9 @@ OC.L10N.register(
     "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Prema para descargar o álbum nun arquivo zip.",
     "Edit" : "Editar",
-    "Editing" : "Editando",
     "Choose" : "Escoller",
     "Change layout" : "Cambiar o deseño",
+    "Drag to move" : "Arrastrar para mover",
     "Remove image" : "Retirar a imaxe"
 },
 "nplurals=2; plural=(n != 1);");

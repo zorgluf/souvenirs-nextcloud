@@ -22,7 +22,6 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Klõpsa, et laadida album alla zip-failina.",
     "Edit" : "Muuda",
     "Finish editing" : "Lõpeta muutmine",
-    "Editing" : "Muutmisel",
     "Add page" : "Lisa leht",
     "Could not delete the page." : "Selle lehe kustutamine ei õnnestunud.",
     "Could not remove the image." : "Selle pildi eemaldamine ei õnnestunud",
@@ -41,6 +40,7 @@ OC.L10N.register(
     "Change layout" : "Muuda küljendust",
     "Move page left" : "Tõsta leht vasakule",
     "Move page right" : "Tõsta leht paremale",
+    "Drag to move" : "Teisaldamiseks lohista",
     "Remove text" : "Eemalda tekst",
     "Remove image" : "Eemalda pilt"
 },

@@ -8,7 +8,6 @@ OC.L10N.register(
     "Download" : "Sider",
     "Fullscreen" : "Plein écran",
     "Edit" : "Ẓreg",
-    "Editing" : "Asiẓreg",
     "Choose" : "Fren",
     "Change layout" : "Snifel taneγruft"
 },

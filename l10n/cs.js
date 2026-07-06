@@ -16,7 +16,6 @@ OC.L10N.register(
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
     "Edit" : "Upravit",
-    "Editing" : "Upravování",
     "Choose" : "Vybrat",
     "Change layout" : "Změnit rozvržení",
     "Remove image" : "Odebrat obrázek"

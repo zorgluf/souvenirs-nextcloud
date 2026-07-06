@@ -14,7 +14,6 @@ OC.L10N.register(
     "Fullscreen" : "Toʻliq ekran",
     "Click to download album in a zip file." : "Albomni zip faylda yuklab olish uchun bosing.",
     "Edit" : "Tahrirlash",
-    "Editing" : "Tahrirlash",
     "Choose" : "Tanlang",
     "Change layout" : "Tartibni o'zgartirish"
 },

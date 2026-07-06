@@ -7,7 +7,6 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
     "Edit" : "Editează",
-    "Editing" : "Se modifică",
     "Choose" : "Alege",
     "Remove image" : "Înlătură imagine"
 },

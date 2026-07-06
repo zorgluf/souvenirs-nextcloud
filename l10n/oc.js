@@ -11,7 +11,6 @@ OC.L10N.register(
     "Download" : "Telecargar",
     "Fullscreen" : "Ecran complèt",
     "Edit" : "Modificar",
-    "Editing" : "Edicion",
     "Choose" : "Causir",
     "Remove image" : "Suprimir imatge"
 },

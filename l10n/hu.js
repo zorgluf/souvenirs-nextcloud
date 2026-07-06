@@ -15,7 +15,6 @@ OC.L10N.register(
     "Fullscreen" : "Teljes képernyő",
     "Click to download album in a zip file." : "Kattintson az album ZIP-fájlban való letöltéséhez.",
     "Edit" : "Szerkesztés",
-    "Editing" : "Szerkesztés",
     "Choose" : "Válasszon",
     "Change layout" : "Elrendezés módosítása",
     "Remove image" : "Kép eltávolítása"

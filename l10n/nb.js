@@ -16,7 +16,6 @@ OC.L10N.register(
     "Fullscreen" : "Fullskjerm",
     "Click to download album in a zip file." : "Klikk for å laste ned album i en zip-fil.",
     "Edit" : "Rediger",
-    "Editing" : "Rediger",
     "Choose" : "Velg",
     "Change layout" : "Endre utforming",
     "Remove image" : "Fjern bilde"

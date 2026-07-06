@@ -15,8 +15,8 @@ OC.L10N.register(
     "Fullscreen" : "Бүтэн дэлгэц",
     "Click to download album in a zip file." : "Цомгийг zip файлаар татахын тулд дарна уу.",
     "Edit" : "”®”©—Ä—á–ª”©—Ö",
-    "Editing" : "Засварлаж байна",
     "Choose" : "–°–æ–Ω–≥–æ—Ö",
+    "Drag to move" : "Зөөхийн тулд чирнэ үү",
     "Remove image" : "Зургийг хасах"
 },
 "nplurals=2; plural=(n != 1);");

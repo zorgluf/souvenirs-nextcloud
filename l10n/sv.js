@@ -16,9 +16,9 @@ OC.L10N.register(
     "Fullscreen" : "Fullskärm",
     "Click to download album in a zip file." : "Klicka för att ladda ner albumet i en zip-fil.",
     "Edit" : "Redigera",
-    "Editing" : "Ändrar",
     "Choose" : "Välj",
     "Change layout" : "Ändra layout",
+    "Drag to move" : "Dra för att flytta",
     "Remove image" : "Ta bort bild"
 },
 "nplurals=2; plural=(n != 1);");

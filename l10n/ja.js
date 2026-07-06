@@ -8,8 +8,8 @@ OC.L10N.register(
     "Download" : "ダウンロード",
     "Fullscreen" : "全画面",
     "Edit" : "編集",
-    "Editing" : "編集中",
     "Choose" : "選択",
+    "Drag to move" : "ドラッグして移動",
     "Remove image" : "画像を削除"
 },
 "nplurals=1; plural=0;");

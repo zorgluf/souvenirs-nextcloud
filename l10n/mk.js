@@ -9,7 +9,6 @@ OC.L10N.register(
     "Download" : "Преземи",
     "Fullscreen" : "Цел екран",
     "Edit" : "Уреди",
-    "Editing" : "Уредување",
     "Choose" : "Избери",
     "Remove image" : "Отстрани ја фотографијата"
 },

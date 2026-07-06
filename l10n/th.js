@@ -6,7 +6,6 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "ดาวน์โหลด",
     "Edit" : "แก้ไข",
-    "Editing" : "กำลังแก้ไข",
     "Choose" : "เลือก",
     "Remove image" : "ลบรูปภาพ"
 },
