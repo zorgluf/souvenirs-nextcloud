@@ -27,6 +27,7 @@ OC.L10N.register(
     "Could not remove the image." : "Selle pildi eemaldamine ei õnnestunud",
     "Could not change the layout." : "Paigutuse muutmine ei õnnestunud.",
     "Could not move the page." : "Selle lehe teisaldamine ei õnnestunud.",
+    "Could not move the element." : "Elemendi teisaldamine ei õnnestunud.",
     "Could not create the page." : "Selle lehe loomine ei õnnestunud.",
     "Could not add the text." : "Selle teksti lisamine ei õnnestunud.",
     "Choose an image" : "Vali pilt",

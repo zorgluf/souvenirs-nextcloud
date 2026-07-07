@@ -19,6 +19,7 @@ OC.L10N.register(
     "Finish editing" : "Finish editing",
     "Choose" : "Choose",
     "Change layout" : "Change layout",
+    "Drag to move" : "Drag to move",
     "Remove image" : "Remove image"
 },
 "nplurals=2; plural=(n != 1);");

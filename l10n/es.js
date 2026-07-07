@@ -18,6 +18,7 @@ OC.L10N.register(
     "Edit" : "Editar",
     "Choose" : "Seleccione",
     "Change layout" : "Cambiar diseño",
+    "Drag to move" : "Arrastrar para mover",
     "Remove image" : "Borrar imagen"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

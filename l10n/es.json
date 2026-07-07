@@ -16,6 +16,7 @@
     "Edit" : "Editar",
     "Choose" : "Seleccione",
     "Change layout" : "Cambiar diseño",
+    "Drag to move" : "Arrastrar para mover",
     "Remove image" : "Borrar imagen"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

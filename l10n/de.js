@@ -27,6 +27,7 @@ OC.L10N.register(
     "Could not remove the image." : "Bild konnte nicht gelöscht werden",
     "Could not change the layout." : "Layout konnte nicht geändert werden",
     "Could not move the page." : "Seite konnte nicht verschoben werden.",
+    "Could not move the element." : "Das Element konnte nicht verschoben werden.",
     "Could not create the page." : "Seite konnte nicht erstellt werden.",
     "Could not add the text." : "Text konnte nicht hinzugefügt werden.",
     "Choose an image" : "Bild auswählen",
@@ -40,6 +41,7 @@ OC.L10N.register(
     "Change layout" : "Layout ändern",
     "Move page left" : "Seite nach links verschieben",
     "Move page right" : "Seite nach rechts verschieben",
+    "Drag to move" : "Ziehen zum Verschieben",
     "Remove text" : "Text entfernen",
     "Remove image" : "Bild entfernen"
 },
