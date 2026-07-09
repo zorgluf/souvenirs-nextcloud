@@ -3,7 +3,7 @@ OC.L10N.register(
     {
     "Souvenirs" : "Сувеніри",
     "Loading album list…" : "Завантаження списку альбомів...",
-    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбом не доступний. Вам потрібно буде завантажити їх з додатку Сувеніри для Android (https://github.com/zorgluf/souvenirs-android).",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбом не доступний. Вам потрібно буде завантажити їх із застосунку Souvenirs для Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Новий альбом",
     "Album name" : "Назва альбому",
     "Date" : "Дата",
