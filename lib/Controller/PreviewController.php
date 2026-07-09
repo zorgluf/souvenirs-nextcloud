@@ -38,12 +38,12 @@ class PreviewController extends Controller {
 
 	/**
 	 * get asset
-	 * @NoAdminRequiredrealFilePath
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get(urldecode($apath)));
+		$album = Album::withFolder($userFolder->get($apath));
 		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
 		$node = $this->rootFolder->get($realFilePath);
 		$response = new StreamResponse($node->fopen("r"));
@@ -77,6 +77,7 @@ class PreviewController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
+	 * @BruteForceProtection(action=souvenirs_public)
 	 *
 	 * Sends a large preview of the requested file for public share
 	 *
@@ -91,12 +92,14 @@ class PreviewController extends Controller {
 		//check token and get album path
 		$share = $this->shareMapper->findByToken($token);
 		if (is_null($share)) {
-			return new JSONResponse(
+			$response = new JSONResponse(
 				[
 					'message' => "Album do not exists.",
 					'success' => false
 				], Http::STATUS_NOT_FOUND
 			);
+			$response->throttle();
+			return $response;
 		}
 		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
 		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
@@ -111,20 +114,23 @@ class PreviewController extends Controller {
 
 	/**
 	 * get public asset
-	 * @NoAdminRequiredrealFilePath
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
+	 * @BruteForceProtection(action=souvenirs_public)
 	 */
 	public function getPublicAsset($token, $file) {
 		//check token and get album path
 		$share = $this->shareMapper->findByToken($token);
 		if (is_null($share)) {
-			return new JSONResponse(
+			$response = new JSONResponse(
 				[
 					'message' => "Album do not exists.",
 					'success' => false
 				], Http::STATUS_NOT_FOUND
 			);
+			$response->throttle();
+			return $response;
 		}
 		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
 		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);

@@ -66,13 +66,12 @@ class Api2Controller extends ApiController {
 		$albumsFolder = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
 		$albumList = AlbumList::getInstance($albumsFolder);
 		$album = $albumList->createAlbum($id);
-		$this->albumMapper->createAlbum($this->userId, $id, $album->getAlbumPath(), 'Just created');
-		if (!is_null($album)) {
-			return new JSONResponse($album->toArray());
-		} else {
-			//album exists
+		if (is_null($album)) {
+			//album already exists
 			return new JSONResponse(array(), Http::STATUS_CONFLICT);
 		}
+		$this->albumMapper->createAlbum($this->userId, $id, $album->getAlbumPath(), 'Just created');
+		return new JSONResponse($album->toArray());
 	}
 
 	/**
@@ -426,7 +425,11 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function createShare($albumId) {
-		
+		//make sure the album actually exists for this user before sharing it
+		$album_db = $this->albumMapper->findByAlbumId($this->userId, $albumId);
+		if (is_null($album_db)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
 		$results = $this->shareMapper->createShare($this->userId,$albumId);
 		//get shareUrl
 		$shareUrl = $this->urlGen->linkToRouteAbsolute('souvenirs.public.show',array('token' => $results['share']['token']));

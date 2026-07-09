@@ -6,14 +6,18 @@ namespace OCA\Souvenirs\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
+use OCP\Security\ISecureRandom;
 use OCA\Souvenirs\Db\Share;
 
 define("SHARE_TABLE", 'souvenirs_shares');
 
 class ShareMapper extends QBMapper {
 
-    public function __construct(IDBConnection $db) {
+    private $secureRandom;
+
+    public function __construct(IDBConnection $db, ISecureRandom $secureRandom) {
         parent::__construct($db, SHARE_TABLE);
+        $this->secureRandom = $secureRandom;
     }
 
 
@@ -109,13 +113,8 @@ class ShareMapper extends QBMapper {
     }
 
     private function generateRandomString($length = 10) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
+        //use Nextcloud's cryptographically secure RNG for share tokens
+        return $this->secureRandom->generate($length, ISecureRandom::CHAR_ALPHANUMERIC);
     }
 
 }

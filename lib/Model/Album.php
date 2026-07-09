@@ -378,9 +378,12 @@ class Album {
     }
 
     public function setValues($valuesArray) {
+        //structural keys managed through dedicated endpoints / immutable at creation
+        $protectedKeys = array("pages", "id");
         if (is_array($valuesArray)) {
             foreach ($valuesArray as $key => $value) {
-                if ((!is_null($value)) && (substr($key,0,1) !== "_")) {
+                if ((!is_null($value)) && (substr($key,0,1) !== "_")
+                    && (!in_array($key, $protectedKeys, true))) {
                     $this->setContent($key,$value);
                 }
             }
