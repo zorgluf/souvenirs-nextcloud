@@ -34,7 +34,7 @@ Albums are stored as plain folders and files on your own Nextcloud. No third-par
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/11.png</screenshot>
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/12.png</screenshot>
     <dependencies>
-        <nextcloud min-version="31" max-version="33"/>
+        <nextcloud min-version="31" max-version="34"/>
     </dependencies>
     <navigations>
         <navigation>
