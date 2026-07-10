@@ -11,5 +11,12 @@ export default defineConfig({
         setupFiles: ['./tests/frontend/setup.js'],
         include: ['src/**/*.{test,spec}.js'],
         globals: true,
+        server: {
+            deps: {
+                // @nextcloud/vue ships ESM that imports its own .css assets;
+                // inline it so Vite transforms those imports during tests.
+                inline: [/@nextcloud\/vue/],
+            },
+        },
     },
 })

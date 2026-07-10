@@ -28,7 +28,8 @@
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
             v-bind:is-last="index === pages.length - 1"
-            v-on:remove-element="onRemoveElement" v-on:add-image="onAddImage"
+            v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
+            v-on:add-image="onAddImage"
             v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
             v-on:add-page="onAddPage" v-on:move-page="onMovePage"
             v-on:element-drop="onElementDrop">
@@ -77,7 +78,7 @@ import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar,
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../utils/albumEdit.js'
+import { setElementText, setElementGeometry, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../api/albumApi.js'
@@ -420,6 +421,19 @@ export default {
                 .catch(error => {
                     showError(t("souvenirs","Could not remove the image."));
                 });
+        },
+        onResizeElement: function(pageId, elementId, geometry) {
+            // Patch only the resized element's geometry (preserving every other
+            // album/page/element field), then persist that page.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = setElementGeometry(this.pages[index], elementId, geometry);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not resize the element."));
+            });
         },
         onCycleLayout: function(pageId) {
             // Switch the page to the next layout available for its element count.

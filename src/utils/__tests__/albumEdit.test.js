@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
+import { setElementText, setElementGeometry, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -310,5 +310,74 @@ describe('addElement', () => {
         const page = { id: 'p', elements: [] }
         addElement(page, buildImageElement({ name: 'b.jpg', size: 2, mime: 'image/jpeg' }))
         expect(page.elements).toHaveLength(0)
+    })
+})
+
+describe('setElementGeometry', () => {
+    const makePage = () => ({
+        id: 'page-1',
+        // A field this app does not know about — must survive editing.
+        customPageField: 'keep-me',
+        elements: [
+            {
+                id: 'el-1',
+                class: 'ImageElement',
+                image: 'data/a.jpg',
+                text: 'caption',
+                top: 0,
+                left: 0,
+                right: 100,
+                bottom: 50,
+                zoom: 120,
+                // Unknown per-element field that must be preserved.
+                androidOnlyField: 42,
+            },
+            {
+                id: 'el-2',
+                class: 'TextElement',
+                top: 50,
+                left: 0,
+                right: 100,
+                bottom: 100,
+            },
+        ],
+    })
+
+    it('replaces only the targeted element geometry', () => {
+        const result = setElementGeometry(makePage(), 'el-1', { top: 10, left: 20, right: 80, bottom: 40 })
+        expect(result.elements[0]).toMatchObject({ top: 10, left: 20, right: 80, bottom: 40 })
+        expect(result.elements[1]).toMatchObject({ top: 50, left: 0, right: 100, bottom: 100 })
+    })
+
+    it('preserves all other element fields, including unknown ones', () => {
+        const result = setElementGeometry(makePage(), 'el-1', { top: 10, left: 20, right: 80, bottom: 40 })
+        const resized = result.elements[0]
+        expect(resized.image).toBe('data/a.jpg')
+        expect(resized.text).toBe('caption')
+        expect(resized.zoom).toBe(120)
+        expect(resized.androidOnlyField).toBe(42)
+    })
+
+    it('preserves unknown page-level fields and the full elements set', () => {
+        const result = setElementGeometry(makePage(), 'el-1', { top: 10, left: 20, right: 80, bottom: 40 })
+        expect(result.id).toBe('page-1')
+        expect(result.customPageField).toBe('keep-me')
+        expect(result.elements).toHaveLength(2)
+    })
+
+    it('does not mutate the original page or its elements', () => {
+        const page = makePage()
+        setElementGeometry(page, 'el-1', { top: 10, left: 20, right: 80, bottom: 40 })
+        expect(page.elements[0]).toMatchObject({ top: 0, left: 0, right: 100, bottom: 50 })
+    })
+
+    it('is a no-op when the element id is not found', () => {
+        const result = setElementGeometry(makePage(), 'missing', { top: 10, left: 20, right: 80, bottom: 40 })
+        expect(result.elements[0]).toMatchObject({ top: 0, left: 0, right: 100, bottom: 50 })
+        expect(result.elements[1]).toMatchObject({ top: 50, left: 0, right: 100, bottom: 100 })
+    })
+
+    it('tolerates a page without an elements array', () => {
+        expect(setElementGeometry({ id: 'p' }, 'el-1', { top: 0, left: 0, right: 100, bottom: 100 }).elements).toEqual([])
     })
 })

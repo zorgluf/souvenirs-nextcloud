@@ -7,7 +7,7 @@
     v-on:dragstart="onDragStart" v-on:dragend="onDragEnd"
     v-on:dragenter="onDragEnter" v-on:dragleave="onDragLeave"
     v-on:dragover="onDragOver" v-on:drop="onDrop"
-    v-bind:style="'top:'+(sTop+elementMargin).toString()+'%;left:'+(sLeft+elementMargin).toString()+'%;width:'+(sRight-sLeft-2*elementMargin).toString()+'%;height:'+(sBottom-sTop-2*elementMargin).toString()+'%;--image-src-url:url(\''+ sImageSrc +'\')'">
+    v-bind:style="rootStyle">
 		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
 		</button>
@@ -17,6 +17,15 @@
 				<CursorMove :size="20" />
 			</template>
 		</NcButton>
+		<template v-if="isResizable">
+			<div v-for="corner in resizeCorners" v-bind:key="'resize-'+corner"
+				v-bind:class="['s-element-resize-handle', 's-element-resize-handle--'+corner]"
+				:title="sDragToResize"
+				v-on:pointerdown="onResizeStart($event, corner)"
+				v-on:pointermove="onResizeMove"
+				v-on:pointerup="onResizeEnd"
+				v-on:pointercancel="onResizeCancel"></div>
+		</template>
 		<EditableText v-if="sText || editMode" class="s-element-text resize"
 			:value="sText" :editable="editMode" :auto-fit="true"
 			@save="onTextSave" />
@@ -105,6 +114,14 @@ export default {
             // suppresses caret placement / text selection in the contenteditable.
             "dragSuppressed": false,
             "sDragToMove": t("souvenirs","Drag to move"),
+            "sDragToResize": t("souvenirs","Drag to resize"),
+            "resizeCorners": ['nw', 'ne', 'sw', 'se'],
+            // State of the corner drag in progress (pointer id, start position,
+            // page size in px, original geometry), null when not resizing.
+            "resizing": null,
+            // Geometry shown while a corner is being dragged; the committed
+            // props (sTop/...) take over again once the resize is released.
+            "resizePreview": null,
             // dragenter/dragleave also fire when moving over children, so the
             // drag-over highlight is tracked with an enter/leave counter.
             "dragOverCount": 0,
@@ -210,6 +227,22 @@ export default {
             // and unknown elements have no visual box to grab).
             return this.editMode && this.isRemovable;
         },
+        'isResizable': function() {
+            // Any tile that can be dragged can also be resized (issue #20).
+            return this.isDraggable;
+        },
+        'displayGeometry': function() {
+            // Live preview while a corner is being dragged, committed props otherwise.
+            return this.resizePreview != null ? this.resizePreview
+                : { top: this.sTop, bottom: this.sBottom, left: this.sLeft, right: this.sRight };
+        },
+        'rootStyle': function() {
+            var g = this.displayGeometry;
+            return 'top:' + (g.top + this.elementMargin) + '%;left:' + (g.left + this.elementMargin)
+                + '%;width:' + (g.right - g.left - 2 * this.elementMargin)
+                + '%;height:' + (g.bottom - g.top - 2 * this.elementMargin)
+                + "%;--image-src-url:url('" + this.sImageSrc + "')";
+        },
         'removeTitle': function() {
             return (this.sClass != null && this.sClass.endsWith('TextElement'))
                 ? t("souvenirs","Remove text")
@@ -313,8 +346,69 @@ export default {
                 this.$refs.eldiv.setAttribute("draggable", String(this.isDraggable && !this.dragSuppressed));
             }
         },
+        onResizeStart: function(event, corner) {
+            if (!this.isResizable || this.resizing != null) {
+                return;
+            }
+            // The press belongs to the resize: keep it from starting an HTML5
+            // drag of the tile and from reaching onRootMouseDown.
+            event.preventDefault();
+            event.stopPropagation();
+            var page = this.$refs.eldiv ? this.$refs.eldiv.parentElement : null;
+            if (page == null) {
+                return;
+            }
+            // Element geometry is in page percentages, so pointer deltas are
+            // converted against the page box (the element's positioned parent).
+            var rect = page.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) {
+                return;
+            }
+            this.resizing = {
+                corner: corner,
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                pageWidth: rect.width,
+                pageHeight: rect.height,
+                orig: { top: this.sTop, bottom: this.sBottom, left: this.sLeft, right: this.sRight },
+            };
+            // Route the whole gesture to the handle, even when the pointer
+            // leaves it (or the element) while dragging.
+            if (event.target.setPointerCapture) {
+                event.target.setPointerCapture(event.pointerId);
+            }
+        },
+        onResizeMove: function(event) {
+            if (this.resizing == null || event.pointerId !== this.resizing.pointerId) {
+                return;
+            }
+            this.resizePreview = resizedGeometry(this.resizing, event.clientX, event.clientY);
+        },
+        onResizeEnd: function(event) {
+            if (this.resizing == null || event.pointerId !== this.resizing.pointerId) {
+                return;
+            }
+            var geometry = resizedGeometry(this.resizing, event.clientX, event.clientY);
+            var orig = this.resizing.orig;
+            this.resizing = null;
+            this.resizePreview = null;
+            if (geometry.top !== orig.top || geometry.bottom !== orig.bottom
+                || geometry.left !== orig.left || geometry.right !== orig.right) {
+                // Bubble the new geometry up with this element's id so the
+                // album can patch and persist it (sId is the element id here).
+                this.$emit("resize-element", this.sId, geometry);
+            }
+        },
+        onResizeCancel: function(event) {
+            if (this.resizing == null || event.pointerId !== this.resizing.pointerId) {
+                return;
+            }
+            this.resizing = null;
+            this.resizePreview = null;
+        },
         onDragStart: function(event) {
-            if (!this.isDraggable || this.dragSuppressed) {
+            if (!this.isDraggable || this.dragSuppressed || this.resizing != null) {
                 event.preventDefault();
                 return;
             }
@@ -406,6 +500,44 @@ function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, 
     return style;
 }
 
+// Tiles cannot be resized below this, so the corner handles stay grabbable
+// (in page percentages, i.e. 5% of the page side).
+const MIN_ELEMENT_SIZE_PCT = 5;
+
+// Geometry (in page percentages) of an ongoing corner resize: the two edges
+// meeting at the grabbed corner follow the pointer, clamped to the page bounds
+// and to the minimum tile size; the opposite edges stay put.
+function resizedGeometry(resizing, clientX, clientY) {
+    var dx = (clientX - resizing.startX) * 100 / resizing.pageWidth;
+    var dy = (clientY - resizing.startY) * 100 / resizing.pageHeight;
+    var g = {
+        top: resizing.orig.top,
+        bottom: resizing.orig.bottom,
+        left: resizing.orig.left,
+        right: resizing.orig.right,
+    };
+    if (resizing.corner === 'nw' || resizing.corner === 'ne') {
+        g.top = clampPct(resizing.orig.top + dy, 0, g.bottom - MIN_ELEMENT_SIZE_PCT);
+    } else {
+        g.bottom = clampPct(resizing.orig.bottom + dy, g.top + MIN_ELEMENT_SIZE_PCT, 100);
+    }
+    if (resizing.corner === 'nw' || resizing.corner === 'sw') {
+        g.left = clampPct(resizing.orig.left + dx, 0, g.right - MIN_ELEMENT_SIZE_PCT);
+    } else {
+        g.right = clampPct(resizing.orig.right + dx, g.left + MIN_ELEMENT_SIZE_PCT, 100);
+    }
+    return g;
+}
+
+function clampPct(value, min, max) {
+    if (max < min) {
+        // A tile already smaller than the minimum (e.g. hand-written album.json)
+        // can only grow, never shrink further.
+        max = min;
+    }
+    return Math.round(Math.min(Math.max(value, min), max) * 100) / 100;
+}
+
 function basename(path) {
    return path.split('/').reverse()[0];
 }
@@ -452,6 +584,34 @@ function basename(path) {
 .s-element-drag-handle :deep(*) {
 	cursor: grab;
 }
+
+/* Corner resize handles (edit mode). Above the drag/delete buttons (z 8) so
+   the small overlap in the top corners resolves to the resize cursor; inside
+   the tile because .s-element clips its overflow. touch-action:none keeps the
+   browser from turning the pointer gesture into a scroll on touch screens. */
+.s-element-resize-handle {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	z-index: 9;
+	/* The element wrapper disables pointer events; handles must opt back in. */
+	pointer-events: all;
+	touch-action: none;
+	background-color: var(--color-primary-element, #0082c9);
+	border: 2px solid var(--color-primary-element-text, #ffffff);
+	border-radius: 3px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+	opacity: 0.9;
+}
+
+.s-element-resize-handle:hover {
+	opacity: 1;
+}
+
+.s-element-resize-handle--nw { top: 0; left: 0; cursor: nwse-resize; }
+.s-element-resize-handle--ne { top: 0; right: 0; cursor: nesw-resize; }
+.s-element-resize-handle--sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.s-element-resize-handle--se { bottom: 0; right: 0; cursor: nwse-resize; }
 
 /* Valid drop target under the dragged tile. Inset dashed frame (the tile clips
    its overflow, so an offset outline would be cut on the page edges). */
