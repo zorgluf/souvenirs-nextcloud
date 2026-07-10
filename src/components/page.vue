@@ -204,6 +204,10 @@ export default {
     },
     mounted: function() {
         fitText();
+        // The displayedPage watcher only fires on navigation, so without this
+        // the initially displayed page would stay unfocused until the user
+        // leaves it and comes back (no photosphere rotation / video autoplay).
+        this.isFocus = (this.displayedPage == this.sNum);
     }
 }
 
