@@ -55,6 +55,15 @@ describe('selement corner resize', () => {
         expect(mountTile({ sClass: 'AudioElement' }).findAll('.s-element-resize-handle')).toHaveLength(0)
     })
 
+    it('keeps paint elements static: no resize handles, no drag handle, not draggable', () => {
+        const wrapper = mountTile({ sClass: 'PaintElement' })
+        expect(wrapper.findAll('.s-element-resize-handle')).toHaveLength(0)
+        expect(wrapper.find('.s-element-drag-handle').exists()).toBe(false)
+        expect(wrapper.attributes('draggable')).toBe('false')
+        // Still removable: the delete button stays.
+        expect(wrapper.find('.s-element-delete').exists()).toBe(true)
+    })
+
     it('emits resize-element with the new geometry after dragging the SE corner', async () => {
         const wrapper = mountTile()
         await dragHandle(wrapper, 'se', { x: 500, y: 500 }, { x: 700, y: 600 })

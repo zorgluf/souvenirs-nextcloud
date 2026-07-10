@@ -223,9 +223,14 @@ export default {
                 || this.sClass.endsWith('TextElement'));
         },
         'isDraggable': function() {
-            // The same visible tiles that can be removed can be dragged (Audio
-            // and unknown elements have no visual box to grab).
-            return this.editMode && this.isRemovable;
+            // The visible tiles that can be removed can be dragged (Audio and
+            // unknown elements have no visual box to grab) — except paint
+            // elements, which are static foregrounds: they keep their position
+            // (as in the page layouts) and never move or resize. Not being
+            // draggable also keeps them pointer-transparent, so they cannot be
+            // a drop target either.
+            return this.editMode && this.isRemovable
+                && !this.sClass.endsWith('PaintElement');
         },
         'isResizable': function() {
             // Any tile that can be dragged can also be resized (issue #20).
