@@ -155,6 +155,29 @@ export function swapElements(page, elementIdA, elementIdB) {
 
 /**
  * Return a copy of `page` in which the element identified by `elementId` has its
+ * geometry (top/left/right/bottom, in page percentages) replaced. All other fields
+ * of the page and of every element (including ones this app does not know about)
+ * are preserved untouched. Used by the corner-handle resize (issue #20).
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @param {string} elementId - the `id` of the element being resized
+ * @param {{top: number, left: number, right: number, bottom: number}} geometry
+ * @returns {object} a new page object with the single change applied
+ */
+export function setElementGeometry(page, elementId, { top, left, right, bottom }) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return {
+        ...page,
+        elements: elements.map(element =>
+            element.id === elementId
+                ? { ...element, top, left, right, bottom }
+                : element,
+        ),
+    }
+}
+
+/**
+ * Return a copy of `page` in which the element identified by `elementId` has its
  * `text` set to `newText`. All other fields of the page and of every element
  * (including ones this app does not know about) are preserved untouched.
  *

@@ -14,7 +14,7 @@
                 v-bind:s-video="element.video" v-bind:is-focus="isFocus"
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
                 v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
-                v-on:remove-element="onRemoveElement"
+                v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
                 v-bind:s-page-id="sId" v-on:element-drop="onElementDrop"
                 v-bind:element-margin="elementMargin">
 	</selement>
@@ -149,6 +149,10 @@ export default {
       onRemoveElement: function(elementId) {
         // Re-emit with this page's id (sId) so the album can locate the element.
         this.$emit("remove-element", this.sId, elementId);
+      },
+      onResizeElement: function(elementId, geometry) {
+        // Re-emit with this page's id (sId) so the album can locate the element.
+        this.$emit("resize-element", this.sId, elementId, geometry);
       },
       onElementDrop: function(srcPageId, srcElementId, destElementId) {
         // Drop landed on one of this page's elements: re-emit with this page as
