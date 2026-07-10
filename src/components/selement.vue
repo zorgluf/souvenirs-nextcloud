@@ -141,6 +141,13 @@ export default {
             }
         },
         "isFocus": function(newFocus,oldFocus) {
+            if (this.autorotate != null && this.panoReady) {
+                if (newFocus) {
+                    this.autorotate.start();
+                } else {
+                    this.autorotate.stop();
+                }
+            }
             if (this.sClass == 'VideoElement') {
                 if (newFocus != oldFocus) {
                     let video = document.getElementById(this.sId+"video");
@@ -159,6 +166,10 @@ export default {
         }
     },
     created: function() {
+            // Plain properties, not data(): wrapping the Photo Sphere Viewer
+            // plugin in a reactive proxy is useless and fragile.
+            this.autorotate = null;
+            this.panoReady = false;
             if (this.preload) {
                 this.loadImage();
             }
@@ -235,14 +246,27 @@ export default {
                     panorama: this.imageUrl(true),
                     container: "pano-"+this.sId,
                     loadingImg: imagePath('souvenirs','loading.gif'),
-                    navbar: [],
-                    plugins: [ 
-                        AutorotatePlugin.withConfig(),
+                    // false, not []: an empty list still renders the translucent bar.
+                    navbar: false,
+                    plugins: [
+                        AutorotatePlugin.withConfig({
+                            // Rotation is driven by page focus (see the isFocus
+                            // watcher), not by the plugin's own autostart/idle timers.
+                            autostartDelay: null,
+                            autostartOnIdle: false,
+                        }),
                         VisibleRangePlugin.withConfig({
                             usePanoData: true,
                         }),
                      ],
                 });
+                this.autorotate = pano.getPlugin(AutorotatePlugin);
+                pano.addEventListener('ready', () => {
+                    this.panoReady = true;
+                    if (this.isFocus) {
+                        this.autorotate.start();
+                    }
+                }, { once: true });
             }
         },
         imageUrl: function(full = false) {
