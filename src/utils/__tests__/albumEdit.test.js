@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, setElementGeometry, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -379,5 +379,70 @@ describe('setElementGeometry', () => {
 
     it('tolerates a page without an elements array', () => {
         expect(setElementGeometry({ id: 'p' }, 'el-1', { top: 0, left: 0, right: 100, bottom: 100 }).elements).toEqual([])
+    })
+})
+
+describe('setElementPanZoom', () => {
+    const makePage = () => ({
+        id: 'page-1',
+        customPageField: 'keep-me',
+        elements: [
+            {
+                id: 'el-1',
+                class: 'ImageElement',
+                image: 'data/a.jpg',
+                text: 'caption',
+                top: 0,
+                left: 0,
+                right: 100,
+                bottom: 50,
+                zoom: 100,
+                offsetX: 0,
+                offsetY: 0,
+                transformType: 1,
+                // Unknown per-element field that must be preserved.
+                androidOnlyField: 42,
+            },
+            {
+                id: 'el-2',
+                class: 'ImageElement',
+                image: 'data/b.jpg',
+                zoom: 100,
+                offsetX: 0,
+                offsetY: 0,
+                transformType: 2,
+            },
+        ],
+    })
+
+    it('replaces only the targeted element pan/zoom and transform type', () => {
+        const result = setElementPanZoom(makePage(), 'el-1', { zoom: 150, offsetX: 10, offsetY: -5, transformType: 2 })
+        expect(result.elements[0]).toMatchObject({ zoom: 150, offsetX: 10, offsetY: -5, transformType: 2 })
+        expect(result.elements[1]).toMatchObject({ zoom: 100, offsetX: 0, offsetY: 0, transformType: 2 })
+    })
+
+    it('preserves all other element and page fields, including unknown ones', () => {
+        const result = setElementPanZoom(makePage(), 'el-1', { zoom: 150, offsetX: 10, offsetY: -5, transformType: 2 })
+        expect(result.elements[0]).toMatchObject({
+            image: 'data/a.jpg', text: 'caption',
+            top: 0, left: 0, right: 100, bottom: 50,
+            androidOnlyField: 42,
+        })
+        expect(result.customPageField).toBe('keep-me')
+    })
+
+    it('does not mutate the original page or its elements', () => {
+        const page = makePage()
+        setElementPanZoom(page, 'el-1', { zoom: 150, offsetX: 10, offsetY: -5, transformType: 2 })
+        expect(page.elements[0]).toMatchObject({ zoom: 100, offsetX: 0, offsetY: 0, transformType: 1 })
+    })
+
+    it('is a no-op when the element id is not found', () => {
+        const result = setElementPanZoom(makePage(), 'missing', { zoom: 150, offsetX: 10, offsetY: -5, transformType: 2 })
+        expect(result.elements[0]).toMatchObject({ zoom: 100, offsetX: 0, offsetY: 0, transformType: 1 })
+    })
+
+    it('tolerates a page without an elements array', () => {
+        expect(setElementPanZoom({ id: 'p' }, 'el-1', { zoom: 100, offsetX: 0, offsetY: 0, transformType: 2 }).elements).toEqual([])
     })
 })

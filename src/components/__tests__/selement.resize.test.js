@@ -55,13 +55,20 @@ describe('selement corner resize', () => {
         expect(mountTile({ sClass: 'AudioElement' }).findAll('.s-element-resize-handle')).toHaveLength(0)
     })
 
-    it('keeps paint elements static: no resize handles, no drag handle, not draggable', () => {
+    it('keeps paint elements static: no resize handles, no drag handle', () => {
         const wrapper = mountTile({ sClass: 'PaintElement' })
         expect(wrapper.findAll('.s-element-resize-handle')).toHaveLength(0)
         expect(wrapper.find('.s-element-drag-handle').exists()).toBe(false)
-        expect(wrapper.attributes('draggable')).toBe('false')
         // Still removable: the delete button stays.
         expect(wrapper.find('.s-element-delete').exists()).toBe(true)
+    })
+
+    it('never marks the tile itself as an HTML5 drag source (handle-only drags)', () => {
+        // Moving an element grabs the handle button; the tile surface is
+        // reserved for the pan & zoom gestures (issue #27).
+        const wrapper = mountTile()
+        expect(wrapper.attributes('draggable')).toBeUndefined()
+        expect(wrapper.find('.s-element-drag-handle').attributes('draggable')).toBe('true')
     })
 
     it('emits resize-element with the new geometry after dragging the SE corner', async () => {

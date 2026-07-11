@@ -178,6 +178,31 @@ export function setElementGeometry(page, elementId, { top, left, right, bottom }
 
 /**
  * Return a copy of `page` in which the element identified by `elementId` has its
+ * pan & zoom values (zoom, offsetX, offsetY — album.json percent units) and its
+ * `transformType` replaced. The transform type is included because the first
+ * pan/zoom gesture on a fill/center-crop element switches it to the zoom-offset
+ * type (issue #27). All other fields of the page and of every element (including
+ * ones this app does not know about) are preserved untouched.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @param {string} elementId - the `id` of the element being panned/zoomed
+ * @param {{zoom: number, offsetX: number, offsetY: number, transformType: number}} panZoom
+ * @returns {object} a new page object with the single change applied
+ */
+export function setElementPanZoom(page, elementId, { zoom, offsetX, offsetY, transformType }) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return {
+        ...page,
+        elements: elements.map(element =>
+            element.id === elementId
+                ? { ...element, zoom, offsetX, offsetY, transformType }
+                : element,
+        ),
+    }
+}
+
+/**
+ * Return a copy of `page` in which the element identified by `elementId` has its
  * `text` set to `newText`. All other fields of the page and of every element
  * (including ones this app does not know about) are preserved untouched.
  *
