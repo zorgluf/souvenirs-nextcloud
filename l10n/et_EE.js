@@ -25,6 +25,7 @@ OC.L10N.register(
     "Add page" : "Lisa leht",
     "Could not delete the page." : "Selle lehe kustutamine ei õnnestunud.",
     "Could not remove the image." : "Selle pildi eemaldamine ei õnnestunud",
+    "Could not resize the element." : "Elemendi suuruse muutmine ei õnnestunud.",
     "Could not change the layout." : "Paigutuse muutmine ei õnnestunud.",
     "Could not move the page." : "Selle lehe teisaldamine ei õnnestunud.",
     "Could not move the element." : "Elemendi teisaldamine ei õnnestunud.",
@@ -42,6 +43,7 @@ OC.L10N.register(
     "Move page left" : "Tõsta leht vasakule",
     "Move page right" : "Tõsta leht paremale",
     "Drag to move" : "Teisaldamiseks lohista",
+    "Drag to resize" : "Suuruse muutmiseks lohista",
     "Remove text" : "Eemalda tekst",
     "Remove image" : "Eemalda pilt"
 },

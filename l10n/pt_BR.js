@@ -24,6 +24,7 @@ OC.L10N.register(
     "Add page" : "Adicionar página",
     "Could not delete the page." : "Não foi possível excluir a página.",
     "Could not remove the image." : "Não foi possível remover a imagem.",
+    "Could not resize the element." : "Não foi possível redimensionar o elemento.",
     "Could not change the layout." : "Não foi possível alterar o leiaute.",
     "Could not move the page." : "Não foi possível mover a página.",
     "Could not move the element." : "Não foi possível mover o elemento.",
@@ -41,6 +42,7 @@ OC.L10N.register(
     "Move page left" : "Mover a página para a esquerda",
     "Move page right" : "Mover a página para a direita",
     "Drag to move" : "Arraste para mover",
+    "Drag to resize" : "Arraste para redimensionar",
     "Remove text" : "Remover texto",
     "Remove image" : "Remover imagem"
 },
