@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { updatePage, updateAlbum, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../albumApi.js'
+import { updatePage, updateAlbum, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../albumApi.js'
 
 describe('albumApi', () => {
     beforeEach(() => {
@@ -125,6 +125,64 @@ describe('albumApi', () => {
         it('rejects on an error status', async () => {
             globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 }))
             await expect(deletePage('a', 'p')).rejects.toThrow()
+        })
+    })
+
+    describe('probeAsset', () => {
+        beforeEach(() => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({
+                ok: true, status: 200,
+                json: () => Promise.resolve({ status: 'missing', path: 'Souvenirs/album/data/x.png' }),
+            }))
+        })
+
+        it('GETs the assetprobe endpoint keeping the asset path slash', async () => {
+            await probeAsset('album-3', 'data/x.png')
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album-3/assetprobe/data/x.png')
+            expect(options.headers.requesttoken).toBe('test-token')
+        })
+
+        it('resolves to the parsed JSON body (status + upload path)', async () => {
+            const res = await probeAsset('album-3', 'data/x.png')
+            expect(res).toEqual({ status: 'missing', path: 'Souvenirs/album/data/x.png' })
+        })
+
+        it('rejects on an error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404 }))
+            await expect(probeAsset('a', 'data/x.png')).rejects.toThrow()
+        })
+    })
+
+    describe('uploadAsset', () => {
+        it('PUTs the blob to the WebDAV endpoint under the user files root, with its own mimetype', async () => {
+            const blob = new Blob(['fake-png'], { type: 'image/png' })
+            await uploadAsset('Souvenirs/My album/data/x.png', blob)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toContain('/remote.php/webdav/')
+            expect(url.endsWith('/remote.php/webdav/Souvenirs/My%20album/data/x.png')).toBe(true)
+            expect(options.method).toBe('PUT')
+            expect(options.body).toBe(blob)
+            expect(options.headers.requesttoken).toBe('test-token')
+            expect(options.headers['Content-Type']).toBe('image/png')
+        })
+
+        it('drops the leading slash of the probe path (no double slash in the URL)', async () => {
+            await uploadAsset('/Souvenirs/a/data/x.png', new Blob(['x'], { type: 'image/png' }))
+            const [url] = globalThis.fetch.mock.calls[0]
+            expect(url.endsWith('/remote.php/webdav/Souvenirs/a/data/x.png')).toBe(true)
+            expect(url).not.toContain('webdav//')
+        })
+
+        it('falls back to a generic content type for an untyped blob', async () => {
+            await uploadAsset('Souvenirs/a/data/x.png', new Blob(['x']))
+            const [, options] = globalThis.fetch.mock.calls[0]
+            expect(options.headers['Content-Type']).toBe('application/octet-stream')
+        })
+
+        it('rejects on an error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 507 }))
+            await expect(uploadAsset('Souvenirs/a/data/x.png', new Blob(['x']))).rejects.toThrow()
         })
     })
 

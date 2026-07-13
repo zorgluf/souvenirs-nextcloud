@@ -93,6 +93,100 @@ export function buildTextElement() {
     }
 }
 
+function isPaintElement(element) {
+    return element != null && typeof element.class === 'string'
+        && element.class.endsWith('PaintElement')
+}
+
+/**
+ * The page's paint overlay element, or null. Like the Android app, a page holds
+ * at most one paint element (painting again edits it), so the first match wins.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @returns {object|null}
+ */
+export function getPaintElement(page) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return elements.find(isPaintElement) || null
+}
+
+/**
+ * Build a fresh PaintElement following the on-disk format produced by the
+ * Android app: a transparent full-page PNG overlay (transformType 0 = fit; the
+ * PNG is captured with the page's aspect ratio, so "fit" is an exact overlay).
+ * Paint elements never take part in page layouts, so the full-page geometry
+ * set here is what gets persisted.
+ *
+ * @param {number} size - the PNG size in bytes
+ * @returns {object} a new PaintElement object (not yet placed in a page)
+ */
+export function buildPaintElement(size = 0) {
+    return {
+        class: 'PaintElement',
+        id: uuidv4(),
+        image: 'data/' + uuidv4() + '.png',
+        mime: 'image/png',
+        name: '',
+        size: size,
+        offsetX: 0,
+        offsetY: 0,
+        zoom: 100,
+        transformType: 0, // IMG_FILL: exact overlay, see above
+        stop: false,
+        top: 0,
+        left: 0,
+        right: 100,
+        bottom: 100,
+    }
+}
+
+/**
+ * Return a copy of `page` holding exactly one paint element, for a confirmed
+ * (non-empty) drawing:
+ * - if the page has none, a fresh full-page PaintElement is appended (last in
+ *   the array = drawn on top);
+ * - otherwise the FIRST paint element is kept — same id and same `image` asset
+ *   path, whose PNG the caller overwrites in place — with only `size` updated,
+ *   and any exceeding paint elements are dropped (a page holds 0 or 1).
+ *
+ * The other elements are left completely untouched (paint takes no layout
+ * slot, so no re-layout happens and manual geometry survives).
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @param {number} size - the confirmed PNG size in bytes
+ * @returns {object} a new page object with the single paint element in place
+ */
+export function setPagePaintElement(page, size) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    const first = elements.find(isPaintElement)
+    if (first == null) {
+        return { ...page, elements: [...elements, buildPaintElement(size)] }
+    }
+    return {
+        ...page,
+        elements: elements
+            .filter(element => !isPaintElement(element) || element === first)
+            .map(element => (element === first ? { ...element, size } : element)),
+    }
+}
+
+/**
+ * Return a copy of `page` with every paint element removed (a drawing confirmed
+ * fully transparent means "no overlay"). Unlike `removeElement`, the remaining
+ * elements are NOT re-laid-out: paint takes no layout slot, so removing it must
+ * not touch anyone's geometry.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @returns {object} a new page object without paint elements
+ */
+export function removePaintElements(page) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return {
+        ...page,
+        elements: elements.filter(element => !isPaintElement(element)),
+    }
+}
+
 /**
  * Build a fresh, empty page. The backend stamps its lastEditDate on creation.
  *
@@ -115,9 +209,15 @@ export function buildPage() {
  */
 export function addElement(page, element) {
     const elements = Array.isArray(page.elements) ? page.elements : []
+    // As in the Android app, the paint overlay stays last in the array (= drawn
+    // on top of the tiles), so new non-paint elements go before it.
+    const paintIndex = elements.findIndex(isPaintElement)
+    const insertAt = (paintIndex >= 0 && !isPaintElement(element)) ? paintIndex : elements.length
+    const added = [...elements]
+    added.splice(insertAt, 0, element)
     return {
         ...page,
-        elements: relayoutElements([...elements, element]),
+        elements: relayoutElements(added),
     }
 }
 

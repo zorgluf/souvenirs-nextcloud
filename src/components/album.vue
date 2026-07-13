@@ -30,7 +30,7 @@
             v-bind:is-last="index === pages.length - 1"
             v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
             v-on:add-image="onAddImage"
-            v-on:add-text="onAddText" v-on:cycle-layout="onCycleLayout"
+            v-on:add-text="onAddText" v-on:paint="onPaint" v-on:cycle-layout="onCycleLayout"
             v-on:add-page="onAddPage" v-on:move-page="onMovePage"
             v-on:element-drop="onElementDrop">
 	    </page>
@@ -60,6 +60,10 @@
                 {{ sAddPage }}
             </NcButton>
         </div>
+        <paint-dialog v-if="paintPage != null" :page-id="paintPage.id"
+            :elements="paintPage.elements" :album-path="path" :element-margin="elementMargin"
+            :saving="paintSaving" v-on:close="closePaint" v-on:confirm="onPaintConfirm">
+        </paint-dialog>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
@@ -78,10 +82,11 @@ import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar,
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, setElementGeometry, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../utils/albumEdit.js'
+import { setElementText, setElementGeometry, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
-import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage } from '../api/albumApi.js'
+import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../api/albumApi.js'
+import PaintDialog from './PaintDialog.vue'
 import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
 import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
@@ -131,6 +136,10 @@ export default {
             "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
+            // Id of the page currently open in the paint dialog (null = closed),
+            // and whether its confirmed drawing is being uploaded/persisted.
+            "paintPageId": null,
+            "paintSaving": false,
             // Timestamp of the last page turn triggered by dragging an element
             // near the album edge (throttles the edge navigation).
             "dragNavLast": 0,
@@ -196,6 +205,12 @@ export default {
                 }
             }
             return "";
+        },
+        "paintPage": function() {
+            if (this.paintPageId == null) {
+                return null;
+            }
+            return this.pages.find(p => p.id === this.paintPageId) || null;
         },
         "isStopCmd": function() {
             if (this.pages.length > 0) {
@@ -301,7 +316,9 @@ export default {
                     const d = await getFile(this.token + '/asset?file=' + encodeURIComponent(basename(asset)));
                     if (d) data.file(basename(asset),d,{binary:true});
                 } else {
-                    const d = await getFile('asset' + '?apath=' + encodeURIComponent(this.path) + '&file=' + encodeURIComponent(basename(asset)));
+                    // this.path is already percent-encoded (see the route query):
+                    // encoding it again would double-encode the slashes.
+                    const d = await getFile('asset' + '?apath=' + this.path + '&file=' + encodeURIComponent(basename(asset)));
                     if (d) data.file(basename(asset),d,{binary:true});
                 }
                 this.downloadProgress = 100 * i / asset_list.length;
@@ -581,6 +598,81 @@ export default {
                 showError(t("souvenirs","Could not add the text."));
             });
         },
+        onPaint: function(pageId) {
+            this.paintSaving = false;
+            this.paintPageId = pageId;
+        },
+        closePaint: function() {
+            // Ignore the dialog's close while a confirmed drawing is being saved.
+            if (!this.paintSaving) {
+                this.paintPageId = null;
+            }
+        },
+        onPaintConfirm: async function(blob) {
+            var index = this.pages.findIndex(p => p.id === this.paintPageId);
+            if (index < 0 || this.paintSaving) {
+                return;
+            }
+            var page = this.pages[index];
+            // A fully transparent drawing (blob == null) means no overlay: drop
+            // the page's paint element(s) instead of saving an empty PNG.
+            if (blob == null) {
+                if (getPaintElement(page) == null) {
+                    this.paintPageId = null;
+                    return;
+                }
+                var cleared = removePaintElements(page);
+                this.paintSaving = true;
+                try {
+                    await updatePage(this.albumId, cleared);
+                } catch (error) {
+                    this.paintSaving = false;
+                    showError(t("souvenirs","Could not save the drawing."));
+                    return;
+                }
+                this.pages.splice(index, 1, cleared);
+                this.paintSaving = false;
+                this.paintPageId = null;
+                // Best-effort GC of the removed drawing's PNG.
+                cleanAssets(this.albumId).catch(() => {});
+                return;
+            }
+            // A page holds 0 or 1 paint element (as in the Android app): an
+            // existing one keeps its id and asset path (the PNG is overwritten
+            // in place, only `size` changes), exceeding ones are dropped; a
+            // fresh one is appended when the page had none.
+            var updatedPage = setPagePaintElement(page, blob.size);
+            var element = getPaintElement(updatedPage);
+            this.paintSaving = true;
+            try {
+                // The probe returns where the asset lives under the user's files
+                // root; the bytes then go up over native WebDAV (same flow as the
+                // Android app). Upload before persisting the page, so a failed
+                // upload never leaves an element pointing at a missing asset.
+                var probe = await probeAsset(this.albumId, element.image);
+                if (probe == null || !probe.path) {
+                    throw new Error("assetprobe returned no upload path");
+                }
+                await uploadAsset(probe.path, blob);
+                // The server must confirm the PNG actually landed in the album
+                // before the page starts referencing it.
+                var check = await probeAsset(this.albumId, element.image);
+                if (check == null || check.status !== "ok") {
+                    throw new Error("uploaded asset not found in the album");
+                }
+                await updatePage(this.albumId, updatedPage);
+            } catch (error) {
+                // Keep the dialog open so the drawing is not lost.
+                this.paintSaving = false;
+                showError(t("souvenirs","Could not save the drawing."));
+                return;
+            }
+            this.pages.splice(index, 1, updatedPage);
+            this.paintSaving = false;
+            this.paintPageId = null;
+            // Best-effort GC of assets orphaned by dropped paint elements.
+            cleanAssets(this.albumId).catch(() => {});
+        },
         onAddImage: async function(pageId) {
             var index = this.pages.findIndex(p => p.id === pageId);
             if (index < 0) {
@@ -656,6 +748,7 @@ export default {
         Imagefull: Imagefull,
         Videofull: Videofull,
         AudioPlayer: AudioPlayer,
+        "paint-dialog": PaintDialog,
         NcModal,
         NcProgressBar,
         NcActions,

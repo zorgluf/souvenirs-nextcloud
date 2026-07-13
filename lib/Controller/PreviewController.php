@@ -43,9 +43,19 @@ class PreviewController extends Controller {
 	 */
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get($apath));
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-		$node = $this->rootFolder->get($realFilePath);
+		try {
+			$album = Album::withFolder($userFolder->get($apath));
+			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+			$node = $this->rootFolder->get($realFilePath);
+		} catch (\Exception $exception) {
+			//also covers getAssetRealPath returning "unknown" for a missing asset
+			return new JSONResponse(
+				[
+					'message' => "File do not exists.",
+					'success' => false
+				], Http::STATUS_NOT_FOUND
+			);
+		}
 		$response = new StreamResponse($node->fopen("r"));
 		$response->addHeader('Content-Disposition', 'attachment; filename="' . $node->getName() . '"');
 		$response->addHeader('Content-Type', $node->getMimetype());
@@ -133,11 +143,21 @@ class PreviewController extends Controller {
 			return $response;
 		}
 		$userFolder = $this->rootFolder->getUserFolder($share->getUser());
-		$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
-		$albumList = AlbumList::getInstance($albumsFolder);
-		$album = $albumList->getAlbum($share->getAlbumId());
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-		$node = $this->rootFolder->get($realFilePath);
+		try {
+			$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
+			$albumList = AlbumList::getInstance($albumsFolder);
+			$album = $albumList->getAlbum($share->getAlbumId());
+			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+			$node = $this->rootFolder->get($realFilePath);
+		} catch (\Exception $exception) {
+			//also covers getAssetRealPath returning "unknown" for a missing asset
+			return new JSONResponse(
+				[
+					'message' => "File do not exists.",
+					'success' => false
+				], Http::STATUS_NOT_FOUND
+			);
+		}
 		$response = new StreamResponse($node->fopen("r"));
 		$response->addHeader('Content-Disposition', 'attachment; filename="' . $node->getName() . '"');
 		$response->addHeader('Content-Type', $node->getMimetype());
