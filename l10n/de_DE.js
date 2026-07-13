@@ -26,6 +26,7 @@ OC.L10N.register(
     "Could not delete the page." : "Seite konnte nicht gelöscht werden",
     "Could not remove the image." : "Bild konnte nicht gelöscht werden",
     "Could not resize the element." : "Das Element konnte nicht in der Größe angepasst werden.",
+    "Could not adjust the image." : "Das Bild konnte nicht angepasst werden.",
     "Could not change the layout." : "Layout konnte nicht geändert werden",
     "Could not move the page." : "Seite konnte nicht verschoben werden.",
     "Could not move the element." : "Das Element konnte nicht verschoben werden.",
@@ -44,6 +45,7 @@ OC.L10N.register(
     "Move page right" : "Seite nach rechts verschieben",
     "Drag to move" : "Ziehen zum Verschieben",
     "Drag to resize" : "Zum Größenänderung ziehen",
+    "Reset zoom and position" : "Zoom und Position zurücksetzen",
     "Remove text" : "Text entfernen",
     "Remove image" : "Bild entfernen"
 },
