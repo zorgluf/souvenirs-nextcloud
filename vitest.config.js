@@ -13,9 +13,10 @@ export default defineConfig({
         globals: true,
         server: {
             deps: {
-                // @nextcloud/vue ships ESM that imports its own .css assets;
-                // inline it so Vite transforms those imports during tests.
-                inline: [/@nextcloud\/vue/],
+                // @nextcloud/vue and @nextcloud/dialogs ship ESM that imports
+                // .css assets; inline them so Vite transforms those imports
+                // during tests.
+                inline: [/@nextcloud\/vue/, /@nextcloud\/dialogs/],
             },
         },
     },

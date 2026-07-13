@@ -9,6 +9,8 @@
  * Adding a new editable field later means adding one function here.
  */
 
+import { generateRemoteUrl } from '@nextcloud/router'
+
 /**
  * Build the common request headers, including the Nextcloud CSRF token.
  * @returns {object} headers for a JSON POST request
@@ -162,6 +164,51 @@ export function searchAsset(albumId, asset, name, size) {
     return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/assetsearch?' + params.toString(), {
         headers: { 'requesttoken': OC.requestToken },
     }).then(ensureOk).then(response => response.json())
+}
+
+/**
+ * Ask the backend where an in-album asset lives (Api2Controller::assetExistsInAlbum).
+ * Besides the existence status, the response carries `path`: the asset's location
+ * relative to the user's files root (e.g. "Souvenirs/<album>/data/<uuid>.png"),
+ * which is where new asset bytes must be uploaded over WebDAV. This mirrors the
+ * Android app's upload flow (AlbumNC.pushAsset).
+ *
+ * @param {string} albumId - the album id
+ * @param {string} assetPath - the in-album asset path, e.g. "data/<uuid>.png"
+ * @returns {Promise<object>} the parsed JSON, `{ status: "ok" | "missing", path }`
+ */
+export function probeAsset(albumId, assetPath) {
+    const encodedAsset = assetPath.split('/').map(encodeURIComponent).join('/')
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/assetprobe/' + encodedAsset, {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(ensureOk).then(response => response.json())
+}
+
+/**
+ * Upload asset bytes over Nextcloud's native WebDAV endpoint, authenticated by
+ * the web session + CSRF token (the same way the Files app uploads). There is
+ * deliberately no app-specific upload endpoint; the destination `davPath` comes
+ * from `probeAsset` (the Android app uploads the same way, see Utils.uploadFile).
+ *
+ * @param {string} davPath - path relative to the user's files root
+ * @param {Blob} blob - the file content (e.g. the paint PNG)
+ * @returns {Promise<Response>}
+ */
+export function uploadAsset(davPath, blob) {
+    // The probe returns the path with a leading slash; empty segments are
+    // dropped so the WebDAV URL never contains a double slash.
+    const encodedPath = davPath.split('/')
+        .filter(segment => segment !== '')
+        .map(encodeURIComponent)
+        .join('/')
+    return fetch(generateRemoteUrl('webdav') + '/' + encodedPath, {
+        method: 'PUT',
+        headers: {
+            'requesttoken': OC.requestToken,
+            'Content-Type': blob.type || 'application/octet-stream',
+        },
+        body: blob,
+    }).then(ensureOk)
 }
 
 /**

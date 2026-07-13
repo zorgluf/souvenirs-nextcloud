@@ -117,6 +117,10 @@ export default {
       "sOffsetX": Number,
       "sOffsetY": Number,
       "sClass": String,
+      // Asset size in bytes. For paint elements it doubles as the version of
+      // the PNG (which is overwritten in place on re-paint, under the same
+      // asset path): a change triggers a reload and busts the HTTP cache.
+      "sSize": Number,
       "albumPath": String,
       "preload": Boolean,
       "token": String,
@@ -193,6 +197,14 @@ export default {
                 if (this.preload && this.loadingImage==null) {
                     this.loadImage();
                 }
+            }
+        },
+        "sSize": function(newSize, oldSize) {
+            // The paint PNG was overwritten in place (see the prop comment):
+            // re-fetch it so the page shows the new drawing right away.
+            if (newSize !== oldSize && this.sClass != null && this.sClass.endsWith('PaintElement')
+                && this.loadingImage != null) {
+                this.loadImage();
             }
         },
         "isFocus": function(newFocus,oldFocus) {
@@ -373,18 +385,24 @@ export default {
             }
         },
         imageUrl: function(full = false) {
+            var url;
             if (full) {
                 if (this.token != "") {
-                    return this.token+'/preview?file=' + this.sImage;
+                    url = this.token+'/preview?file=' + this.sImage;
                 } else {
-                    return 'preview?apath=' + this.albumPath + '&file=' + this.sImage;
+                    url = 'preview?apath=' + this.albumPath + '&file=' + this.sImage;
                 }
-            }
-            if (this.token != "") {
-                return this.token+'/preview?file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
+            } else if (this.token != "") {
+                url = this.token+'/preview?file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
             } else {
-                return 'preview?apath=' + this.albumPath + '&file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
+                url = 'preview?apath=' + this.albumPath + '&file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
             }
+            if (this.sClass != null && this.sClass.endsWith('PaintElement') && this.sSize) {
+                // Cache-buster: the paint PNG is overwritten in place on
+                // re-paint, so the URL must change with its content.
+                url += '&v=' + this.sSize;
+            }
+            return url;
         },
         isPhotosphere: function() {
             return (this.sMime == GOOGLE_PANORAMA_360_MIMETYPE);

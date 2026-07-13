@@ -6,7 +6,7 @@
 				v-bind:s-right="element.right" v-bind:s-text="element.text"
         v-bind:s-offset-x="element.offsetX" v-bind:s-offset-y="element.offsetY" v-bind:s-zoom="element.zoom"
 				v-bind:s-image="('image' in element) ? element.image.replace(/.*\//, '') : ''" 
-        v-bind:s-mime="element.mime"
+        v-bind:s-mime="element.mime" v-bind:s-size="element.size"
         v-bind:key="element.id"
                 v-bind:album-path="albumPath" v-bind:token="token"
                 v-bind:preload="pagePreload" v-bind:s-transform-type="element.transformType"
@@ -54,6 +54,12 @@
                 </template>
                 {{ sAddText }}
             </NcButton>
+            <NcButton type="primary" v-on:click="onPaint">
+                <template #icon>
+                    <Brush :size="20" />
+                </template>
+                {{ sPaint }}
+            </NcButton>
             <NcButton v-if="canCycle" type="secondary" v-on:click="onCycleLayout">
                 <template #icon>
                     <ViewDashboardVariantOutline :size="20" />
@@ -70,6 +76,7 @@ import Selement from "./selement.vue"
 import { NcButton } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TextBoxPlusOutline from 'vue-material-design-icons/TextBoxPlusOutline.vue'
+import Brush from 'vue-material-design-icons/Brush.vue'
 import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
 import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
 import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
@@ -95,6 +102,7 @@ export default {
             "preloadScope": 5,
             "sAddImage": t("souvenirs","Add image"),
             "sAddText": t("souvenirs","Add text"),
+            "sPaint": t("souvenirs","Paint"),
             "sChangeLayout": t("souvenirs","Change layout"),
             "sAddPage": t("souvenirs","Add page"),
             "sMoveLeft": t("souvenirs","Move page left"),
@@ -132,6 +140,7 @@ export default {
         NcButton,
         Plus,
         TextBoxPlusOutline,
+        Brush,
         ViewDashboardVariantOutline,
         ChevronLeft,
         ChevronRight,
@@ -191,6 +200,10 @@ export default {
       onAddText: function() {
         // Ask the album to add a new (empty) text element to this page.
         this.$emit("add-text", this.sId);
+      },
+      onPaint: function() {
+        // Ask the album to open the paint dialog for this page.
+        this.$emit("paint", this.sId);
       },
       onCycleLayout: function() {
         // Ask the album to switch this page to the next available layout.

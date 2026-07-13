@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements } from '../albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, buildPaintElement, setPagePaintElement, removePaintElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -310,6 +310,158 @@ describe('addElement', () => {
         const page = { id: 'p', elements: [] }
         addElement(page, buildImageElement({ name: 'b.jpg', size: 2, mime: 'image/jpeg' }))
         expect(page.elements).toHaveLength(0)
+    })
+
+    it('inserts new elements before an existing paint overlay (paint stays last)', () => {
+        const paint = { id: 'pt', class: 'PaintElement', image: 'data/p.png', top: 0, left: 0, right: 100, bottom: 100 }
+        const page = {
+            id: 'p',
+            elements: [
+                { id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', top: 0, left: 0, right: 100, bottom: 100 },
+                paint,
+            ],
+        }
+        const el = buildImageElement({ name: 'b.jpg', size: 2, mime: 'image/jpeg' })
+        const result = addElement(page, el)
+        expect(result.elements.map(e => e.id)).toEqual(['el-1', el.id, 'pt'])
+        // the two images get the 2-element layout; paint keeps its own box
+        expect(result.elements[0]).toMatchObject({ top: 0, bottom: 50 })
+        expect(result.elements[1]).toMatchObject({ top: 50, bottom: 100 })
+        expect(result.elements[2]).toMatchObject({ top: 0, left: 0, right: 100, bottom: 100 })
+    })
+
+    it('appends a paint element at the end', () => {
+        const page = { id: 'p', elements: [{ id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', top: 0, left: 0, right: 100, bottom: 100 }] }
+        const result = addElement(page, buildPaintElement())
+        expect(result.elements.map(e => e.class)).toEqual(['ImageElement', 'PaintElement'])
+        // one layout element -> stays full page; paint keeps its full-page box
+        expect(result.elements[0]).toMatchObject({ top: 0, left: 0, right: 100, bottom: 100 })
+        expect(result.elements[1]).toMatchObject({ top: 0, left: 0, right: 100, bottom: 100 })
+    })
+})
+
+describe('getPaintElement', () => {
+    it('returns the page paint element', () => {
+        const paint = { id: 'pt', class: 'PaintElement', image: 'data/p.png' }
+        const page = { id: 'p', elements: [{ id: 'el-1', class: 'ImageElement' }, paint] }
+        expect(getPaintElement(page)).toBe(paint)
+    })
+
+    it('matches namespaced class names too', () => {
+        const paint = { id: 'pt', class: 'fr.nuage.souvenirs.model.PaintElement' }
+        expect(getPaintElement({ elements: [paint] })).toBe(paint)
+    })
+
+    it('returns null when the page has no paint element', () => {
+        expect(getPaintElement({ elements: [{ id: 'el-1', class: 'ImageElement' }] })).toBeNull()
+        expect(getPaintElement({ id: 'p' })).toBeNull()
+    })
+})
+
+describe('buildPaintElement', () => {
+    it('builds a full-page PaintElement matching the on-disk schema', () => {
+        const el = buildPaintElement(2048)
+        expect(el.class).toBe('PaintElement')
+        expect(el.mime).toBe('image/png')
+        expect(el.image).toMatch(/^data\/[0-9a-f-]+\.png$/)
+        expect(el.size).toBe(2048)
+        expect(el.id).toBeTruthy()
+        expect(el).toMatchObject({
+            name: '', transformType: 0, zoom: 100, offsetX: 0, offsetY: 0, stop: false,
+            top: 0, left: 0, right: 100, bottom: 100,
+        })
+    })
+
+    it('gives each call a distinct element id and asset path', () => {
+        const a = buildPaintElement()
+        const b = buildPaintElement()
+        expect(a.id).not.toBe(b.id)
+        expect(a.image).not.toBe(b.image)
+    })
+})
+
+describe('setPagePaintElement', () => {
+    // An image with a hand-resized (non-default) geometry: it must never be
+    // re-laid-out by paint operations.
+    const image = () => ({ id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', size: 10, top: 12, left: 8, right: 77, bottom: 63 })
+    const paint = () => ({
+        id: 'pt',
+        class: 'PaintElement',
+        image: 'data/old.png',
+        size: 111,
+        top: 0, left: 0, right: 100, bottom: 100,
+        androidOnlyField: 42,
+    })
+
+    it('appends a fresh full-page paint element when the page has none', () => {
+        const result = setPagePaintElement({ id: 'p', elements: [image()] }, 333)
+        expect(result.elements).toHaveLength(2)
+        expect(result.elements[1]).toMatchObject({
+            class: 'PaintElement', mime: 'image/png', size: 333,
+            top: 0, left: 0, right: 100, bottom: 100,
+        })
+        expect(result.elements[1].image).toMatch(/^data\/[0-9a-f-]+\.png$/)
+    })
+
+    it('keeps the existing paint element id and asset path, updating only its size', () => {
+        const result = setPagePaintElement({ id: 'p', elements: [image(), paint()] }, 333)
+        expect(result.elements[1]).toMatchObject({
+            id: 'pt', image: 'data/old.png', size: 333, androidOnlyField: 42,
+        })
+    })
+
+    it('drops exceeding paint elements, keeping only the first', () => {
+        const extra = { id: 'pt2', class: 'PaintElement', image: 'data/extra.png', size: 5 }
+        const result = setPagePaintElement({ id: 'p', elements: [paint(), image(), extra] }, 333)
+        expect(result.elements.map(e => e.id)).toEqual(['pt', 'el-1'])
+        expect(result.elements[0]).toMatchObject({ image: 'data/old.png', size: 333 })
+    })
+
+    it('never re-lays-out the other elements', () => {
+        const withPaint = setPagePaintElement({ id: 'p', elements: [image(), paint()] }, 333)
+        expect(withPaint.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+        const withoutPaint = setPagePaintElement({ id: 'p', elements: [image()] }, 333)
+        expect(withoutPaint.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+    })
+
+    it('preserves unknown page-level fields and does not mutate the input', () => {
+        const page = { id: 'p', customPageField: 'keep-me', elements: [paint()] }
+        const result = setPagePaintElement(page, 333)
+        expect(result.customPageField).toBe('keep-me')
+        expect(page.elements[0].size).toBe(111)
+    })
+
+    it('tolerates a page without an elements array', () => {
+        const result = setPagePaintElement({ id: 'p' }, 333)
+        expect(result.elements).toHaveLength(1)
+        expect(result.elements[0].class).toBe('PaintElement')
+    })
+})
+
+describe('removePaintElements', () => {
+    it('removes every paint element and nothing else', () => {
+        const page = {
+            id: 'p',
+            elements: [
+                { id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', top: 12, left: 8, right: 77, bottom: 63 },
+                { id: 'pt', class: 'PaintElement', image: 'data/p.png' },
+                { id: 'pt2', class: 'fr.nuage.souvenirs.model.PaintElement', image: 'data/q.png' },
+            ],
+        }
+        const result = removePaintElements(page)
+        expect(result.elements.map(e => e.id)).toEqual(['el-1'])
+        // no re-layout: the survivor keeps its hand-set geometry
+        expect(result.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+    })
+
+    it('does not mutate the original page', () => {
+        const page = { id: 'p', elements: [{ id: 'pt', class: 'PaintElement' }] }
+        removePaintElements(page)
+        expect(page.elements).toHaveLength(1)
+    })
+
+    it('tolerates a page without an elements array', () => {
+        expect(removePaintElements({ id: 'p' }).elements).toEqual([])
     })
 })
 
