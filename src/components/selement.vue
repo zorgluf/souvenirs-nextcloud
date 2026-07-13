@@ -1,20 +1,29 @@
 <template>
-    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && sZoom < 100) ? 'blur-back' : '',
+    <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && effectiveZoom < 100) ? 'blur-back' : '',
     { 's-element--draggable': isDraggable, 's-element--dragging': isDragging, 's-element--dragover': isDragOver }]"
     v-bind:id="sId"
-    v-bind:draggable="isDraggable && !dragSuppressed"
-    v-on:mousedown="onRootMouseDown"
-    v-on:dragstart="onDragStart" v-on:dragend="onDragEnd"
     v-on:dragenter="onDragEnter" v-on:dragleave="onDragLeave"
     v-on:dragover="onDragOver" v-on:drop="onDrop"
     v-bind:style="rootStyle">
 		<button v-if="editMode && isRemovable" class="s-element-delete" :title="removeTitle" v-on:click.stop="onRemove">
 			<Delete :size="20" />
 		</button>
+		<!-- The handle is the only drag source for moving the element to another
+		     page/slot (issue #27): the tile surface itself is reserved for the
+		     pan & zoom gestures on image elements. -->
 		<NcButton v-if="isDraggable" class="s-element-drag-handle" type="primary"
-			:aria-label="sDragToMove" :title="sDragToMove">
+			:aria-label="sDragToMove" :title="sDragToMove"
+			draggable="true" v-on:dragstart="onDragStart" v-on:dragend="onDragEnd">
 			<template #icon>
 				<CursorMove :size="20" />
+			</template>
+		</NcButton>
+		<!-- Back to the default framing (cover-fit: zoom 100, no offset) after
+		     pan & zoom gestures. -->
+		<NcButton v-if="editMode && sClass.endsWith('ImageElement')" class="s-element-pan-reset" type="primary"
+			:aria-label="sResetPanZoom" :title="sResetPanZoom" v-on:click="onPanZoomReset">
+			<template #icon>
+				<FitToScreen :size="20" />
 			</template>
 		</NcButton>
 		<template v-if="isResizable">
@@ -26,8 +35,11 @@
 				v-on:pointerup="onResizeEnd"
 				v-on:pointercancel="onResizeCancel"></div>
 		</template>
-		<EditableText v-if="sText || editMode" class="s-element-text resize"
-			:value="sText" :editable="editMode" :auto-fit="true"
+		<!-- Editing text is a TextElement-only affair: on other elements a
+		     stored caption is still displayed, but read-only (and click-through,
+		     so it does not block the pan & zoom gestures on the image below). -->
+		<EditableText v-if="sText || (editMode && isTextElement)" class="s-element-text resize"
+			:value="sText" :editable="editMode && isTextElement" :auto-fit="true"
 			@save="onTextSave" />
         <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
             v-bind:class="['video-element', sZoom == 100 ? 'centercrop' : 'fill' ]" 
@@ -39,15 +51,19 @@
             <NcLoadingIcon :size="64"></NcLoadingIcon>
         </div>
         
-		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]"
+		<img id="image_element" v-bind:style="imageStyle" v-bind:class="['image-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '', canPanZoom ? 'image-element--pan' : '' ]"
         v-if="sImage != '' && (sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement'))"
-        v-bind:src="sImageSrc" v-on:click="openImgFull" v-bind:draggable="!editMode" />
+        v-bind:src="sImageSrc" v-on:click="openImgFull" v-bind:draggable="!editMode"
+        v-on:pointerdown="onImagePointerDown" v-on:pointermove="onImagePointerMove"
+        v-on:pointerup="onImagePointerUp" v-on:pointercancel="onImagePointerCancel"
+        v-on:wheel="onImageWheel" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc" v-bind:draggable="!editMode"/>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
         <!-- In edit mode the tile takes pointer-events:all (drag and drop), which
-             would make this whole-tile overlay swallow clicks meant for the
-             caption editor below it: keep it click-through while editing. -->
+             would make this whole-tile overlay swallow the events meant for the
+             caption editor and the pan & zoom surface below it: keep it
+             click-through while editing. -->
         <div v-bind:id="'pano-'+sId" v-bind:style="'position:absolute;top:0;left:0;width: 100%;height: 100%;' + (editMode ? 'pointer-events:none;' : '')"/>
         <div v-if="isVideoLoading" class="center">
             <NcLoadingIcon :size="64">
@@ -73,7 +89,15 @@ import { imagePath } from '@nextcloud/router'
 import EditableText from './EditableText.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import CursorMove from 'vue-material-design-icons/CursorMove.vue'
+import FitToScreen from 'vue-material-design-icons/FitToScreen.vue'
 import { setElementDragData, isElementDrag, getElementDragData } from '../utils/elementDrag.js'
+import { initialPanZoom, panBy, zoomAt, roundPanZoom } from '../utils/imagePanZoom.js'
+
+// Zoom speed of the mouse wheel: multiplicative factor e^(-deltaY * this).
+// 0.002 gives ~±22% per classic 100-unit wheel notch.
+const WHEEL_ZOOM_SPEED = 0.002;
+// A wheel gesture has no end event: commit after this much wheel silence.
+const WHEEL_COMMIT_DELAY_MS = 500;
 
 export default {
     props: {
@@ -113,12 +137,16 @@ export default {
             "isVideoLoading": false,
             "isDragging": false,
             "isDragOver": false,
-            // True while the current press started inside the caption editor:
-            // the tile must not be draggable then, otherwise the browser
-            // suppresses caret placement / text selection in the contenteditable.
-            "dragSuppressed": false,
+            // Natural size of the loaded image, needed by the zoom/offset
+            // transform and by the pan & zoom gesture math.
+            "imgSize": null,
+            // Pan & zoom values shown while a gesture is in progress (or a
+            // wheel commit is pending); the committed props take over when
+            // null. Always rendered as the zoom-offset transform type.
+            "panZoomPreview": null,
             "sDragToMove": t("souvenirs","Drag to move"),
             "sDragToResize": t("souvenirs","Drag to resize"),
+            "sResetPanZoom": t("souvenirs","Reset zoom and position"),
             "resizeCorners": ['nw', 'ne', 'sw', 'se'],
             // State of the corner drag in progress (pointer id, start position,
             // page size in px, original geometry), null when not resizing.
@@ -137,6 +165,7 @@ export default {
         EditableText,
         Delete,
         CursorMove,
+        FitToScreen,
     },
     watch: {
         "geometryKey": function() {
@@ -144,14 +173,23 @@ export default {
             // which resizes this element's box. A zoom/offset cover-fit is computed
             // from the box size at load time, so recompute it on resize, otherwise
             // the image would keep a stale transform and letterbox in its new cell.
-            if (this.loadingImage != null && this.loadingImage.complete
-                && (this.sClass == 'ImageElement' || this.sClass == 'VideoElement')
-                && this.sTransformType == IMG_ZOOMOFFSET) {
-                this.$nextTick(() => {
-                    this.imageStyle = getImageZoomOffsetStyle(this.sZoom, this.sOffsetX, this.sOffsetY,
-                        this.$refs.eldiv.clientWidth, this.$refs.eldiv.clientHeight,
-                        this.loadingImage.width, this.loadingImage.height);
-                });
+            this.$nextTick(() => {
+                this.refreshImageStyle();
+            });
+        },
+        "panZoomKey": function() {
+            // The committed pan/zoom props caught up with (or replaced) the
+            // preview: hand the rendering back to them. Not while a pointer
+            // gesture is running — it keeps driving the preview.
+            if (this.panZoomGesture == null) {
+                this.panZoomPreview = null;
+            }
+            this.refreshImageStyle();
+        },
+        "editMode": function(newEdit) {
+            // Leaving edit mode commits a still-pending wheel zoom.
+            if (!newEdit) {
+                this.commitPanZoom();
             }
         },
         "preload": function(newPreload, oldPreload) {
@@ -196,12 +234,20 @@ export default {
     },
     created: function() {
             // Plain properties, not data(): wrapping the Photo Sphere Viewer
-            // plugin in a reactive proxy is useless and fragile.
+            // plugin in a reactive proxy is useless and fragile. Same for the
+            // pan & zoom gesture bookkeeping (pointer positions at 60+ Hz) —
+            // the reactive rendering is driven by panZoomPreview alone.
             this.autorotate = null;
             this.panoReady = false;
+            this.panZoomGesture = null;
+            this.wheelCommitTimer = null;
             if (this.preload) {
                 this.loadImage();
             }
+        },
+    beforeUnmount: function() {
+            // Commit a still-pending wheel zoom instead of dropping it.
+            this.commitPanZoom();
         },
     computed: {
         'sWidth': function() {
@@ -219,13 +265,33 @@ export default {
             return Math.floor(eh*(this.sBottom-this.sTop)/100);
         },
         'isImgCenterCrop': function() {
-            return (this.sTransformType == IMG_CENTERCROP);
+            // A pan/zoom preview always renders as zoom-offset, whatever the
+            // committed transform type still says.
+            return (this.panZoomPreview == null && this.sTransformType == IMG_CENTERCROP);
         },
         'isImgFill': function() {
-            return (this.sTransformType == IMG_FILL);
+            return (this.panZoomPreview == null && this.sTransformType == IMG_FILL);
+        },
+        'effectiveZoom': function() {
+            return this.panZoomPreview != null ? this.panZoomPreview.zoom : this.sZoom;
+        },
+        'canPanZoom': function() {
+            // Pan & zoom applies to image elements in edit mode (issue #27),
+            // once the image is loaded (the math needs its natural size) — and
+            // only on the currently displayed page: on a peeking neighbor page
+            // a touch drag must keep scrolling the album, not pan the image.
+            return this.editMode && this.isFocus
+                && this.sClass != null && this.sClass.endsWith('ImageElement')
+                && this.imgSize != null && this.imgSize.width > 0 && this.imgSize.height > 0;
         },
         'geometryKey': function() {
             return [this.sTop, this.sBottom, this.sLeft, this.sRight].join(',');
+        },
+        'panZoomKey': function() {
+            return [this.sZoom, this.sOffsetX, this.sOffsetY, this.sTransformType].join(',');
+        },
+        'isTextElement': function() {
+            return this.sClass != null && this.sClass.endsWith('TextElement');
         },
         'isRemovable': function() {
             // Media tiles (image / video / paint) and text elements can be removed.
@@ -288,9 +354,8 @@ export default {
         },
         onLoadedImage: function() {
             this.sImageSrc = this.loadingImage.src;
-            if (((this.sClass == 'ImageElement') || (this.sClass == 'VideoElement')) && (this.sTransformType == IMG_ZOOMOFFSET)) {
-                this.imageStyle = getImageZoomOffsetStyle(this.sZoom,this.sOffsetX,this.sOffsetY,this.$refs.eldiv.clientWidth,this.$refs.eldiv.clientHeight,this.loadingImage.width,this.loadingImage.height);
-            }
+            this.imgSize = { width: this.loadingImage.width, height: this.loadingImage.height };
+            this.refreshImageStyle();
             if (this.isPhotosphere()) {
                 var pano = new Viewer({
                     panorama: this.imageUrl(true),
@@ -343,6 +408,11 @@ export default {
             return (this.sMime == GOOGLE_PANORAMA_360_MIMETYPE);
         },
         openImgFull: function() {
+            // In edit mode a click on the image is the tail of a pan gesture
+            // (or a stray press), not a request for the fullscreen viewer.
+            if (this.editMode) {
+                return;
+            }
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         },
         openVideo: function() {
@@ -358,23 +428,206 @@ export default {
             // Bubble the removal up with this element's id (sId).
             this.$emit("remove-element", this.sId);
         },
-        onRootMouseDown: function(event) {
-            // Decide per-press whether the tile is draggable: a press inside the
-            // caption editor must edit text, not start a drag. The browser makes
-            // the selection-vs-drag call during this very mousedown's default
-            // action, before Vue's async attribute patch would land, so the
-            // attribute is also updated synchronously here.
-            this.dragSuppressed = !!(event.target && event.target.isContentEditable);
-            if (this.$refs.eldiv) {
-                this.$refs.eldiv.setAttribute("draggable", String(this.isDraggable && !this.dragSuppressed));
+        refreshImageStyle: function() {
+            // Recompute the inline zoom-offset transform of the image from the
+            // effective values: the gesture preview when one is active, the
+            // committed props otherwise. For the other transform types the
+            // rendering is purely CSS classes (fill/centercrop): no inline style.
+            if (this.imgSize == null || this.$refs.eldiv == null
+                || !(this.sClass == 'ImageElement' || this.sClass == 'VideoElement')) {
+                return;
             }
+            var box = this.$refs.eldiv.getBoundingClientRect();
+            if (box.width <= 0 || box.height <= 0) {
+                return;
+            }
+            if (this.panZoomPreview != null) {
+                this.imageStyle = getImageZoomOffsetStyle(this.panZoomPreview.zoom,
+                    this.panZoomPreview.offsetX, this.panZoomPreview.offsetY,
+                    box.width, box.height, this.imgSize.width, this.imgSize.height);
+            } else if (this.sTransformType == IMG_ZOOMOFFSET) {
+                this.imageStyle = getImageZoomOffsetStyle(this.sZoom, this.sOffsetX, this.sOffsetY,
+                    box.width, box.height, this.imgSize.width, this.imgSize.height);
+            } else {
+                this.imageStyle = {};
+            }
+        },
+        basePanZoomState: function(box) {
+            // The state a new gesture step starts from: the still-displayed
+            // preview if there is one (e.g. a pending wheel commit), otherwise
+            // the committed props converted to zoom-offset values.
+            if (this.panZoomPreview != null) {
+                return this.panZoomPreview;
+            }
+            return initialPanZoom({ transformType: this.sTransformType, zoom: this.sZoom,
+                offsetX: this.sOffsetX, offsetY: this.sOffsetY }, box, this.imgSize);
+        },
+        rebasePanZoomGesture: function() {
+            // (Re)anchor the gesture on the current pointer set: called when a
+            // pointer goes down or up, so pan (1 pointer) and pinch (2 pointers)
+            // phases compose without jumps.
+            var g = this.panZoomGesture;
+            var points = Array.from(g.pointers.values());
+            g.box = this.$refs.eldiv.getBoundingClientRect();
+            g.state = this.basePanZoomState(g.box);
+            g.startMid = {
+                x: points.length >= 2 ? (points[0].x + points[1].x) / 2 : points[0].x,
+                y: points.length >= 2 ? (points[0].y + points[1].y) / 2 : points[0].y,
+            };
+            g.startDist = points.length >= 2
+                ? Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y) : 0;
+        },
+        onImagePointerDown: function(event) {
+            if (!this.canPanZoom || this.resizing != null) {
+                return;
+            }
+            // The press belongs to the pan/pinch: keep the browser from starting
+            // a native image drag or a text selection with it.
+            event.preventDefault();
+            // A pending wheel commit merges into this gesture (committed at its end).
+            if (this.wheelCommitTimer != null) {
+                clearTimeout(this.wheelCommitTimer);
+                this.wheelCommitTimer = null;
+            }
+            // Route the whole gesture to the image, even when the pointer
+            // leaves it while dragging.
+            if (event.currentTarget.setPointerCapture) {
+                event.currentTarget.setPointerCapture(event.pointerId);
+            }
+            if (this.panZoomGesture == null) {
+                this.panZoomGesture = { pointers: new Map() };
+            }
+            this.panZoomGesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            this.rebasePanZoomGesture();
+        },
+        onImagePointerMove: function(event) {
+            var g = this.panZoomGesture;
+            if (g == null || !g.pointers.has(event.pointerId)) {
+                return;
+            }
+            g.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            var points = Array.from(g.pointers.values());
+            var state;
+            if (points.length >= 2) {
+                // Pinch: zoom by the distance ratio about the start midpoint,
+                // then pan by the midpoint travel.
+                var mid = { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 };
+                var dist = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+                var factor = g.startDist > 0 ? dist / g.startDist : 1;
+                state = zoomAt(g.state, factor,
+                    { x: g.startMid.x - g.box.left, y: g.startMid.y - g.box.top }, g.box, this.imgSize);
+                state = panBy(state, { x: mid.x - g.startMid.x, y: mid.y - g.startMid.y }, g.box, this.imgSize);
+            } else {
+                state = panBy(g.state,
+                    { x: points[0].x - g.startMid.x, y: points[0].y - g.startMid.y }, g.box, this.imgSize);
+            }
+            this.panZoomPreview = state;
+            this.refreshImageStyle();
+        },
+        onImagePointerUp: function(event) {
+            var g = this.panZoomGesture;
+            if (g == null || !g.pointers.has(event.pointerId)) {
+                return;
+            }
+            g.pointers.delete(event.pointerId);
+            if (g.pointers.size > 0) {
+                // Pinch dropping to a single finger: continue as a pan.
+                this.rebasePanZoomGesture();
+                return;
+            }
+            this.panZoomGesture = null;
+            this.commitPanZoom();
+        },
+        onImagePointerCancel: function(event) {
+            var g = this.panZoomGesture;
+            if (g == null || !g.pointers.has(event.pointerId)) {
+                return;
+            }
+            g.pointers.delete(event.pointerId);
+            if (g.pointers.size > 0) {
+                this.rebasePanZoomGesture();
+                return;
+            }
+            // A cancelled gesture snaps back to the committed values.
+            this.panZoomGesture = null;
+            this.panZoomPreview = null;
+            this.refreshImageStyle();
+        },
+        onImageWheel: function(event) {
+            // Zoom about the cursor; a pointer gesture in progress owns the
+            // preview, so wheel input is ignored during one.
+            if (!this.canPanZoom || this.panZoomGesture != null) {
+                return;
+            }
+            event.preventDefault();
+            var box = this.$refs.eldiv.getBoundingClientRect();
+            if (box.width <= 0 || box.height <= 0) {
+                return;
+            }
+            // deltaMode 1 means lines, not pixels (e.g. Firefox with a plain mouse).
+            var delta = event.deltaMode === 1 ? event.deltaY * 40 : event.deltaY;
+            this.panZoomPreview = zoomAt(this.basePanZoomState(box), Math.exp(-delta * WHEEL_ZOOM_SPEED),
+                { x: event.clientX - box.left, y: event.clientY - box.top }, box, this.imgSize);
+            this.refreshImageStyle();
+            if (this.wheelCommitTimer != null) {
+                clearTimeout(this.wheelCommitTimer);
+            }
+            this.wheelCommitTimer = setTimeout(() => { this.commitPanZoom(); }, WHEEL_COMMIT_DELAY_MS);
+        },
+        commitPanZoom: function() {
+            if (this.wheelCommitTimer != null) {
+                clearTimeout(this.wheelCommitTimer);
+                this.wheelCommitTimer = null;
+            }
+            if (this.panZoomPreview == null) {
+                return;
+            }
+            var rounded = roundPanZoom(this.panZoomPreview);
+            if (rounded.zoom === this.sZoom && rounded.offsetX === this.sOffsetX
+                && rounded.offsetY === this.sOffsetY && this.sTransformType === IMG_ZOOMOFFSET) {
+                this.panZoomPreview = null;
+                this.refreshImageStyle();
+                return;
+            }
+            // Keep showing the (rounded) preview until the committed props flow
+            // back down (the panZoomKey watcher then clears it). Bubble the new
+            // values up with this element's id (sId) so the album can patch and
+            // persist them; the transform type becomes zoom-offset, which is
+            // what the first gesture on a fill/center-crop element switches to.
+            this.panZoomPreview = rounded;
+            this.refreshImageStyle();
+            this.$emit("pan-zoom-element", this.sId,
+                { zoom: rounded.zoom, offsetX: rounded.offsetX, offsetY: rounded.offsetY, transformType: IMG_ZOOMOFFSET });
+        },
+        onPanZoomReset: function() {
+            // Back to the default framing: drop any gesture in progress and any
+            // pending wheel commit, then persist plain cover-fit — unless the
+            // committed element already renders that way (zoom-offset at
+            // 100/0/0, or center-crop, which is the same rendering).
+            if (this.wheelCommitTimer != null) {
+                clearTimeout(this.wheelCommitTimer);
+                this.wheelCommitTimer = null;
+            }
+            this.panZoomGesture = null;
+            var isDefault = (this.sTransformType === IMG_ZOOMOFFSET && this.sZoom === 100
+                    && this.sOffsetX === 0 && this.sOffsetY === 0)
+                || this.sTransformType === IMG_CENTERCROP;
+            if (isDefault) {
+                this.panZoomPreview = null;
+                this.refreshImageStyle();
+                return;
+            }
+            this.panZoomPreview = { zoom: 100, offsetX: 0, offsetY: 0 };
+            this.refreshImageStyle();
+            this.$emit("pan-zoom-element", this.sId,
+                { zoom: 100, offsetX: 0, offsetY: 0, transformType: IMG_ZOOMOFFSET });
         },
         onResizeStart: function(event, corner) {
             if (!this.isResizable || this.resizing != null) {
                 return;
             }
-            // The press belongs to the resize: keep it from starting an HTML5
-            // drag of the tile and from reaching onRootMouseDown.
+            // The press belongs to the resize: keep it from selecting text or
+            // reaching the pan & zoom handlers below.
             event.preventDefault();
             event.stopPropagation();
             var page = this.$refs.eldiv ? this.$refs.eldiv.parentElement : null;
@@ -431,17 +684,19 @@ export default {
             this.resizePreview = null;
         },
         onDragStart: function(event) {
-            if (!this.isDraggable || this.dragSuppressed || this.resizing != null) {
+            // Drags start from the handle button only (issue #27); the tile
+            // surface is reserved for the pan & zoom gestures.
+            if (!this.isDraggable || this.resizing != null) {
                 event.preventDefault();
                 return;
             }
-            // A drag starting inside the caption editor is the browser dragging
-            // selected text: leave it to the native behavior (our drop targets
-            // ignore it, as it does not carry the element payload).
-            if (event.target && event.target.isContentEditable) {
-                return;
-            }
             setElementDragData(event, this.sPageId, this.sId);
+            // Show the whole tile in flight, not just the handle button.
+            if (event.dataTransfer.setDragImage && this.$refs.eldiv) {
+                var rect = this.$refs.eldiv.getBoundingClientRect();
+                event.dataTransfer.setDragImage(this.$refs.eldiv,
+                    event.clientX - rect.left, event.clientY - rect.top);
+            }
             this.isDragging = true;
         },
         onDragEnd: function() {
@@ -578,11 +833,12 @@ function basename(path) {
     overflow: hidden;
 }
 
-/* Draggable tiles (edit mode) must receive pointer/drag events; the base
-   .s-element disables them (children normally opt back in). */
+/* Editable tiles (edit mode) must receive pointer/drag events — as drop
+   targets and for the pan & zoom gestures; the base .s-element disables them
+   (children normally opt back in). No grab cursor here: moving the tile is
+   done from the handle button only. */
 .s-element--draggable {
 	pointer-events: all;
-	cursor: grab;
 }
 
 /* The tile being dragged: ghost it so the user sees it is in flight. */
@@ -590,9 +846,10 @@ function basename(path) {
 	opacity: 0.4;
 }
 
-/* Grab handle, mirroring the delete button in the opposite corner. It floats
-   above the caption editor (which fills the whole cell on text tiles), so text
-   elements stay draggable even though a press inside the editor never drags.
+/* Grab handle, mirroring the delete button in the opposite corner: the only
+   drag source for moving the element to another page/slot (the tile surface
+   itself pans the image). It floats above the caption editor, so text elements
+   stay draggable even though a press inside the editor never drags.
    It is a primary NcButton so its face (color, hover) is exactly the one of the
    other edit buttons ("Add image", ...); only placement is set here. */
 .s-element-drag-handle {
@@ -606,6 +863,16 @@ function basename(path) {
 .s-element-drag-handle,
 .s-element-drag-handle :deep(*) {
 	cursor: grab;
+}
+
+/* Reset-framing button, just under the move handle (whose height follows the
+   theme's clickable-area size, e.g. 34px in compact mode). */
+.s-element-pan-reset {
+	position: absolute;
+	top: calc(6px + var(--default-clickable-area, 44px) + 6px);
+	left: 6px;
+	z-index: 8;
+	pointer-events: all;
 }
 
 /* Corner resize handles (edit mode). Above the drag/delete buttons (z 8) so
@@ -689,6 +956,11 @@ function basename(path) {
 	justify-content: center;
 	text-align: center;
     white-space: pre-wrap;
+	/* The text layer covers the whole cell above the image: keep it
+	   click-through so it cannot swallow the pan & zoom gestures (in edit mode
+	   the tile root re-enables pointer events, which children inherit). When it
+	   is actually editable, EditableText's own --editing rule opts back in. */
+	pointer-events: none;
 }
 
 center {
@@ -714,6 +986,13 @@ center {
 
 .image-element {
     pointer-events: all;
+}
+
+/* Image surface while it can be panned/zoomed (edit mode). touch-action:none
+   keeps the browser from turning the pan/pinch into a scroll on touch screens. */
+.image-element--pan {
+    cursor: move;
+    touch-action: none;
 }
 
 .video-element {

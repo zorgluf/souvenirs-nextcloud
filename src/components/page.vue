@@ -15,6 +15,7 @@
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
                 v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
                 v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
+                v-on:pan-zoom-element="onPanZoomElement"
                 v-bind:s-page-id="sId" v-on:element-drop="onElementDrop"
                 v-bind:element-margin="elementMargin">
 	</selement>
@@ -163,6 +164,10 @@ export default {
         // Re-emit with this page's id (sId) so the album can locate the element.
         this.$emit("resize-element", this.sId, elementId, geometry);
       },
+      onPanZoomElement: function(elementId, panZoom) {
+        // Re-emit with this page's id (sId) so the album can locate the element.
+        this.$emit("pan-zoom-element", this.sId, elementId, panZoom);
+      },
       onElementDrop: function(srcPageId, srcElementId, destElementId) {
         // Drop landed on one of this page's elements: re-emit with this page as
         // the destination so the album can swap (same page) or move (other page).
@@ -278,9 +283,9 @@ function isFullyVisible(el) {
   z-index: 8;
 }
 
-/* Insert-page affordance: a "+" button at the top of a vertical line that sits
-   on the seam between two pages. Zero width so it does not affect page layout;
-   children opt back into pointer events. */
+/* Insert-page affordance: a "+" button vertically centered on a full-height
+   line that sits on the seam between two pages. Zero width so it does not
+   affect page layout; children opt back into pointer events. */
 .page-insert {
   position: absolute;
   top: 0;
@@ -289,6 +294,7 @@ function isFullyVisible(el) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   z-index: 9;
   pointer-events: none;
   cursor: pointer;
@@ -309,13 +315,15 @@ function isFullyVisible(el) {
 
 .page-insert__btn {
   pointer-events: all;
+  /* Positioned (above the absolute line) without leaving the flex flow. */
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  margin-top: 6px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -330,9 +338,14 @@ function isFullyVisible(el) {
   filter: brightness(0.9);
 }
 
+/* Full-height seam line behind the centered button. */
 .page-insert__line {
   pointer-events: all;
-  flex: 1 1 auto;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
   width: 3px;
   background-color: var(--color-primary-element, #0082c9);
   opacity: 0.85;

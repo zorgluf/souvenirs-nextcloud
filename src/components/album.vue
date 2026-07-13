@@ -29,6 +29,7 @@
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
             v-bind:is-last="index === pages.length - 1"
             v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
+            v-on:pan-zoom-element="onPanZoomElement"
             v-on:add-image="onAddImage"
             v-on:add-text="onAddText" v-on:paint="onPaint" v-on:cycle-layout="onCycleLayout"
             v-on:add-page="onAddPage" v-on:move-page="onMovePage"
@@ -82,7 +83,7 @@ import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar,
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, setElementGeometry, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements } from '../utils/albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../api/albumApi.js'
@@ -450,6 +451,19 @@ export default {
             this.pages.splice(index, 1, updatedPage);
             updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not resize the element."));
+            });
+        },
+        onPanZoomElement: function(pageId, elementId, panZoom) {
+            // Patch only the panned/zoomed element's values (preserving every
+            // other album/page/element field), then persist that page.
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var updatedPage = setElementPanZoom(this.pages[index], elementId, panZoom);
+            this.pages.splice(index, 1, updatedPage);
+            updatePage(this.albumId, updatedPage).catch(error => {
+                showError(t("souvenirs","Could not adjust the image."));
             });
         },
         onCycleLayout: function(pageId) {

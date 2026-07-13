@@ -1,6 +1,7 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
+    "Relive your memories the way you used to with paper albums: page after page, story after story.\n\n**Souvenirs** lets you craft \"old school\" albums from the photos and videos already stored on your Nextcloud — and share them with the people who matter.\n\n### ✨ What you can do\n\n- 📖 **Browse albums like a book** — turn pages instead of scrolling through photo grids\n- 🎨 **Create and edit albums** right from the web interface: pick your photos, arrange your pages, give each album a name and a date\n- 🎬 **Mix media freely** — photos, videos, audio recordings and even 360° panoramas on the same page\n- 🌐 **Explore panoramas** interactively thanks to the integrated 360° viewer\n- 🔗 **Share with a simple link** — family and friends can enjoy your albums without a Nextcloud account\n- 📱 **Pair with the [Souvenirs Android app](https://github.com/zorgluf/souvenirs-android)** to build albums on the go and sync them with your server\n- ♻️ **Save space** — media already on your server is reused, not duplicated\n\n### 🔒 Your souvenirs, your server\n\nAlbums are stored as plain folders and files on your own Nextcloud. No third-party service, no lock-in: your souvenirs stay yours." : "Reviva suas memórias como você costumava fazer com os álbuns de papel: página após página, história após história.\n\nO **Souvenirs** permite que você crie álbuns “à moda antiga” a partir das fotos e vídeos já armazenados no seu Nextcloud — e os compartilhe com as pessoas que importam.\n\n### ✨ O que você pode fazer\n\n- 📖 **Navegue pelos álbuns como se fosse um livro** — vire as páginas em vez de rolar pela grade de fotos\n- 🎨 **Crie e edite álbuns** diretamente da interface da web: escolha suas fotos, organize suas páginas, dê a cada álbum um nome e uma data\n- 🎬 **Misture mídias livremente** — fotos, vídeos, gravações de áudio e até panoramas de 360° na mesma página\n- 🌐 **Explore panoramas** de forma interativa graças ao visualizador de 360° integrado\n- 🔗 **Compartilhe com um link simples** — familiares e amigos podem curtir seus álbuns sem precisar de uma conta no Nextcloud\n- 📱 **Conecte-se ao [aplicativo Souvenirs para Android](https://github.com/zorgluf/souvenirs-android)** para criar álbuns em qualquer lugar e sincronizá-los com seu servidor\n- ♻️ **Economize espaço** — os arquivos de mídia que já estão no seu servidor são reutilizados, não duplicados\n\n### 🔒 Suas lembranças, seu servidor\n\nOs álbuns são armazenados como pastas e arquivos simples no seu próprio Nextcloud. Sem serviços de terceiros, sem dependência: suas lembranças continuam sendo suas.",
     "Loading album list…" : "Carregando lista de álbuns…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nenhum álbum disponível. Você precisará fazer upload das fotos do aplicativo Souvenirs para Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Novo álbum",
@@ -22,6 +23,8 @@
     "Add page" : "Adicionar página",
     "Could not delete the page." : "Não foi possível excluir a página.",
     "Could not remove the image." : "Não foi possível remover a imagem.",
+    "Could not resize the element." : "Não foi possível redimensionar o elemento.",
+    "Could not adjust the image." : "Não foi possível ajustar a imagem.",
     "Could not change the layout." : "Não foi possível alterar o leiaute.",
     "Could not move the page." : "Não foi possível mover a página.",
     "Could not move the element." : "Não foi possível mover o elemento.",
@@ -39,6 +42,8 @@
     "Move page left" : "Mover a página para a esquerda",
     "Move page right" : "Mover a página para a direita",
     "Drag to move" : "Arraste para mover",
+    "Drag to resize" : "Arraste para redimensionar",
+    "Reset zoom and position" : "Redefinir zoom e posição",
     "Remove text" : "Remover texto",
     "Remove image" : "Remover imagem"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Add page" : "Cuir leathanach leis",
     "Could not delete the page." : "Níorbh fhéidir an leathanach a scriosadh.",
     "Could not remove the image." : "Níorbh fhéidir an íomhá a bhaint.",
+    "Could not resize the element." : "Níorbh fhéidir méid an eiliminte a athrú.",
     "Could not change the layout." : "Níorbh fhéidir an leagan amach a athrú.",
     "Could not move the page." : "Níorbh fhéidir an leathanach a bhogadh.",
     "Could not move the element." : "Níorbh fhéidir an eilimint a bhogadh.",
@@ -42,6 +43,7 @@ OC.L10N.register(
     "Move page left" : "Bog an leathanach ar chlé",
     "Move page right" : "Bog an leathanach ar dheis",
     "Drag to move" : "Tarraing le bogadh",
+    "Drag to resize" : "Tarraing chun athrú méide",
     "Remove text" : "Bain téacs",
     "Remove image" : "Bain íomhá"
 },
