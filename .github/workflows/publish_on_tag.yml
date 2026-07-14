@@ -21,11 +21,24 @@ jobs:
           path: ${{ env.APP_NAME }}
       - name: Run build
         run: cd ${{ env.APP_NAME }} && make && make appstore
+      - name: Extract changelog for this release
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            found && /^## / { exit }
+            $0 ~ ("^## " ver "([ -]|$)") { found=1; next }
+            found { print }
+          ' "${APP_NAME}/CHANGELOG.md" > release_notes.md
+          # Fall back to auto-generated notes if the section is missing/empty
+          if [ ! -s release_notes.md ]; then echo "generate=true" >> "$GITHUB_OUTPUT"; fi
       - name: Create release and upload tarball
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           files: ${{ env.APP_NAME }}/build/artifacts/appstore/${{ env.APP_NAME }}.tar.gz
           tag_name: ${{ github.ref_name }}
+          body_path: release_notes.md
+          generate_release_notes: ${{ steps.changelog.outputs.generate == 'true' }}
       - name: Upload app to Nextcloud appstore
         uses: zorgluf/nextcloud-appstore-push-action@v1
         with:

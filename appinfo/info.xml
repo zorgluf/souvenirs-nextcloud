@@ -22,7 +22,7 @@ Relive your memories the way you used to with paper albums: page after page, sto
 ### 🔒 Your souvenirs, your server
 
 Albums are stored as plain folders and files on your own Nextcloud. No third-party service, no lock-in: your souvenirs stay yours.]]></description>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
     <licence>agpl</licence>
     <author mail="zorgluf@gmail.com">Francois Valley</author>
     <namespace>Souvenirs</namespace>

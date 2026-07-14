@@ -1,3 +1,16 @@
+## 2.3.0 - 2026-07-14
+### Added
+- Mosaic image chooser dialog with direct upload [#37](https://github.com/zorgluf/souvenirs-nextcloud/pull/37)
+- Paint mode on page in edit mode [#35](https://github.com/zorgluf/souvenirs-nextcloud/pull/35)
+- Pan and zoom image elements in edit mode [#29](https://github.com/zorgluf/souvenirs-nextcloud/pull/29)
+- Resize elements with corner drag handles in edit mode [#28](https://github.com/zorgluf/souvenirs-nextcloud/pull/28)
+- Support of Nextcloud 34
+
+### Changed
+- Cleaner photosphere viewer in album view
+- Center add page icon [#34](https://github.com/zorgluf/souvenirs-nextcloud/pull/34)
+- Security hardening of share tokens, public endpoints, and input handling [#23](https://github.com/zorgluf/souvenirs-nextcloud/pull/23)
+
 ## 2.2.0 - 2026-07-05
 ### Added
 - Drag and drop elements in edit mode [#18](https://github.com/zorgluf/souvenirs-nextcloud/pull/18)
