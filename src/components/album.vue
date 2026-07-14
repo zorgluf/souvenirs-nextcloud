@@ -65,6 +65,9 @@
             :elements="paintPage.elements" :album-path="path" :element-margin="elementMargin"
             :saving="paintSaving" v-on:close="closePaint" v-on:confirm="onPaintConfirm">
         </paint-dialog>
+        <image-chooser-dialog v-if="imageChooserPageId != null" :saving="imageChooserSaving"
+            v-on:close="closeImageChooser" v-on:pick="onImagePick" v-on:upload="onImageUpload">
+        </image-chooser-dialog>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
@@ -88,7 +91,8 @@ import { isElementDrag } from '../utils/elementDrag.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../api/albumApi.js'
 import PaintDialog from './PaintDialog.vue'
-import { getFilePickerBuilder, showError } from '@nextcloud/dialogs'
+import ImageChooserDialog from './ImageChooserDialog.vue'
+import { showError } from '@nextcloud/dialogs'
 import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
@@ -141,6 +145,9 @@ export default {
             // and whether its confirmed drawing is being uploaded/persisted.
             "paintPageId": null,
             "paintSaving": false,
+            // Same pair for the image chooser dialog.
+            "imageChooserPageId": null,
+            "imageChooserSaving": false,
             // Timestamp of the last page turn triggered by dragging an element
             // near the album edge (throttles the edge navigation).
             "dragNavLast": 0,
@@ -687,37 +694,22 @@ export default {
             // Best-effort GC of assets orphaned by dropped paint elements.
             cleanAssets(this.albumId).catch(() => {});
         },
-        onAddImage: async function(pageId) {
-            var index = this.pages.findIndex(p => p.id === pageId);
-            if (index < 0) {
+        onAddImage: function(pageId) {
+            this.imageChooserSaving = false;
+            this.imageChooserPageId = pageId;
+        },
+        closeImageChooser: function() {
+            // Ignore the dialog's close while a chosen image is being saved.
+            if (!this.imageChooserSaving) {
+                this.imageChooserPageId = null;
+            }
+        },
+        onImagePick: async function(entry) {
+            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
+            if (index < 0 || this.imageChooserSaving) {
                 return;
             }
-            // Browse the user's existing Nextcloud files and pick one image.
-            var node;
-            try {
-                const picker = getFilePickerBuilder(t("souvenirs","Choose an image"))
-                    .setMimeTypeFilter(["image/png","image/jpeg","image/gif","image/webp","image/bmp","image/tiff","image/svg+xml"])
-                    .setMultiSelect(false)
-                    .allowDirectories(false)
-                    // Without an explicit confirm button the picker shows no way to
-                    // validate a selection, so pickNodes() would never resolve.
-                    .setButtonFactory((nodes) => [{
-                        label: t("souvenirs","Choose"),
-                        variant: "primary",
-                        disabled: nodes.length === 0,
-                        callback: () => {},
-                    }])
-                    .build();
-                const nodes = await picker.pickNodes();
-                node = Array.isArray(nodes) ? nodes[0] : nodes;
-            } catch (e) {
-                // The picker rejects when closed without a selection: ignore.
-                return;
-            }
-            if (node == null) {
-                return;
-            }
-            const file = { name: node.basename, size: node.size, mime: node.mime };
+            const file = { name: entry.basename, size: entry.size, mime: entry.mime };
             if (!file.size) {
                 showError(t("souvenirs","Could not read the selected file."));
                 return;
@@ -725,22 +717,62 @@ export default {
             // Build the element first so we know the in-album asset path to link,
             // then ask the backend to link the picked file to it (no copy/upload).
             const element = buildImageElement(file);
-            var res;
+            this.imageChooserSaving = true;
+            var updatedPage;
             try {
-                res = await searchAsset(this.albumId, element.image, file.name, file.size);
-            } catch (e) {
+                var res = await searchAsset(this.albumId, element.image, file.name, file.size);
+                if (res == null || res.status !== "found") {
+                    // Keep the dialog open so the user can pick another file.
+                    this.imageChooserSaving = false;
+                    showError(t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+                    return;
+                }
+                updatedPage = addElement(this.pages[index], element);
+                await updatePage(this.albumId, updatedPage);
+            } catch (error) {
+                this.imageChooserSaving = false;
                 showError(t("souvenirs","Could not add the image."));
                 return;
             }
-            if (res == null || res.status !== "found") {
-                showError(t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+            this.pages.splice(index, 1, updatedPage);
+            this.imageChooserSaving = false;
+            this.imageChooserPageId = null;
+        },
+        onImageUpload: async function(file) {
+            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
+            if (index < 0 || this.imageChooserSaving) {
                 return;
             }
-            const updatedPage = addElement(this.pages[index], element);
+            const element = buildImageElement({ name: file.name, size: file.size, mime: file.type });
+            this.imageChooserSaving = true;
+            var updatedPage;
+            try {
+                // Same upload flow as the paint dialog (and the Android app):
+                // the probe returns where the asset lives under the user's files
+                // root, the bytes go up over native WebDAV, and the server must
+                // confirm the file landed before the page starts referencing it.
+                var probe = await probeAsset(this.albumId, element.image);
+                if (probe == null || !probe.path) {
+                    throw new Error("assetprobe returned no upload path");
+                }
+                await uploadAsset(probe.path, file);
+                var check = await probeAsset(this.albumId, element.image);
+                if (check == null || check.status !== "ok") {
+                    throw new Error("uploaded asset not found in the album");
+                }
+                updatedPage = addElement(this.pages[index], element);
+                await updatePage(this.albumId, updatedPage);
+            } catch (error) {
+                // Keep the dialog open so the user can retry; GC any bytes that
+                // landed before the failure (the element was never persisted).
+                this.imageChooserSaving = false;
+                showError(t("souvenirs","Could not upload the image."));
+                cleanAssets(this.albumId).catch(() => {});
+                return;
+            }
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
-                showError(t("souvenirs","Could not save the added image."));
-            });
+            this.imageChooserSaving = false;
+            this.imageChooserPageId = null;
         },
         resizeEventHandler: function(e) {
             if (window.innerHeight > window.innerWidth) {
@@ -763,6 +795,7 @@ export default {
         Videofull: Videofull,
         AudioPlayer: AudioPlayer,
         "paint-dialog": PaintDialog,
+        "image-chooser-dialog": ImageChooserDialog,
         NcModal,
         NcProgressBar,
         NcActions,
