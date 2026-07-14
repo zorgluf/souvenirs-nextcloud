@@ -1,4 +1,6 @@
 { "translations": {
+    "Cancel" : "გაუქმება",
+    "Confirm" : "Confirm",
     "Date" : "თარიღი",
     "Create" : "Create",
     "Save" : "Save",

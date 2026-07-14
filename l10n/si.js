@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Confirm" : "තහවුරු කරන්න",
     "Date" : "දිනය",
     "Create" : "සාදන්න",
     "Save" : "Save",

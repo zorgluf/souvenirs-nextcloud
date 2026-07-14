@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "یادگاری‌ها",
+    "Pen" : "قلم",
+    "Cancel" : "انصراف",
+    "Confirm" : "تأیید",
     "Loading album list…" : "در حال بارگذاری لیست آلبوم‌ها…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "هیچ آلبومی موجود نیست. باید آن‌ها را از برنامه اندروید Souvenirs (https://github.com/zorgluf/souvenirs-android) بارگذاری کنید.",
     "New album" : "آلبوم جدید",

@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Hediyelikler",
+    "Pen" : "Kalem",
+    "Cancel" : "İptal",
+    "Confirm" : "Onayla",
     "Loading album list…" : "Albüm listesi yükleniyor…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Kullanılabilecek bir albüm yok. Souvenirs Android uygulamasından yüklemelisiniz (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Yeni albüm",

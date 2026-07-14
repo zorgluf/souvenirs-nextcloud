@@ -1,4 +1,6 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Confirm" : "ยืนยัน",
     "Date" : "วันที่",
     "Create" : "สร้าง",
     "Save" : "Save",

@@ -2,6 +2,7 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenýry",
+    "Confirm" : "Potvrdit",
     "Loading album list…" : "Načítání seznamu alb …",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Není k dispozici žádné album. Je třeba je nahrát z Android aplikace Suvenýry (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Nové album",

@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Acordanzas",
+    "Pen" : "Bolígrafo",
+    "Cancel" : "Cancelar",
+    "Confirm" : "Confirmar",
     "Loading album list…" : "Cargando a lista de álbums…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Non hai ningún álbum dispoñíbel. Terá que envialos desde a aplicación de Android Acordanzas (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Novo álbum",

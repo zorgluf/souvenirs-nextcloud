@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Воспоминания",
+    "Pen" : "Ручка",
+    "Cancel" : "Отмена",
+    "Confirm" : "Подтвердить",
     "New album" : "Создать альбом",
     "Album name" : "Название альбома",
     "Date" : "Дата",

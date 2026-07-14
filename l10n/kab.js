@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Semmet",
+    "Confirm" : "Sergeg",
     "Album name" : "Isem n walbum",
     "Date" : "Azemz",
     "Create" : "Snulfu-d",

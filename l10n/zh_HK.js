@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "回憶",
+    "Pen" : "筆",
+    "Cancel" : "取消",
+    "Confirm" : "確認",
     "Loading album list…" : "正在加載相簿清單 ...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "沒有相簿可用。您需要從 Andriod 應用程式 Souvenirs (https://github.com/zorgluf/souvenirs-android) 上傳它們。",
     "New album" : "新相簿",

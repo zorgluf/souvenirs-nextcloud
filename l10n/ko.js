@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "펜",
+    "Cancel" : "Cancel",
+    "Confirm" : "확인",
     "New album" : "새 앨범",
     "Album name" : "앨범 이름",
     "Date" : "날짜",

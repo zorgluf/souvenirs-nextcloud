@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Confirm" : "אישור",
     "New album" : "אלבום חדש",
     "Date" : "תאריך",
     "Create" : "יצירה",

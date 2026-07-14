@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Kynä",
+    "Cancel" : "Cancel",
+    "Confirm" : "Vahvista",
     "New album" : "Uusi albumi",
     "Album name" : "Albumin nimi",
     "Date" : "Päivä",

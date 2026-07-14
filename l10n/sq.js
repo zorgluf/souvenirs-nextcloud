@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Confirm" : "Konfirmo",
     "Create" : "Krijo",
     "Save" : "Save",
     "Download" : "Shkarko",

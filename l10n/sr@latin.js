@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Poništi",
     "Save" : "Sačuvaj",
     "Download" : "Preuzmi",
     "Edit" : "Izmeni",

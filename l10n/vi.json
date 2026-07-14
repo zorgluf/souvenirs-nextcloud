@@ -1,4 +1,6 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Confirm" : "Xác nhận",
     "Date" : "Ngày",
     "Create" : "Tạo",
     "Save" : "Save",

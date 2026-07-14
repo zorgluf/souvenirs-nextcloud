@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "Pen" : "Toll",
+    "Cancel" : "Mégse",
+    "Confirm" : "Megerősítés",
     "Loading album list…" : "Albumlista betöltése…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nem érhető el album. Fel kell töltenie őket a Souvenirs androidos alkalmazásból (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Új album",

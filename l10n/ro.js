@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Peniță",
+    "Cancel" : "Cancel",
+    "Confirm" : "Confirmă",
     "Date" : "Dată",
     "Create" : "Crează",
     "Save" : "Save",

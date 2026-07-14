@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
     "Save" : "Save",
     "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
     "Edit" : "ಸಂಪಾದಿಸು",

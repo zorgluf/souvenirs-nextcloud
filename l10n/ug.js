@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "خاتىرە بۇيۇملار",
+    "Pen" : "قەلەم",
+    "Cancel" : "Cancel",
+    "Confirm" : "جەزملەشتۈرۈڭ",
     "Loading album list…" : "ئالبۇم تىزىملىكى يۈكلىنىۋاتىدۇ…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "ئالبۇم يوق. ئۇلارنى ئاندىرويىد دېتالى خاتىرە بۇيۇملىرى (https://github.com/zorgluf/souvenirs-android) دىن يۈكلىشىڭىز كېرەك.",
     "New album" : "يېڭى پىلاستىنكا",

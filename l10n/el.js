@@ -2,6 +2,8 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Αναμνηστικά",
+    "Pen" : "Στυλό",
+    "Confirm" : "Επιβεβαίωση",
     "New album" : "Νέο άλμπουμ",
     "Album name" : "Όνομα άλμπουμ",
     "Date" : "Ημερομηνία",

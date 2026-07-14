@@ -1,5 +1,7 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
+    "Pen" : "Pluma",
+    "Confirm" : "Confirmar",
     "Loading album list…" : "Cargando lista de álbumes…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No hay álbum disponible. Tendrá que subirlos desde la app Android Souvernirs (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Nuevo álbum",

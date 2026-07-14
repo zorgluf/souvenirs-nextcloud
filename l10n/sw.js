@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Ukumbusho",
+    "Pen" : "Kalamu",
+    "Cancel" : "Ghairi",
+    "Confirm" : "Thibitisha",
     "Loading album list…" : "Inapakia orodha ya albamu...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Hakuna albamu inayopatikana. Utahitaji kuzipakia kutoka kwa Zawadi za programu ya Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Albamu mpya",

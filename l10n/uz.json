@@ -1,5 +1,7 @@
 { "translations": {
     "Souvenirs" : "Suvenirlar",
+    "Cancel" : "Bekor qilish",
+    "Confirm" : "Tasdiqlash",
     "Loading album list…" : "Albom roʻyxati yuklanmoqda…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Hech qanday albom mavjud emas. Siz ularni Android ilovasidan Suvenirs (https://github.com/zorgluf/souvenirs-android) dan yuklashingiz kerak bo'ladi.",
     "Date" : "Sana",

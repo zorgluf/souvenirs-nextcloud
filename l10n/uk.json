@@ -1,5 +1,8 @@
 { "translations": {
     "Souvenirs" : "Сувеніри",
+    "Pen" : "Перо",
+    "Cancel" : "Cancel",
+    "Confirm" : "Підтвердити",
     "Loading album list…" : "Завантаження списку альбомів...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбом не доступний. Вам потрібно буде завантажити їх із застосунку Souvenirs для Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Новий альбом",

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
     "Create" : "Cruthaich",
     "Save" : "Save",
     "Download" : "Luchdaich a-nuas",

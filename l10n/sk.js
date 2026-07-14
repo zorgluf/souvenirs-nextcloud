@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Pero",
+    "Cancel" : "Cancel",
+    "Confirm" : "Potvrdiť",
     "New album" : "Nový album",
     "Album name" : "Názov albumu",
     "Date" : "Dátum",

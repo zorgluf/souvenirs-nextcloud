@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Pisalo",
+    "Cancel" : "Cancel",
+    "Confirm" : "Potrdi",
     "New album" : "Nov album",
     "Date" : "Datum",
     "Create" : "Ustvari",

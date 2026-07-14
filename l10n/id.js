@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "Pen" : "Pena",
+    "Cancel" : "Cancel",
+    "Confirm" : "Konfirmasi",
     "Loading album list…" : "Memuat daftar album…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Tidak ada album yang tersedia. Anda perlu mengunggahnya dari aplikasi Android Souvenirs (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Album baru",

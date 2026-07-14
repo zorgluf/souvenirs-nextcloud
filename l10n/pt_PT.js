@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
+    "Pen" : "Caneta",
+    "Cancel" : "Cancel",
+    "Confirm" : "Confirmar",
     "Loading album list…" : "Carregando lista de álbuns…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nenhum álbum disponível. Você precisará fazer upload das fotos do aplicativo Souvenirs para Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Novo álbum",

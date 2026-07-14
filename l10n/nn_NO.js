@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
     "Date" : "Dato",
     "Save" : "Save",
     "Download" : "Last ned",

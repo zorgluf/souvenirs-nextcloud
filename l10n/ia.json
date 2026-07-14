@@ -1,4 +1,6 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Confirm" : "Confirmar",
     "Save" : "Save",
     "Download" : "Discargar",
     "Fullscreen" : "Schermo plen",

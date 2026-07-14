@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "ປາກກາ",
+    "Cancel" : "Cancel",
+    "Confirm" : "ຢືນຢັນ",
     "New album" : "ອະລະບໍ້າໃໝ່",
     "Album name" : "ຊື່ອາລະບ້ຳ",
     "Date" : "Date",

@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Pluma",
+    "Cancel" : "Cancel",
+    "Confirm" : "Confirmar",
     "New album" : "Nuevo álbum",
     "Date" : "Fecha",
     "Create" : "Crear",

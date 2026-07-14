@@ -2,6 +2,8 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "Pen" : "Pen",
+    "Confirm" : "Confirm",
     "Loading album list…" : "Loading album list…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "New album",

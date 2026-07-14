@@ -1,5 +1,8 @@
 { "translations": {
     "Souvenirs" : "Дурсамж",
+    "Pen" : "Үзэг",
+    "Cancel" : "‚Äì¬±‚Äì√¶‚Äì¬™‚Äì‚àè‚Äî√â‚Äì¬™‚Äì‚àû‚Äî√ñ",
+    "Confirm" : "–ë–∞—Ç–ª–∞—Ö",
     "Loading album list…" : "Цомгийн жагсаалтыг ачааллаж байна…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Цомог байхгүй байна. Android апп Souvenirs (https://github.com/zorgluf/souvenirs-android)-аас байршуулах шаардлагатай.",
     "New album" : "Шинэ цомог",

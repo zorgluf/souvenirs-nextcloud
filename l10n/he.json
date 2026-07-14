@@ -1,4 +1,6 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Confirm" : "אישור",
     "New album" : "אלבום חדש",
     "Date" : "תאריך",
     "Create" : "יצירה",

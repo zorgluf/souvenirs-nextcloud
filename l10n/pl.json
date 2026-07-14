@@ -1,4 +1,7 @@
 { "translations": {
+    "Pen" : "Długopis",
+    "Cancel" : "Anuluj",
+    "Confirm" : "Potwierdź",
     "New album" : "Nowy album",
     "Date" : "Data",
     "Create" : "Utwórz",

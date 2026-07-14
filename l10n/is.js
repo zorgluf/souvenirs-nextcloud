@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Penni",
+    "Cancel" : "Cancel",
+    "Confirm" : "Staðfesta",
     "New album" : "Nýtt albúm",
     "Date" : "Dagsetning",
     "Create" : "Búa til",

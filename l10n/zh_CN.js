@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "笔",
+    "Cancel" : "Cancel",
+    "Confirm" : "确认",
     "New album" : "新相册",
     "Album name" : "相册名称",
     "Date" : "日期",

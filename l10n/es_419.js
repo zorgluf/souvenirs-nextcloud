@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Confirm" : "Confirmar",
     "Save" : "Save",
     "Download" : "Descargar",
     "Fullscreen" : "Pantalla completa",

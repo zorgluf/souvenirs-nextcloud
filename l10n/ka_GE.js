@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Confirm" : "დადასტურება",
     "Save" : "Save",
     "Download" : "ჩამოტვირთვა",
     "Fullscreen" : "მთელი ეკრანი",

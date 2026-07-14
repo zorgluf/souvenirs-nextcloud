@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Pen" : "Пенкало",
+    "Cancel" : "Cancel",
+    "Confirm" : "Потврди",
     "New album" : "Нов албум",
     "Album name" : "Име на албумот",
     "Date" : "Датум",

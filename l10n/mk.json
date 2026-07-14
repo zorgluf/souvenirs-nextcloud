@@ -1,4 +1,7 @@
 { "translations": {
+    "Pen" : "Пенкало",
+    "Cancel" : "Cancel",
+    "Confirm" : "Потврди",
     "New album" : "Нов албум",
     "Album name" : "Име на албумот",
     "Date" : "Датум",

@@ -2,6 +2,9 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Oroigarriak",
+    "Pen" : "Boligrafoa",
+    "Cancel" : "Cancel",
+    "Confirm" : "Berretsi",
     "New album" : "Album berria",
     "Album name" : "Albumaren izena",
     "Date" : "Data",

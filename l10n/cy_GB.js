@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Confirm" : "Cadarnhau",
     "Save" : "Save",
     "Download" : "Llwytho i lawr",
     "Edit" : "Golygu",

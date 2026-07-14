@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Confirm" : "Apstiprināt",
     "New album" : "Jauns albums",
     "Album name" : "Albuma nosaukums",
     "Date" : "Datums",
