@@ -1,13 +1,16 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Todos los archivos",
+    "Upload" : "Cargar",
+    "Cancel" : "Cancel",
+    "Choose" : "Elige",
     "Confirm" : "Confirmar",
     "Date" : "Fecha",
     "Save" : "Save",
     "Download" : "Descargar",
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Editar",
-    "Choose" : "Elige",
     "Change layout" : "Cambiar diseño",
     "Remove image" : "Eliminar imagen"
 },

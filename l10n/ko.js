@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "펜",
+    "All files" : "모든 파일",
+    "Upload" : "업로드",
     "Cancel" : "Cancel",
+    "Choose" : "선택",
+    "Pen" : "펜",
     "Confirm" : "확인",
     "New album" : "새 앨범",
     "Album name" : "앨범 이름",
@@ -12,7 +15,6 @@ OC.L10N.register(
     "Download" : "다운로드",
     "Fullscreen" : "전체 화면",
     "Edit" : "편집",
-    "Choose" : "선택",
     "Remove image" : "그림 삭제"
 },
 "nplurals=1; plural=0;");

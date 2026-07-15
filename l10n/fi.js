@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Kynä",
+    "All files" : "Kaikki tiedostot",
+    "Upload" : "Lähetä",
     "Cancel" : "Cancel",
+    "Choose" : "Valitse",
+    "Pen" : "Kynä",
     "Confirm" : "Vahvista",
     "New album" : "Uusi albumi",
     "Album name" : "Albumin nimi",
@@ -16,7 +19,6 @@ OC.L10N.register(
     "Fullscreen" : "Koko näyttö",
     "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona.",
     "Edit" : "Muokkaa",
-    "Choose" : "Valitse",
     "Add image" : "Lisää kuva",
     "Change layout" : "Vaihda asettelua",
     "Drag to move" : "Vedä siirtääksesi",

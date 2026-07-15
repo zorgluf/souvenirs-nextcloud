@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "回憶",
-    "Pen" : "筆",
+    "All files" : "所有檔案",
+    "Upload" : "上傳",
     "Cancel" : "取消",
+    "Choose" : "選擇",
+    "Pen" : "筆",
     "Confirm" : "確認",
     "Loading album list…" : "正在加載相簿清單 ...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "沒有相簿可用。您需要從 Andriod 應用程式 Souvenirs (https://github.com/zorgluf/souvenirs-android) 上傳它們。",
@@ -19,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "全螢幕",
     "Click to download album in a zip file." : "點擊以將相簿下載為 zip 檔案。",
     "Edit" : "編輯",
-    "Choose" : "選擇",
     "Change layout" : "更改佈局",
     "Drag to move" : "拖動以移動",
     "Remove image" : "移除圖像"

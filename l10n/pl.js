@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Długopis",
+    "All files" : "Wszystkie pliki",
+    "Upload" : "Wyślij",
     "Cancel" : "Anuluj",
+    "Choose" : "Wybierz",
+    "Pen" : "Długopis",
     "Confirm" : "Potwierdź",
     "New album" : "Nowy album",
     "Date" : "Data",
@@ -11,7 +14,6 @@ OC.L10N.register(
     "Download" : "Pobierz",
     "Fullscreen" : "Pełny ekran",
     "Edit" : "Edycja",
-    "Choose" : "Wybierz",
     "Change layout" : "Zmień układ",
     "Drag to move" : "Przeciągnij, aby przenieść",
     "Remove image" : "Usuń zdjęcie"

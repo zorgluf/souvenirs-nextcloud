@@ -1,10 +1,12 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "﻿ಎಲ್ಲಾ ಕಡತಗಳು",
+    "Upload" : "ವರ್ಗಾಯಿಸಿ",
     "Cancel" : "Cancel",
+    "Choose" : "﻿ಆಯ್ಕೆ",
     "Save" : "Save",
     "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
-    "Edit" : "ಸಂಪಾದಿಸು",
-    "Choose" : "﻿ಆಯ್ಕೆ"
+    "Edit" : "ಸಂಪಾದಿಸು"
 },
 "nplurals=2; plural=(n > 1);");

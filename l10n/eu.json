@@ -1,7 +1,10 @@
 { "translations": {
     "Souvenirs" : "Oroigarriak",
-    "Pen" : "Boligrafoa",
+    "All files" : "Fitxategi guztiak",
+    "Upload" : "Igo",
     "Cancel" : "Cancel",
+    "Choose" : "Aukeratu",
+    "Pen" : "Boligrafoa",
     "Confirm" : "Berretsi",
     "New album" : "Album berria",
     "Album name" : "Albumaren izena",
@@ -15,7 +18,6 @@
     "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
     "Edit" : "Editatu",
-    "Choose" : "Aukeratu",
     "Change layout" : "Aldatu diseinua",
     "Remove image" : "Kendu irudia"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

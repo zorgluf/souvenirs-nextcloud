@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Pen" : "Toll",
+    "All files" : "Összes fájl",
+    "Upload" : "Feltöltés",
     "Cancel" : "Mégse",
+    "Choose" : "Válasszon",
+    "Pen" : "Toll",
     "Confirm" : "Megerősítés",
     "Loading album list…" : "Albumlista betöltése…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Nem érhető el album. Fel kell töltenie őket a Souvenirs androidos alkalmazásból (https://github.com/zorgluf/souvenirs-android).",
@@ -18,7 +21,6 @@ OC.L10N.register(
     "Fullscreen" : "Teljes képernyő",
     "Click to download album in a zip file." : "Kattintson az album ZIP-fájlban való letöltéséhez.",
     "Edit" : "Szerkesztés",
-    "Choose" : "Válasszon",
     "Change layout" : "Elrendezés módosítása",
     "Remove image" : "Kép eltávolítása"
 },

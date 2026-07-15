@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувеніри",
-    "Pen" : "Перо",
+    "All files" : "Усі документи",
+    "Upload" : "Завантажити",
     "Cancel" : "Cancel",
+    "Choose" : "Вибрати",
+    "Pen" : "Перо",
     "Confirm" : "Підтвердити",
     "Loading album list…" : "Завантаження списку альбомів...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбом не доступний. Вам потрібно буде завантажити їх із застосунку Souvenirs для Android (https://github.com/zorgluf/souvenirs-android).",
@@ -19,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "На весь екран",
     "Click to download album in a zip file." : "Натисніть, щоб звантажити архів ZIP з альбомом.",
     "Edit" : "Редагувати",
-    "Choose" : "Вибрати",
     "Change layout" : "Змінити макет",
     "Drag to move" : "Потягніть, щоб пересунути",
     "Remove image" : "Вилучити зображення"

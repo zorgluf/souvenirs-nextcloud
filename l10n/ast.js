@@ -1,6 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Cancel" : "Cancel",
+    "Choose" : "Escoyer",
+    "Pen" : "Pluma",
+    "Confirm" : "Confirmar",
     "Loading album list…" : "Cargando la llista d'álbumes…",
     "New album" : "Álbum nuevu",
     "Date" : "Data",
@@ -11,7 +15,6 @@ OC.L10N.register(
     "Slideshow speed" : "Velocidá de la proyeición",
     "Download" : "Baxar",
     "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
-    "Edit" : "Editar",
-    "Choose" : "Escoyer"
+    "Edit" : "Editar"
 },
 "nplurals=2; plural=(n != 1);");

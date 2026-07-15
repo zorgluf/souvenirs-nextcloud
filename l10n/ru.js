@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Воспоминания",
-    "Pen" : "Ручка",
+    "All files" : "Все файлы",
+    "Upload" : "Отправить",
     "Cancel" : "Отмена",
+    "Choose" : "Выберите",
+    "Pen" : "Ручка",
     "Confirm" : "Подтвердить",
     "New album" : "Создать альбом",
     "Album name" : "Название альбома",
@@ -17,7 +20,6 @@ OC.L10N.register(
     "Fullscreen" : "Полный экран",
     "Click to download album in a zip file." : "Нажмите чтобы скачать альбом в виде zip файла.",
     "Edit" : "Редактировать",
-    "Choose" : "Выберите",
     "Change layout" : "Изменить макет",
     "Remove image" : "Удалить"
 },

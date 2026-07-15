@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Αναμνηστικά",
+    "All files" : "Όλα τα αρχεία",
+    "Upload" : "Μεταφόρτωση",
+    "Cancel" : "Ακύρωση",
+    "Choose" : "Επιλογή",
     "Pen" : "Στυλό",
     "Confirm" : "Επιβεβαίωση",
     "New album" : "Νέο άλμπουμ",
@@ -16,7 +20,6 @@ OC.L10N.register(
     "Fullscreen" : "Πλήρης οθόνη",
     "Click to download album in a zip file." : "Κάντε κλικ για λήψη του άλμπουμ σε ένα αρχείο zip.",
     "Edit" : "Επεξεργασία",
-    "Choose" : "Επιλογή",
     "Change layout" : "Αλλαγή διάταξης",
     "Remove image" : "Αφαίρεση εικόνας"
 },

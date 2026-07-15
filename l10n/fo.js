@@ -2,9 +2,7 @@ OC.L10N.register(
     "souvenirs",
     {
     "Cancel" : "Cancel",
-    "Choose" : "منتخب کریں",
     "Save" : "Save",
-    "Download" : "ڈاؤن لوڈ",
-    "Edit" : "تدوین کریں"
+    "Remove image" : "Strika Myndina"
 },
 "nplurals=2; plural=(n != 1);");

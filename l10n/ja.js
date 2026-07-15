@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "ペン",
+    "All files" : "すべてのファイル",
+    "Upload" : "アップロード",
     "Cancel" : "キャンセル",
+    "Choose" : "選択",
+    "Pen" : "ペン",
     "Confirm" : "承認",
     "New album" : "新しいアルバム",
     "Date" : "日付",
@@ -11,7 +14,6 @@ OC.L10N.register(
     "Download" : "ダウンロード",
     "Fullscreen" : "全画面",
     "Edit" : "編集",
-    "Choose" : "選択",
     "Drag to move" : "ドラッグして移動",
     "Remove image" : "画像を削除"
 },

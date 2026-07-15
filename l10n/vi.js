@@ -1,7 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Tất cả tệp tin",
+    "Upload" : "Tải lên",
     "Cancel" : "Cancel",
+    "Choose" : "Chọn",
     "Confirm" : "Xác nhận",
     "Date" : "Ngày",
     "Create" : "Tạo",
@@ -9,7 +12,6 @@ OC.L10N.register(
     "Download" : "Tải xuống",
     "Fullscreen" : "Toàn màn hình",
     "Edit" : "Chỉnh sửa",
-    "Choose" : "Chọn",
     "Remove image" : "Xóa "
 },
 "nplurals=1; plural=0;");

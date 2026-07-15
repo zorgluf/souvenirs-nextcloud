@@ -1,9 +1,10 @@
 { "translations": {
+    "Upload" : "பதிவேற்றுக",
     "Cancel" : "Cancel",
+    "Choose" : "தெரிவுசெய்க ",
     "Date" : "Date",
     "Save" : "Save",
     "Download" : "பதிவிறக்குக",
-    "Edit" : "தொகுக்க",
-    "Choose" : "தெரிவுசெய்க "
+    "Edit" : "தொகுக்க"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

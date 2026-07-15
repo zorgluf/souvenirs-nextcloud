@@ -1,9 +1,11 @@
 { "translations": {
+    "All files" : "Ähli faýllar",
+    "Upload" : "Ýüklemek",
     "Cancel" : "Cancel",
+    "Choose" : "saýlamak",
     "Create" : "Dörediň",
     "Save" : "Save",
     "Download" : "Göçürip almak",
-    "Edit" : "Redaktirläň",
-    "Choose" : "saýlamak"
+    "Edit" : "Redaktirläň"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

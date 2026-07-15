@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "All files" : "Todos los archivos",
+    "Upload" : "Subir",
+    "Cancel" : "Cancelar",
+    "Choose" : "Seleccione",
     "Pen" : "Pluma",
     "Confirm" : "Confirmar",
     "Loading album list…" : "Cargando lista de álbumes…",
@@ -18,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Pulse para descargar el álbum en un archivo zip.",
     "Edit" : "Editar",
-    "Choose" : "Seleccione",
     "Change layout" : "Cambiar diseño",
     "Drag to move" : "Arrastrar para mover",
     "Remove image" : "Borrar imagen"

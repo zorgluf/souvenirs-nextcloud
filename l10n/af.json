@@ -1,7 +1,9 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Choose" : "Kies",
+    "Confirm" : "Bevestig",
     "Save" : "Save",
     "Download" : "Laai af",
-    "Choose" : "Kies",
     "Remove image" : "Verwyder beeld"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

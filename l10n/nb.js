@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Pen" : "Penn",
+    "All files" : "Alle filer",
+    "Upload" : "Last opp",
     "Cancel" : "Cancel",
+    "Choose" : "Velg",
+    "Pen" : "Penn",
     "Confirm" : "Bekreft",
     "Loading album list…" : "Laster albumliste...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Ingen album tilgjengelig. Du må laste dem opp fra Android-appen Suvenirer (https://github.com/zorgluf/souvenirs-android).",
@@ -19,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "Fullskjerm",
     "Click to download album in a zip file." : "Klikk for å laste ned album i en zip-fil.",
     "Edit" : "Rediger",
-    "Choose" : "Velg",
     "Change layout" : "Endre utforming",
     "Remove image" : "Fjern bilde"
 },

@@ -1,6 +1,9 @@
 { "translations": {
-    "Pen" : "Penni",
+    "All files" : "Allar skrár",
+    "Upload" : "Senda inn",
     "Cancel" : "Cancel",
+    "Choose" : "Velja",
+    "Pen" : "Penni",
     "Confirm" : "Staðfesta",
     "New album" : "Nýtt albúm",
     "Date" : "Dagsetning",
@@ -9,7 +12,6 @@
     "Download" : "Sækja",
     "Fullscreen" : "Fylla skjáinn",
     "Edit" : "Breyta",
-    "Choose" : "Velja",
     "Remove image" : "Fjarlægja mynd"
 },"pluralForm" :"nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);"
 }

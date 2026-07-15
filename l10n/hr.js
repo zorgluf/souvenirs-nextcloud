@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Olovka",
+    "All files" : "Sve datoteke",
+    "Upload" : "Učitaj",
     "Cancel" : "Otkaži",
+    "Choose" : "Odaberite",
+    "Pen" : "Olovka",
     "Confirm" : "Potvrdi",
     "New album" : "Novi album",
     "Date" : "Datum",
@@ -11,7 +14,6 @@ OC.L10N.register(
     "Download" : "Preuzmi",
     "Fullscreen" : "Cijeli zaslon",
     "Edit" : "Uredi",
-    "Choose" : "Odaberite",
     "Drag to move" : "Povucite za premještanje",
     "Remove image" : "Ukloni sliku"
 },

@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Penni",
+    "All files" : "Allar skrár",
+    "Upload" : "Senda inn",
     "Cancel" : "Cancel",
+    "Choose" : "Velja",
+    "Pen" : "Penni",
     "Confirm" : "Staðfesta",
     "New album" : "Nýtt albúm",
     "Date" : "Dagsetning",
@@ -11,7 +14,6 @@ OC.L10N.register(
     "Download" : "Sækja",
     "Fullscreen" : "Fylla skjáinn",
     "Edit" : "Breyta",
-    "Choose" : "Velja",
     "Remove image" : "Fjarlægja mynd"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

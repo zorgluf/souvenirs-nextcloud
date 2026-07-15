@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Дурсамж",
-    "Pen" : "Үзэг",
+    "All files" : "Бүх файлууд",
+    "Upload" : "–±–∞–π—Ä—à—É—É–ª–∞—Ö",
     "Cancel" : "‚Äì¬±‚Äì√¶‚Äì¬™‚Äì‚àè‚Äî√â‚Äì¬™‚Äì‚àû‚Äî√ñ",
+    "Choose" : "–°–æ–Ω–≥–æ—Ö",
+    "Pen" : "Үзэг",
     "Confirm" : "–ë–∞—Ç–ª–∞—Ö",
     "Loading album list…" : "Цомгийн жагсаалтыг ачааллаж байна…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Цомог байхгүй байна. Android апп Souvenirs (https://github.com/zorgluf/souvenirs-android)-аас байршуулах шаардлагатай.",
@@ -18,7 +21,6 @@ OC.L10N.register(
     "Fullscreen" : "Бүтэн дэлгэц",
     "Click to download album in a zip file." : "Цомгийг zip файлаар татахын тулд дарна уу.",
     "Edit" : "”®”©—Ä—á–ª”©—Ö",
-    "Choose" : "–°–æ–Ω–≥–æ—Ö",
     "Drag to move" : "Зөөхийн тулд чирнэ үү",
     "Remove image" : "Зургийг хасах"
 },

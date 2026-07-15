@@ -1,8 +1,8 @@
 { "translations": {
     "Cancel" : "Cancel",
+    "Choose" : "منتخب کریں",
     "Save" : "Save",
     "Download" : "ڈاؤن لوڈ",
-    "Edit" : "تدوین کریں",
-    "Choose" : "منتخب کریں"
+    "Edit" : "تدوین کریں"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

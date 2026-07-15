@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
-    "Pen" : "Pena",
+    "All files" : "Semua berkas",
+    "Upload" : "Unggah",
     "Cancel" : "Cancel",
+    "Choose" : "Pilih",
+    "Pen" : "Pena",
     "Confirm" : "Konfirmasi",
     "Loading album list…" : "Memuat daftar album…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Tidak ada album yang tersedia. Anda perlu mengunggahnya dari aplikasi Android Souvenirs (https://github.com/zorgluf/souvenirs-android).",
@@ -18,7 +21,6 @@ OC.L10N.register(
     "Fullscreen" : "Layar penuh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Edit" : "Edit",
-    "Choose" : "Pilih",
     "Drag to move" : "Seret untuk memindahkan",
     "Remove image" : "Hapus gambar"
 },

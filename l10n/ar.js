@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "تذكارات souvenirs",
+    "Cancel" : "Cancel",
+    "Choose" : "إختر",
+    "Pen" : "قلم",
+    "Confirm" : "تأكيد",
     "Loading album list…" : "تحميل قائمة الألبوم ...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "لا يتوافر أي ألبوم. يتوجب تحميلها من تطبيق الأندرويد \"تذكارات\"souvenirs. \n(https://github.com/zorgluf/souvenirs-android)",
     "New album" : "ألبوم جديد",
@@ -16,7 +20,6 @@ OC.L10N.register(
     "Fullscreen" : "وضع ملء الشاشة",
     "Click to download album in a zip file." : "إضغط لتنزيل الألبوم في ملف zip.",
     "Edit" : "تحرير",
-    "Choose" : "إختر",
     "Change layout" : "غيِّر مُخطّط العرض",
     "Remove image" : "إزالة الصورة"
 },

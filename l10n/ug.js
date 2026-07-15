@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "خاتىرە بۇيۇملار",
-    "Pen" : "قەلەم",
+    "All files" : "بارلىق ھۆججەتلەر",
+    "Upload" : "يۈكلەش",
     "Cancel" : "Cancel",
+    "Choose" : "تاللاڭ",
+    "Pen" : "قەلەم",
     "Confirm" : "جەزملەشتۈرۈڭ",
     "Loading album list…" : "ئالبۇم تىزىملىكى يۈكلىنىۋاتىدۇ…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "ئالبۇم يوق. ئۇلارنى ئاندىرويىد دېتالى خاتىرە بۇيۇملىرى (https://github.com/zorgluf/souvenirs-android) دىن يۈكلىشىڭىز كېرەك.",
@@ -19,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "تولۇق ئېكران",
     "Click to download album in a zip file." : "Zip ھۆججىتىدىكى پىلاستىنكىنى چۈشۈرۈش ئۈچۈن چېكىڭ.",
     "Edit" : "تەھرىر",
-    "Choose" : "تاللاڭ",
     "Change layout" : "ئورۇنلاشتۇرۇش",
     "Drag to move" : "سۆرەپ يۆتكىڭ"
 },

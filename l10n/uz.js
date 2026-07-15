@@ -2,7 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenirlar",
+    "All files" : "Barcha filtrlar",
+    "Upload" : "Yuklash",
     "Cancel" : "Bekor qilish",
+    "Choose" : "Tanlang",
     "Confirm" : "Tasdiqlash",
     "Loading album list…" : "Albom roʻyxati yuklanmoqda…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Hech qanday albom mavjud emas. Siz ularni Android ilovasidan Suvenirs (https://github.com/zorgluf/souvenirs-android) dan yuklashingiz kerak bo'ladi.",
@@ -16,7 +19,6 @@ OC.L10N.register(
     "Fullscreen" : "Toʻliq ekran",
     "Click to download album in a zip file." : "Albomni zip faylda yuklab olish uchun bosing.",
     "Edit" : "Tahrirlash",
-    "Choose" : "Tanlang",
     "Change layout" : "Tartibni o'zgartirish"
 },
 "nplurals=1; plural=0;");

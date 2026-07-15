@@ -1,8 +1,6 @@
 { "translations": {
     "Cancel" : "Cancel",
-    "Choose" : "Eslechir",
-    "Create" : "Crear",
     "Save" : "Save",
-    "Download" : "Escargar"
+    "Remove image" : "Strika Myndina"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -1,7 +1,8 @@
 { "translations": {
+    "Cancel" : "Cancel",
+    "Choose" : "বেছে নিন",
     "Save" : "Save",
     "Download" : "ডাউনলোড",
-    "Edit" : "সম্পাদনা",
-    "Choose" : "বেছে নিন"
+    "Edit" : "সম্পাদনা"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

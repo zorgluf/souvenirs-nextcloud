@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Peniță",
+    "All files" : "Toate fișierele",
+    "Upload" : "Încărcare",
     "Cancel" : "Cancel",
+    "Choose" : "Alege",
+    "Pen" : "Peniță",
     "Confirm" : "Confirmă",
     "Date" : "Dată",
     "Create" : "Crează",
@@ -10,7 +13,6 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
     "Edit" : "Editează",
-    "Choose" : "Alege",
     "Remove image" : "Înlătură imagine"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

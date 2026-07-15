@@ -1,6 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Tots els fitxers",
+    "Upload" : "Puja",
+    "Cancel" : "Cancel",
+    "Choose" : "Tria",
+    "Pen" : "Llapis",
     "Confirm" : "Confirma",
     "New album" : "Àlbum nou",
     "Date" : "Data",
@@ -9,7 +14,6 @@ OC.L10N.register(
     "Download" : "Baixada",
     "Fullscreen" : "Pantalla completa",
     "Edit" : "Edició",
-    "Choose" : "Tria",
     "Change layout" : "Canviar diseny",
     "Remove image" : "Suprimir imatge"
 },

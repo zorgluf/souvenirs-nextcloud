@@ -1,6 +1,9 @@
 { "translations": {
-    "Pen" : "Długopis",
+    "All files" : "Wszystkie pliki",
+    "Upload" : "Wyślij",
     "Cancel" : "Anuluj",
+    "Choose" : "Wybierz",
+    "Pen" : "Długopis",
     "Confirm" : "Potwierdź",
     "New album" : "Nowy album",
     "Date" : "Data",
@@ -9,7 +12,6 @@
     "Download" : "Pobierz",
     "Fullscreen" : "Pełny ekran",
     "Edit" : "Edycja",
-    "Choose" : "Wybierz",
     "Change layout" : "Zmień układ",
     "Drag to move" : "Przeciągnij, aby przenieść",
     "Remove image" : "Usuń zdjęcie"

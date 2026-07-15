@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Tote files",
+    "Upload" : "Incargar",
     "Cancel" : "Cancel",
     "Confirm" : "Confirmar",
     "Save" : "Save",

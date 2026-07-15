@@ -1,7 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Visas datnes",
+    "Upload" : "Augšupielādēt",
     "Cancel" : "Cancel",
+    "Choose" : "Izvēlēties",
     "Confirm" : "Apstiprināt",
     "New album" : "Jauns albums",
     "Album name" : "Albuma nosaukums",
@@ -13,7 +16,6 @@ OC.L10N.register(
     "Download" : "Lejupielādēt",
     "Fullscreen" : "Pilnekrāna",
     "Edit" : "Labot",
-    "Choose" : "Izvēlēties",
     "Remove image" : "Novākt attēlu"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

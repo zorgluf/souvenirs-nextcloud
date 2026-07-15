@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Acordanzas",
-    "Pen" : "Bolígrafo",
+    "All files" : "Todos os ficheiros",
+    "Upload" : "Enviar",
     "Cancel" : "Cancelar",
+    "Choose" : "Escoller",
+    "Pen" : "Bolígrafo",
     "Confirm" : "Confirmar",
     "Loading album list…" : "Cargando a lista de álbums…",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Non hai ningún álbum dispoñíbel. Terá que envialos desde a aplicación de Android Acordanzas (https://github.com/zorgluf/souvenirs-android).",
@@ -19,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Prema para descargar o álbum nun arquivo zip.",
     "Edit" : "Editar",
-    "Choose" : "Escoller",
     "Change layout" : "Cambiar o deseño",
     "Drag to move" : "Arrastrar para mover",
     "Remove image" : "Retirar a imaxe"

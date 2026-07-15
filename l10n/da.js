@@ -1,6 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Alle filer",
+    "Upload" : "Upload",
+    "Cancel" : "Annullér",
+    "Choose" : "Vælg",
+    "Pen" : "Pen",
     "Confirm" : "Bekræft",
     "New album" : "Nyt album",
     "Date" : "Dato",
@@ -9,7 +14,6 @@ OC.L10N.register(
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
     "Edit" : "Redigér",
-    "Choose" : "Vælg",
     "Change layout" : "Ændre layout",
     "Remove image" : "Fjern billede"
 },

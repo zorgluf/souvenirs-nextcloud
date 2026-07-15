@@ -1,7 +1,8 @@
 { "translations": {
+    "All files" : "ټول فایلونه",
     "Cancel" : "Cancel",
+    "Choose" : "غوره کړئ",
     "Save" : "Save",
-    "Download" : "ښکته کول",
-    "Choose" : "غوره کړئ"
+    "Download" : "ښکته کول"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -2,6 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenýry",
+    "All files" : "Všechny soubory",
+    "Upload" : "Nahrát",
+    "Cancel" : "Zrušit",
+    "Choose" : "Vybrat",
+    "Pen" : "Pero",
     "Confirm" : "Potvrdit",
     "Loading album list…" : "Načítání seznamu alb …",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Není k dispozici žádné album. Je třeba je nahrát z Android aplikace Suvenýry (https://github.com/zorgluf/souvenirs-android).",
@@ -17,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
     "Edit" : "Upravit",
-    "Choose" : "Vybrat",
     "Change layout" : "Změnit rozvržení",
     "Drag to move" : "Přesuňte přetažením",
     "Remove image" : "Odebrat obrázek"

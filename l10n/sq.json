@@ -1,12 +1,14 @@
 { "translations": {
+    "All files" : "Të gjithë skedarët",
+    "Upload" : "Ngarkoni",
     "Cancel" : "Cancel",
+    "Choose" : "Zgjidhni",
     "Confirm" : "Konfirmo",
     "Create" : "Krijo",
     "Save" : "Save",
     "Download" : "Shkarko",
     "Fullscreen" : "I gjithë ekrani",
     "Edit" : "Përpuno",
-    "Choose" : "Zgjidhni",
     "Remove image" : "Hiqe figurën"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

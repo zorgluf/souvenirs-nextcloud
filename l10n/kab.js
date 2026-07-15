@@ -1,7 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Akk ifuyla",
+    "Upload" : "Sili",
     "Cancel" : "Semmet",
+    "Choose" : "Fren",
     "Confirm" : "Sergeg",
     "Album name" : "Isem n walbum",
     "Date" : "Azemz",
@@ -10,7 +13,6 @@ OC.L10N.register(
     "Download" : "Sider",
     "Fullscreen" : "Plein écran",
     "Edit" : "Ẓreg",
-    "Choose" : "Fren",
     "Change layout" : "Snifel taneγruft"
 },
 "nplurals=2; plural=(n != 1);");

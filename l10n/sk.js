@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "Pero",
+    "All files" : "Všetky súbory",
+    "Upload" : "Nahrať",
     "Cancel" : "Cancel",
+    "Choose" : "Vybrať",
+    "Pen" : "Pero",
     "Confirm" : "Potvrdiť",
     "New album" : "Nový album",
     "Album name" : "Názov albumu",
@@ -15,7 +18,6 @@ OC.L10N.register(
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku",
     "Edit" : "Upraviť",
-    "Choose" : "Vybrať",
     "Change layout" : "Zmeniť rozloženie",
     "Remove image" : "Zmazať obrázok"
 },

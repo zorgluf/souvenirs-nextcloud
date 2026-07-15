@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Oroigarriak",
-    "Pen" : "Boligrafoa",
+    "All files" : "Fitxategi guztiak",
+    "Upload" : "Igo",
     "Cancel" : "Cancel",
+    "Choose" : "Aukeratu",
+    "Pen" : "Boligrafoa",
     "Confirm" : "Berretsi",
     "New album" : "Album berria",
     "Album name" : "Albumaren izena",
@@ -17,7 +20,6 @@ OC.L10N.register(
     "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
     "Edit" : "Editatu",
-    "Choose" : "Aukeratu",
     "Change layout" : "Aldatu diseinua",
     "Remove image" : "Kendu irudia"
 },

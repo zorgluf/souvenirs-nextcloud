@@ -1,6 +1,9 @@
 { "translations": {
-    "Pen" : "ペン",
+    "All files" : "すべてのファイル",
+    "Upload" : "アップロード",
     "Cancel" : "キャンセル",
+    "Choose" : "選択",
+    "Pen" : "ペン",
     "Confirm" : "承認",
     "New album" : "新しいアルバム",
     "Date" : "日付",
@@ -9,7 +12,6 @@
     "Download" : "ダウンロード",
     "Fullscreen" : "全画面",
     "Edit" : "編集",
-    "Choose" : "選択",
     "Drag to move" : "ドラッグして移動",
     "Remove image" : "画像を削除"
 },"pluralForm" :"nplurals=1; plural=0;"

@@ -1,8 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
-    "Pen" : "笔",
+    "All files" : "全部文件",
+    "Upload" : "上传",
     "Cancel" : "Cancel",
+    "Choose" : "选择",
+    "Pen" : "笔",
     "Confirm" : "确认",
     "New album" : "新相册",
     "Album name" : "相册名称",
@@ -12,7 +15,6 @@ OC.L10N.register(
     "Download" : "下载",
     "Fullscreen" : "全屏",
     "Edit" : "编辑",
-    "Choose" : "选择",
     "Change layout" : "更变布局",
     "Remove image" : "删除图片"
 },

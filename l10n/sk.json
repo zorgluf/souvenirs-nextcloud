@@ -1,6 +1,9 @@
 { "translations": {
-    "Pen" : "Pero",
+    "All files" : "Všetky súbory",
+    "Upload" : "Nahrať",
     "Cancel" : "Cancel",
+    "Choose" : "Vybrať",
+    "Pen" : "Pero",
     "Confirm" : "Potvrdiť",
     "New album" : "Nový album",
     "Album name" : "Názov albumu",
@@ -13,7 +16,6 @@
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku",
     "Edit" : "Upraviť",
-    "Choose" : "Vybrať",
     "Change layout" : "Zmeniť rozloženie",
     "Remove image" : "Zmazať obrázok"
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"

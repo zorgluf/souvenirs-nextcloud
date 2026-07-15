@@ -1,4 +1,9 @@
 { "translations": {
+    "All files" : "Alle filer",
+    "Upload" : "Upload",
+    "Cancel" : "Annullér",
+    "Choose" : "Vælg",
+    "Pen" : "Pen",
     "Confirm" : "Bekræft",
     "New album" : "Nyt album",
     "Date" : "Dato",
@@ -7,7 +12,6 @@
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
     "Edit" : "Redigér",
-    "Choose" : "Vælg",
     "Change layout" : "Ændre layout",
     "Remove image" : "Fjern billede"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

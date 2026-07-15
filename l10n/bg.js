@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувенири",
+    "Cancel" : "Cancel",
+    "Choose" : "Изберете",
+    "Pen" : "Химилка",
+    "Confirm" : "Потвърдете",
     "New album" : "Нов албум",
     "Date" : "Дата",
     "Create" : "Създаване",
@@ -13,7 +17,6 @@ OC.L10N.register(
     "Fullscreen" : "Цял екран",
     "Click to download album in a zip file." : "Кликване/щракване/ за изтегляне на албума в zip файл.",
     "Edit" : "Промяна",
-    "Choose" : "Изберете",
     "Change layout" : "Промени разположението",
     "Remove image" : "Премахни изображението"
 },

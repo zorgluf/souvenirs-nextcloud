@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Ukumbusho",
-    "Pen" : "Kalamu",
+    "All files" : "Faili zote",
+    "Upload" : "Pakia",
     "Cancel" : "Ghairi",
+    "Choose" : "Chagua",
+    "Pen" : "Kalamu",
     "Confirm" : "Thibitisha",
     "Loading album list…" : "Inapakia orodha ya albamu...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Hakuna albamu inayopatikana. Utahitaji kuzipakia kutoka kwa Zawadi za programu ya Android (https://github.com/zorgluf/souvenirs-android).",
@@ -18,7 +21,6 @@ OC.L10N.register(
     "Fullscreen" : "Skrini nzima",
     "Click to download album in a zip file." : "Bofya ili kupakua albamu katika faili ya zip.",
     "Edit" : "Hariri",
-    "Choose" : "Chagua",
     "Change layout" : "Badilisha mpangilio"
 },
 "nplurals=2; plural=(n != 1);");

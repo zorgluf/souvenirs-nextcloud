@@ -1,6 +1,9 @@
 { "translations": {
     "Souvenirs" : "Sovenirs",
+    "All files" : "Totes los fichièrs",
+    "Upload" : "Telecargament",
     "Cancel" : "Cancel",
+    "Choose" : "Causir",
     "Confirm" : "Confirmar",
     "Date" : "Data",
     "Create" : "Crear",
@@ -11,7 +14,6 @@
     "Download" : "Telecargar",
     "Fullscreen" : "Ecran complèt",
     "Edit" : "Modificar",
-    "Choose" : "Causir",
     "Remove image" : "Suprimir imatge"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
