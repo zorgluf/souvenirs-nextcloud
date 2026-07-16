@@ -53,6 +53,14 @@
             <NcLoadingIcon :size="64">
             </NcLoadingIcon>
         </div>
+        <Teleport to="body">
+            <!-- Teleported so it escapes the app-content stacking context and
+                 covers the whole page, Nextcloud header included. -->
+            <div v-if="savingCount > 0" class="saving-overlay">
+                <NcLoadingIcon :size="64">
+                </NcLoadingIcon>
+            </div>
+        </Teleport>
         <div v-if="canEdit && !loading && pages.length === 0" class="empty-album">
             <NcButton type="primary" v-on:click="onAddFirstPage">
                 <template #icon>
@@ -151,6 +159,10 @@ export default {
             // Timestamp of the last page turn triggered by dragging an element
             // near the album edge (throttles the edge navigation).
             "dragNavLast": 0,
+            // Number of in-flight edit actions (issue #39): while > 0, a
+            // full-page overlay blocks any further modification. A counter,
+            // not a boolean, so overlapping actions compose.
+            "savingCount": 0,
         }
     },
     created: function() {
@@ -399,6 +411,13 @@ export default {
                 this.toggleEdit();
             }
         },
+        blockWhile: function(promise) {
+            // Block the UI (saving overlay) until the given edit action -
+            // possibly a chain of several API calls - settles.
+            var that = this;
+            this.savingCount++;
+            return promise.finally(function() { that.savingCount--; });
+        },
         onEditText: function(pageId, elementId, newText) {
             // Locate the page, patch only the changed caption (preserving every
             // other album/page/element field), then persist that page.
@@ -408,9 +427,9 @@ export default {
             }
             var updatedPage = setElementText(this.pages[index], elementId, newText);
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
+            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                 console.log("Error saving album page edit.");
-            });
+            }));
         },
         onRemoveElement: function(pageId, elementId) {
             // Drop the element, re-grid the page so nothing overlaps, persist,
@@ -425,27 +444,27 @@ export default {
             // it is the only page left, which we keep (empty) so the album is not
             // left with no pages and no way to add one.
             if (updatedPage.elements.length === 0 && this.pages.length > 1) {
-                deletePage(this.albumId, pageId)
+                this.blockWhile(deletePage(this.albumId, pageId)
                     .then(() => {
                         that.pages.splice(index, 1);
                         if (that.displayedPage >= that.pages.length) {
                             that.displayedPage = that.pages.length - 1;
                         }
-                        cleanAssets(that.albumId).catch(() => {});
+                        return cleanAssets(that.albumId).catch(() => {});
                     })
                     .catch(error => {
                         showError(t("souvenirs","Could not delete the page."));
-                    });
+                    }));
                 return;
             }
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage)
+            this.blockWhile(updatePage(this.albumId, updatedPage)
                 .then(() => {
-                    cleanAssets(this.albumId).catch(() => {});
+                    return cleanAssets(this.albumId).catch(() => {});
                 })
                 .catch(error => {
                     showError(t("souvenirs","Could not remove the image."));
-                });
+                }));
         },
         onResizeElement: function(pageId, elementId, geometry) {
             // Patch only the resized element's geometry (preserving every other
@@ -456,9 +475,9 @@ export default {
             }
             var updatedPage = setElementGeometry(this.pages[index], elementId, geometry);
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
+            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not resize the element."));
-            });
+            }));
         },
         onPanZoomElement: function(pageId, elementId, panZoom) {
             // Patch only the panned/zoomed element's values (preserving every
@@ -469,9 +488,9 @@ export default {
             }
             var updatedPage = setElementPanZoom(this.pages[index], elementId, panZoom);
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
+            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not adjust the image."));
-            });
+            }));
         },
         onCycleLayout: function(pageId) {
             // Switch the page to the next layout available for its element count.
@@ -482,9 +501,9 @@ export default {
             var page = this.pages[index];
             var updatedPage = { ...page, elements: cycleLayout(page.elements) };
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
+            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not change the layout."));
-            });
+            }));
         },
         onMovePage: function(index, dir) {
             // Reorder a page one step left (dir -1) or right (dir +1), keeping the
@@ -501,13 +520,13 @@ export default {
             this.pages.splice(index, 1);
             this.pages.splice(newIndex, 0, page);
             this.$nextTick(() => { that.showN(newIndex); });
-            movePage(this.albumId, page.id, pos).catch(error => {
+            this.blockWhile(movePage(this.albumId, page.id, pos).catch(error => {
                 // Revert the optimistic move.
                 that.pages.splice(newIndex, 1);
                 that.pages.splice(index, 0, page);
                 that.$nextTick(() => { that.showN(index); });
                 showError(t("souvenirs","Could not move the page."));
-            });
+            }));
         },
         onElementDrop: function(srcPageId, srcElementId, destPageId, destElementId) {
             if (srcPageId === destPageId) {
@@ -522,9 +541,9 @@ export default {
                 }
                 var updatedPage = swapElements(this.pages[index], srcElementId, destElementId);
                 this.pages.splice(index, 1, updatedPage);
-                updatePage(this.albumId, updatedPage).catch(error => {
+                this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                     showError(t("souvenirs","Could not move the element."));
-                });
+                }));
                 return;
             }
             // Other page: move the element there, with the same re-layout logic
@@ -544,7 +563,7 @@ export default {
             this.pages.splice(destIndex, 1, updatedDest);
             // Persist the destination first: if the source update then fails,
             // the element at worst exists on both pages instead of being lost.
-            updatePage(this.albumId, updatedDest)
+            this.blockWhile(updatePage(this.albumId, updatedDest)
                 .then(() => {
                     // Moving the last element away deletes the emptied page (same
                     // rule as onRemoveElement), unless it is the only page left.
@@ -567,7 +586,7 @@ export default {
                 })
                 .catch(error => {
                     showError(t("souvenirs","Could not move the element."));
-                });
+                }));
         },
         onAlbumDragOver: function(event) {
             // Dragging an element near the album edge turns the page, so the
@@ -600,12 +619,12 @@ export default {
             // Create a new empty page at `pos`, insert it locally, and navigate to it.
             var that = this;
             var page = buildPage();
-            createPage(this.albumId, pos, page).then(() => {
+            this.blockWhile(createPage(this.albumId, pos, page).then(() => {
                 that.pages.splice(pos, 0, page);
                 that.$nextTick(() => { that.showN(pos); });
             }).catch(error => {
                 showError(t("souvenirs","Could not create the page."));
-            });
+            }));
         },
         onAddText: function(pageId) {
             // Add a new empty text element and re-lay-out the page, then persist.
@@ -615,9 +634,9 @@ export default {
             }
             var updatedPage = addElement(this.pages[index], buildTextElement());
             this.pages.splice(index, 1, updatedPage);
-            updatePage(this.albumId, updatedPage).catch(error => {
+            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
                 showError(t("souvenirs","Could not add the text."));
-            });
+            }));
         },
         onPaint: function(pageId) {
             this.paintSaving = false;
@@ -1049,6 +1068,20 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
   position: fixed;
   top: 50%;
   left: 50%;
+}
+
+.saving-overlay {
+  /* Blocks every pointer interaction while an edit call is in flight, simply
+     by sitting on top of the whole page. */
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(102, 102, 102, 0.5);
+  /* Above the Nextcloud header (z-index 2000), below NcModal dialogs
+     (z-index 9998+). */
+  z-index: 5000;
 }
 
 .empty-album {
