@@ -2,6 +2,8 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "تذكارات souvenirs",
+    "All files" : "كل الملفات",
+    "Upload" : "إرفَع",
     "Cancel" : "Cancel",
     "Choose" : "إختر",
     "Pen" : "قلم",

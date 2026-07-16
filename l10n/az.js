@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Bütün fayllar",
+    "Upload" : "Serverə yüklə",
     "Cancel" : "Cancel",
     "Choose" : "Seç",
     "Confirm" : "Təsdiq edin",

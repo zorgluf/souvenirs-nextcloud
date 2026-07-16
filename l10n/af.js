@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Upload" : "Oplaai",
     "Cancel" : "Cancel",
     "Choose" : "Kies",
     "Confirm" : "Bevestig",

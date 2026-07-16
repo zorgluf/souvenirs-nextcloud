@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Tolos ficheros",
+    "Upload" : "Xunir",
     "Cancel" : "Cancel",
     "Choose" : "Escoyer",
     "Pen" : "Pluma",
