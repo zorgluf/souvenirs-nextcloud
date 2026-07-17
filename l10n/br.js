@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "An holl restroù",
+    "Upload" : "Enporzhiañ",
     "Cancel" : "Cancel",
     "Choose" : "Dibab",
     "Confirm" : "Kadarnaat",

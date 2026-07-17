@@ -2,6 +2,8 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувенири",
+    "All files" : "Всички файлове",
+    "Upload" : "Качване",
     "Cancel" : "Cancel",
     "Choose" : "Изберете",
     "Pen" : "Химилка",

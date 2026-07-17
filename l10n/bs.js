@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "All files" : "Sve datoteke",
+    "Upload" : "Učitaj",
     "Cancel" : "Cancel",
     "Choose" : "Izaberite",
     "Create" : "Kreiraj",
