@@ -22,6 +22,7 @@ OC.L10N.register(
     "Fullscreen" : "全螢幕",
     "Click to download album in a zip file." : "點擊以將相簿下載為 zip 檔案。",
     "Edit" : "編輯",
+    "Add image" : "新增圖片",
     "Change layout" : "更改佈局",
     "Drag to move" : "拖動以移動",
     "Remove image" : "移除圖像"
