@@ -243,6 +243,9 @@ let lastBrowsedPath = "";
     display: flex;
     align-items: center;
     gap: 8px;
+    /* NcModal's close button floats over the top-right corner of the modal;
+       keep the upload button from sliding underneath it. */
+    padding-inline-end: var(--default-clickable-area, 44px);
 }
 .chooser-crumbs {
     flex: 1 1 auto;
