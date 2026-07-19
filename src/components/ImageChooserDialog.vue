@@ -54,7 +54,11 @@
                                 :src="previewUrl(entry)" :alt="entry.basename"
                                 loading="lazy"
                                 v-on:error="failedPreviews[entry.path] = true" />
+                            <VideoIcon v-else-if="isVideo(entry)" :size="48" />
                             <ImageIcon v-else :size="48" />
+                            <span v-if="isVideo(entry)" class="chooser-video-badge">
+                                <PlayCircleOutline :size="24" />
+                            </span>
                             <span class="chooser-name">{{ entry.basename }}</span>
                         </button>
                     </li>
@@ -86,9 +90,14 @@ import Home from 'vue-material-design-icons/Home.vue'
 import Folder from 'vue-material-design-icons/Folder.vue'
 import UploadIcon from 'vue-material-design-icons/Upload.vue'
 import ImageIcon from 'vue-material-design-icons/Image.vue'
+import VideoIcon from 'vue-material-design-icons/Video.vue'
+import PlayCircleOutline from 'vue-material-design-icons/PlayCircleOutline.vue'
 import Check from 'vue-material-design-icons/Check.vue'
 import { showError } from '@nextcloud/dialogs'
-import { listFolder, getPreviewUrl, IMAGE_MIMES } from '../api/davApi.js'
+import { listFolder, getPreviewUrl, IMAGE_MIMES, VIDEO_MIMES } from '../api/davApi.js'
+
+// Everything the chooser offers: images and, since issue #32, videos.
+const MEDIA_MIMES = IMAGE_MIMES.concat(VIDEO_MIMES)
 
 export default {
     props: {
@@ -107,13 +116,13 @@ export default {
             // Paths whose thumbnail failed to load (no preview provider):
             // their tiles fall back to a generic image icon.
             "failedPreviews": {},
-            "acceptMimes": IMAGE_MIMES.join(','),
-            "sTitle": t("souvenirs", "Choose an image"),
+            "acceptMimes": MEDIA_MIMES.join(','),
+            "sTitle": t("souvenirs", "Choose an image or a video"),
             "sAllFiles": t("souvenirs", "All files"),
             "sUpload": t("souvenirs", "Upload"),
             "sCancel": t("souvenirs", "Cancel"),
             "sChoose": t("souvenirs", "Choose"),
-            "sEmpty": t("souvenirs", "No images in this folder."),
+            "sEmpty": t("souvenirs", "No images or videos in this folder."),
         }
     },
     components: {
@@ -127,6 +136,8 @@ export default {
         Folder,
         UploadIcon,
         ImageIcon,
+        VideoIcon,
+        PlayCircleOutline,
         Check,
     },
     computed: {
@@ -173,14 +184,17 @@ export default {
             const folders = listed.filter(e => e.isFolder)
                 .sort((a, b) => a.basename.localeCompare(b.basename, undefined, { numeric: true, sensitivity: 'base' }));
             // Most recent first within the folder (issue #31).
-            const images = listed.filter(e => !e.isFolder && IMAGE_MIMES.includes(e.mime))
+            const media = listed.filter(e => !e.isFolder && MEDIA_MIMES.includes(e.mime))
                 .sort((a, b) => b.mtime - a.mtime);
-            this.entries = folders.concat(images);
+            this.entries = folders.concat(media);
             this.currentPath = path;
             this.failedPreviews = {};
             this.loading = false;
             lastBrowsedPath = path;
             return true;
+        },
+        isVideo: function(entry) {
+            return VIDEO_MIMES.includes(entry.mime);
         },
         select: function(entry) {
             // Clicking the selected tile again deselects it.
@@ -202,8 +216,8 @@ export default {
             if (!file) {
                 return;
             }
-            if (!IMAGE_MIMES.includes(file.type)) {
-                showError(t("souvenirs", "This file is not a supported image."));
+            if (!MEDIA_MIMES.includes(file.type)) {
+                showError(t("souvenirs", "This file is not a supported image or video."));
                 return;
             }
             this.$emit('upload', file);
@@ -278,6 +292,15 @@ let lastBrowsedPath = "";
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+/* Play badge marking video tiles apart from image ones. */
+.chooser-video-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 .chooser-name {
     position: absolute;

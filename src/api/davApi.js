@@ -27,6 +27,20 @@ export const IMAGE_MIMES = [
 ]
 
 /**
+ * The video mimetypes an album element can play (issue #32): what HTML5
+ * `<video>` commonly decodes — which the poster capture also relies on — and
+ * the Android app records/picks. Shared by the chooser's grid filter and its
+ * upload input's `accept` attribute, like IMAGE_MIMES.
+ */
+export const VIDEO_MIMES = [
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'video/quicktime',
+    'video/x-matroska',
+]
+
+/**
  * Encode a user-files-relative path for use in a WebDAV URL: per-segment
  * percent-encoding, empty segments dropped so the URL never contains a double
  * slash (same rules as albumApi.js uploadAsset).
@@ -116,6 +130,25 @@ export function listFolder(path) {
         }
         return response.text()
     }).then(xml => parseMultistatus(xml, path))
+}
+
+/**
+ * Download a user file over WebDAV (plain GET, same auth as listFolder). Used
+ * to capture a poster frame from a video already on the server: a `<video>`
+ * src cannot carry the CSRF token header, so the bytes are fetched first.
+ *
+ * @param {string} path - file path relative to the user's files root
+ * @returns {Promise<Blob>}
+ */
+export function getFileBlob(path) {
+    return fetch(generateRemoteUrl('webdav') + '/' + encodePath(path), {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('WebDAV GET failed with status ' + response.status)
+        }
+        return response.blob()
+    })
 }
 
 /**

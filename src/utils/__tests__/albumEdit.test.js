@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, buildPaintElement, setPagePaintElement, removePaintElements } from '../albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildVideoElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, buildPaintElement, setPagePaintElement, removePaintElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -204,6 +204,40 @@ describe('buildImageElement', () => {
         const a = buildImageElement({ name: 'x.jpg', size: 1, mime: 'image/jpeg' })
         const b = buildImageElement({ name: 'x.jpg', size: 1, mime: 'image/jpeg' })
         expect(a.id).not.toBe(b.id)
+        expect(a.image).not.toBe(b.image)
+    })
+})
+
+describe('buildVideoElement', () => {
+    it('builds a VideoElement matching the on-disk schema (issue #32)', () => {
+        const el = buildVideoElement({ name: 'clip.MP4', size: 54321, mime: 'video/mp4' })
+        expect(el.class).toBe('VideoElement')
+        // name/size/mime keep the original VIDEO file's identity (asset reuse).
+        expect(el.name).toBe('clip.MP4')
+        expect(el.size).toBe(54321)
+        expect(el.mime).toBe('video/mp4')
+        expect(el.transformType).toBe(2)
+        expect(el.zoom).toBe(100)
+        expect(el.id).toBeTruthy()
+    })
+
+    it('stores the video under a generated uuid name keeping the extension', () => {
+        const el = buildVideoElement({ name: 'clip.MP4', size: 1, mime: 'video/mp4' })
+        expect(el.video).toMatch(/^data\/[0-9a-f-]+\.MP4$/)
+        expect(el.video).not.toContain('clip')
+    })
+
+    it('points image at a generated jpg poster asset, distinct from the video', () => {
+        const el = buildVideoElement({ name: 'clip.mp4', size: 1, mime: 'video/mp4' })
+        expect(el.image).toMatch(/^data\/[0-9a-f-]+\.jpg$/)
+        expect(el.image).not.toBe(el.video)
+    })
+
+    it('gives each call a distinct element id and asset paths', () => {
+        const a = buildVideoElement({ name: 'x.mp4', size: 1, mime: 'video/mp4' })
+        const b = buildVideoElement({ name: 'x.mp4', size: 1, mime: 'video/mp4' })
+        expect(a.id).not.toBe(b.id)
+        expect(a.video).not.toBe(b.video)
         expect(a.image).not.toBe(b.image)
     })
 })

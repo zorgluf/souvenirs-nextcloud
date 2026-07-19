@@ -46,7 +46,7 @@
                 <template #icon>
                     <Plus :size="20" />
                 </template>
-                {{ sAddImage }}
+                {{ sAddMedia }}
             </NcButton>
             <NcButton type="primary" v-on:click="onAddText">
                 <template #icon>
@@ -100,7 +100,8 @@ export default {
         return {
             "isFocus": false,
             "preloadScope": 5,
-            "sAddImage": t("souvenirs","Add image"),
+            // Images and, since issue #32, videos go through the same chooser.
+            "sAddMedia": t("souvenirs","Add media"),
             "sAddText": t("souvenirs","Add text"),
             "sPaint": t("souvenirs","Paint"),
             "sChangeLayout": t("souvenirs","Change layout"),
