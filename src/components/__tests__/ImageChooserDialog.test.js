@@ -4,6 +4,7 @@ import { mount } from '@vue/test-utils'
 vi.mock('@nextcloud/dialogs', () => ({ showError: vi.fn() }))
 vi.mock('../../api/davApi.js', () => ({
     IMAGE_MIMES: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml'],
+    VIDEO_MIMES: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'],
     listFolder: vi.fn(),
     getPreviewUrl: vi.fn(fileid => 'preview-' + fileid),
 }))
@@ -22,8 +23,9 @@ const folderA = { basename: 'A-folder', path: 'A-folder', isFolder: true, mime: 
 const oldImage = { basename: 'old.jpg', path: 'old.jpg', isFolder: false, mime: 'image/jpeg', size: 10, mtime: 1000, fileid: '10' }
 const newImage = { basename: 'new.png', path: 'new.png', isFolder: false, mime: 'image/png', size: 20, mtime: 2000, fileid: '11' }
 const notImage = { basename: 'doc.pdf', path: 'doc.pdf', isFolder: false, mime: 'application/pdf', size: 30, mtime: 3000, fileid: '12' }
+const video = { basename: 'clip.mp4', path: 'clip.mp4', isFolder: false, mime: 'video/mp4', size: 40, mtime: 1500, fileid: '13' }
 
-const ROOT_LISTING = [oldImage, folderB, notImage, newImage, folderA]
+const ROOT_LISTING = [oldImage, folderB, notImage, newImage, folderA, video]
 
 async function mountDialog(props = {}) {
     listFolder.mockReset()
@@ -56,14 +58,30 @@ describe('ImageChooserDialog', () => {
         // by mounting once and navigating home via the root crumb when needed.
     })
 
-    it('lists folders first (alphabetical), then images newest-first, other mimes dropped', async () => {
+    it('lists folders first (alphabetical), then images and videos newest-first, other mimes dropped', async () => {
         const wrapper = await mountDialog()
         // Make the memory-dependent start deterministic: go to the root crumb.
         await wrapper.find('.crumb-stub').trigger('click')
         await flushBrowse()
         const names = wrapper.findAll('.chooser-name').map(n => n.text())
-        expect(names).toEqual(['A-folder', 'b-folder', 'new.png', 'old.jpg'])
+        expect(names).toEqual(['A-folder', 'b-folder', 'new.png', 'clip.mp4', 'old.jpg'])
         expect(names).not.toContain('doc.pdf')
+        wrapper.unmount()
+    })
+
+    it('marks video tiles with a play badge, image tiles without', async () => {
+        const wrapper = await mountDialog()
+        const tiles = wrapper.findAll('.chooser-image')
+        // newest-first: new.png, clip.mp4, old.jpg
+        expect(tiles[1].find('.chooser-video-badge').exists()).toBe(true)
+        expect(tiles[0].find('.chooser-video-badge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('emits pick with the video entry when a video is chosen', async () => {
+        const wrapper = await mountDialog()
+        await wrapper.findAll('.chooser-image')[1].trigger('dblclick')
+        expect(wrapper.emitted('pick')[0][0]).toMatchObject({ basename: 'clip.mp4', mime: 'video/mp4' })
         wrapper.unmount()
     })
 
@@ -161,15 +179,16 @@ describe('ImageChooserDialog', () => {
 
     it('emits pick directly on double-click', async () => {
         const wrapper = await mountDialog()
-        await wrapper.findAll('.chooser-image')[1].trigger('dblclick')
+        await wrapper.findAll('.chooser-image')[2].trigger('dblclick')
         expect(wrapper.emitted('pick')[0][0]).toMatchObject({ basename: 'old.jpg' })
         wrapper.unmount()
     })
 
-    it('restricts the hidden input to image mimetypes and emits upload with the file', async () => {
+    it('restricts the hidden input to media mimetypes and emits upload with the file', async () => {
         const wrapper = await mountDialog()
         const input = wrapper.find('input[type=file]')
         expect(input.attributes('accept')).toContain('image/jpeg')
+        expect(input.attributes('accept')).toContain('video/mp4')
         const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
         Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
         await input.trigger('change')
@@ -178,7 +197,17 @@ describe('ImageChooserDialog', () => {
         wrapper.unmount()
     })
 
-    it('rejects a non-image file with an error toast and no upload event', async () => {
+    it('accepts a video file for upload', async () => {
+        const wrapper = await mountDialog()
+        const input = wrapper.find('input[type=file]')
+        const file = new File(['bytes'], 'clip.mp4', { type: 'video/mp4' })
+        Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
+        await input.trigger('change')
+        expect(wrapper.emitted('upload')[0][0]).toBe(file)
+        wrapper.unmount()
+    })
+
+    it('rejects a non-media file with an error toast and no upload event', async () => {
         const wrapper = await mountDialog()
         const input = wrapper.find('input[type=file]')
         const file = new File(['bytes'], 'doc.pdf', { type: 'application/pdf' })
@@ -208,7 +237,7 @@ describe('ImageChooserDialog', () => {
         await wrapper.find('.chooser-folder').trigger('click')
         await flushBrowse()
         expect(showError).toHaveBeenCalled()
-        expect(wrapper.findAll('.chooser-image')).toHaveLength(2)
+        expect(wrapper.findAll('.chooser-image')).toHaveLength(3)
         wrapper.unmount()
     })
 

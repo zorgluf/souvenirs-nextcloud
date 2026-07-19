@@ -68,6 +68,43 @@ export function buildImageElement({ name, size, mime }) {
 }
 
 /**
+ * Build a fresh VideoElement for a picked Nextcloud file (issue #32). On disk
+ * (as in the Android app) a VideoElement is an ImageElement — whose `image` is a
+ * generated poster/thumbnail of the video — plus a `video` field holding the
+ * actual video asset. `name`/`size`/`mime` keep the ORIGINAL VIDEO file's
+ * identity, so the asset-reuse endpoints (assetsearch/clean) match the video,
+ * not the poster (which is generated, hence never present elsewhere).
+ * Geometry is left at full-page; the caller runs it through `addElement`.
+ *
+ * @param {object} file - the picked file: `{ name, size, mime }`
+ * @returns {object} a new VideoElement object (not yet placed in a page)
+ */
+export function buildVideoElement({ name, size, mime }) {
+    const dot = name.lastIndexOf('.')
+    const extension = dot >= 0 ? name.slice(dot) : ''
+    return {
+        class: 'VideoElement',
+        id: uuidv4(),
+        video: 'data/' + uuidv4() + extension,
+        // Poster frame captured from the video, stored as a JPEG asset. The
+        // caller blanks this field if the capture/upload fails (best-effort).
+        image: 'data/' + uuidv4() + '.jpg',
+        mime: mime,
+        name: name,
+        size: size,
+        offsetX: 0,
+        offsetY: 0,
+        zoom: 100,
+        transformType: 2, // IMG_ZOOMOFFSET (zoom 100 / no offset): cover-fit, matches the Android format
+        stop: false,
+        top: 0,
+        left: 0,
+        right: 100,
+        bottom: 100,
+    }
+}
+
+/**
  * Build a fresh, empty TextElement following the on-disk format produced by the
  * Android app. Geometry is left at full-page; the caller runs it through
  * `addElement` (which re-lays-out the page). The caption is filled in afterwards

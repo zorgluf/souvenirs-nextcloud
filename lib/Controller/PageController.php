@@ -3,6 +3,7 @@ namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\IConfig;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
@@ -39,7 +40,13 @@ class PageController extends Controller {
 		try { 
 			$albumsDir = Utils::getAlbumsNode($this->config, $this->userId, $this->appName, $this->userFolder);
 			if($albumsDir instanceof \OCP\Files\Folder) {
-				return new TemplateResponse('souvenirs','index', array("isDev" => $isDev));
+				$response = new TemplateResponse('souvenirs','index', array("isDev" => $isDev));
+				// The video poster capture (issue #32) plays the picked video
+				// from an object URL, which the default CSP media-src blocks.
+				$csp = new ContentSecurityPolicy();
+				$csp->addAllowedMediaDomain("blob:");
+				$response->setContentSecurityPolicy($csp);
+				return $response;
 			} else {
 				return new TemplateResponse('souvenirs','error',array('msg' => 'Wrong album path {$albumsDir->getPath()}'));
 			}

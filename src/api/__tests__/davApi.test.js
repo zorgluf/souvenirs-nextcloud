@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { listFolder, getPreviewUrl, IMAGE_MIMES } from '../davApi.js'
+import { listFolder, getPreviewUrl, getFileBlob, IMAGE_MIMES, VIDEO_MIMES } from '../davApi.js'
 
 // A realistic Nextcloud PROPFIND multistatus: the listed collection itself
 // (must be skipped), a subfolder, and two images — one with a space + UTF-8
@@ -144,6 +144,38 @@ describe('davApi', () => {
             expect(IMAGE_MIMES).toContain('image/jpeg')
             expect(IMAGE_MIMES).toContain('image/svg+xml')
             expect(IMAGE_MIMES).toHaveLength(7)
+        })
+    })
+
+    describe('VIDEO_MIMES', () => {
+        it('covers the common HTML5-playable containers (issue #32)', () => {
+            expect(VIDEO_MIMES).toContain('video/mp4')
+            expect(VIDEO_MIMES).toContain('video/webm')
+            // No overlap with the image list: the chooser branches on it.
+            for (const mime of VIDEO_MIMES) {
+                expect(IMAGE_MIMES).not.toContain(mime)
+            }
+        })
+    })
+
+    describe('getFileBlob', () => {
+        it('GETs the encoded WebDAV URL with the request token and returns the blob', async () => {
+            const blob = new Blob(['video-bytes'])
+            globalThis.fetch = vi.fn(() => Promise.resolve({
+                ok: true,
+                status: 200,
+                blob: () => Promise.resolve(blob),
+            }))
+            const result = await getFileBlob('Photos/Vacances 2024/clip été.mp4')
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toMatch(/\/remote\.php\/webdav\/Photos\/Vacances%202024\/clip%20%C3%A9t%C3%A9.mp4$/)
+            expect(options.headers.requesttoken).toBe('test-token')
+            expect(result).toBe(blob)
+        })
+
+        it('rejects on an HTTP error status', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404 }))
+            await expect(getFileBlob('gone.mp4')).rejects.toThrow('404')
         })
     })
 })
