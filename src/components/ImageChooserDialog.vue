@@ -23,7 +23,7 @@
                 </NcButton>
                 <!-- Hidden native picker behind the upload button; `accept`
                      narrows the OS dialog to the mimetypes albums support. -->
-                <input ref="fileInput" type="file" class="chooser-file-input"
+                <input ref="fileInput" type="file" multiple class="chooser-file-input"
                     :accept="acceptMimes" v-on:change="onFileChosen" />
             </div>
 
@@ -46,10 +46,10 @@
                         </button>
                         <button v-else type="button"
                             class="chooser-tile chooser-image"
-                            :class="{ selected: selectedPath === entry.path }"
-                            :aria-pressed="String(selectedPath === entry.path)"
+                            :class="{ selected: isSelected(entry) }"
+                            :aria-pressed="String(isSelected(entry))"
                             :disabled="saving"
-                            v-on:click="select(entry)" v-on:dblclick="choose(entry)">
+                            v-on:click="select(entry)" v-on:dblclick="choose([entry])">
                             <img v-if="!failedPreviews[entry.path]" class="chooser-thumb"
                                 :src="previewUrl(entry)" :alt="entry.basename"
                                 loading="lazy"
@@ -59,6 +59,10 @@
                             <span v-if="isVideo(entry)" class="chooser-video-badge">
                                 <PlayCircleOutline :size="24" />
                             </span>
+                            <!-- Selection rank = the page order the media will be
+                                 inserted in (issue #36); only meaningful with 2+. -->
+                            <span v-if="selectedPaths.length > 1 && selectionOrder(entry) > 0"
+                                class="chooser-order-badge">{{ selectionOrder(entry) }}</span>
                             <span class="chooser-name">{{ entry.basename }}</span>
                         </button>
                     </li>
@@ -70,13 +74,13 @@
                 <NcButton :disabled="saving" v-on:click="$emit('close')">
                     {{ sCancel }}
                 </NcButton>
-                <NcButton variant="primary" :disabled="saving || selectedEntry == null"
-                    v-on:click="choose(selectedEntry)">
+                <NcButton variant="primary" :disabled="saving || selectedEntries.length === 0"
+                    v-on:click="choose(selectedEntries)">
                     <template #icon>
                         <NcLoadingIcon v-if="saving" :size="20" />
                         <Check v-else :size="20" />
                     </template>
-                    {{ sChoose }}
+                    {{ chooseLabel }}
                 </NcButton>
             </div>
         </div>
@@ -112,12 +116,14 @@ export default {
             "currentPath": "",
             "entries": [],
             "loading": false,
-            "selectedPath": null,
+            // Paths of the selected media, in click order — that order is the
+            // page order the album inserts them in (issue #36).
+            "selectedPaths": [],
             // Paths whose thumbnail failed to load (no preview provider):
             // their tiles fall back to a generic image icon.
             "failedPreviews": {},
             "acceptMimes": MEDIA_MIMES.join(','),
-            "sTitle": t("souvenirs", "Choose an image or a video"),
+            "sTitle": t("souvenirs", "Choose images or videos"),
             "sAllFiles": t("souvenirs", "All files"),
             "sUpload": t("souvenirs", "Upload"),
             "sCancel": t("souvenirs", "Cancel"),
@@ -152,8 +158,17 @@ export default {
             }
             return crumbs;
         },
-        'selectedEntry': function() {
-            return this.entries.find(e => e.path === this.selectedPath) || null;
+        'selectedEntries': function() {
+            // Selection order preserved; paths no longer listed are dropped.
+            return this.selectedPaths
+                .map(path => this.entries.find(e => e.path === path))
+                .filter(e => e != null);
+        },
+        'chooseLabel': function() {
+            const count = this.selectedEntries.length;
+            return count > 1
+                ? t("souvenirs", "Choose ({count})", { count: count })
+                : this.sChoose;
         },
     },
     mounted: function() {
@@ -172,7 +187,7 @@ export default {
         // (mounted() uses that for its root fallback).
         browse: async function(path) {
             this.loading = true;
-            this.selectedPath = null;
+            this.selectedPaths = [];
             var listed;
             try {
                 listed = await listFolder(path);
@@ -196,31 +211,45 @@ export default {
         isVideo: function(entry) {
             return VIDEO_MIMES.includes(entry.mime);
         },
-        select: function(entry) {
-            // Clicking the selected tile again deselects it.
-            this.selectedPath = this.selectedPath === entry.path ? null : entry.path;
+        isSelected: function(entry) {
+            return this.selectedPaths.includes(entry.path);
         },
-        choose: function(entry) {
-            if (this.saving || entry == null) {
+        selectionOrder: function(entry) {
+            // 1-based rank in the selection, 0 when not selected.
+            return this.selectedPaths.indexOf(entry.path) + 1;
+        },
+        select: function(entry) {
+            // Clicking a tile toggles it in/out of the selection (issue #36).
+            if (this.isSelected(entry)) {
+                this.selectedPaths = this.selectedPaths.filter(path => path !== entry.path);
+            } else {
+                this.selectedPaths = this.selectedPaths.concat(entry.path);
+            }
+        },
+        choose: function(entries) {
+            if (this.saving || entries.length === 0) {
                 return;
             }
-            this.$emit('pick', entry);
+            this.$emit('pick', entries);
         },
         previewUrl: function(entry) {
             return getPreviewUrl(entry.fileid);
         },
         onFileChosen: function(event) {
-            const file = event.target.files && event.target.files[0];
-            // Reset so picking the same file again re-fires `change`.
+            const files = Array.from(event.target.files || []);
+            // Reset so picking the same files again re-fires `change`.
             event.target.value = '';
-            if (!file) {
+            if (files.length === 0) {
                 return;
             }
-            if (!MEDIA_MIMES.includes(file.type)) {
+            const supported = files.filter(file => MEDIA_MIMES.includes(file.type));
+            if (supported.length < files.length) {
                 showError(t("souvenirs", "This file is not a supported image or video."));
+            }
+            if (supported.length === 0) {
                 return;
             }
-            this.$emit('upload', file);
+            this.$emit('upload', supported);
         },
     },
 }
@@ -295,6 +324,25 @@ let lastBrowsedPath = "";
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+/* Selection-order badge: the rank the media will be inserted in. Top-left,
+   clear of the video play badge (top-right). */
+.chooser-order-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--color-primary-element-text, #ffffff);
+    background-color: var(--color-primary-element, #0082c9);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 /* Play badge marking video tiles apart from image ones. */
 .chooser-video-badge {
