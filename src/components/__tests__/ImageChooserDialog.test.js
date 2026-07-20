@@ -81,7 +81,8 @@ describe('ImageChooserDialog', () => {
     it('emits pick with the video entry when a video is chosen', async () => {
         const wrapper = await mountDialog()
         await wrapper.findAll('.chooser-image')[1].trigger('dblclick')
-        expect(wrapper.emitted('pick')[0][0]).toMatchObject({ basename: 'clip.mp4', mime: 'video/mp4' })
+        expect(wrapper.emitted('pick')[0][0]).toHaveLength(1)
+        expect(wrapper.emitted('pick')[0][0][0]).toMatchObject({ basename: 'clip.mp4', mime: 'video/mp4' })
         wrapper.unmount()
     })
 
@@ -164,7 +165,51 @@ describe('ImageChooserDialog', () => {
         expect(chooseButton.attributes('disabled')).toBeUndefined()
         await chooseButton.trigger('click')
         expect(wrapper.emitted('pick')).toHaveLength(1)
-        expect(wrapper.emitted('pick')[0][0]).toMatchObject({ basename: 'new.png' })
+        expect(wrapper.emitted('pick')[0][0]).toHaveLength(1)
+        expect(wrapper.emitted('pick')[0][0][0]).toMatchObject({ basename: 'new.png' })
+        wrapper.unmount()
+    })
+
+    it('emits every selected entry in click order and counts them on the Choose button', async () => {
+        const wrapper = await mountDialog()
+        const tiles = wrapper.findAll('.chooser-image') // new.png, clip.mp4, old.jpg
+        await tiles[2].trigger('click')
+        await tiles[0].trigger('click')
+        // Both tiles selected, ranked in click order.
+        expect(tiles[2].attributes('aria-pressed')).toBe('true')
+        expect(tiles[0].attributes('aria-pressed')).toBe('true')
+        expect(tiles[2].find('.chooser-order-badge').text()).toBe('1')
+        expect(tiles[0].find('.chooser-order-badge').text()).toBe('2')
+        const chooseButton = wrapper.findAll('button').filter(b => b.text() === 'Choose (2)')[0]
+        expect(chooseButton).toBeDefined()
+        await chooseButton.trigger('click')
+        const picked = wrapper.emitted('pick')[0][0]
+        expect(picked.map(e => e.basename)).toEqual(['old.jpg', 'new.png'])
+        wrapper.unmount()
+    })
+
+    it('hides the order badge for a single selection', async () => {
+        const wrapper = await mountDialog()
+        const tile = wrapper.findAll('.chooser-image')[0]
+        await tile.trigger('click')
+        expect(tile.find('.chooser-order-badge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('clears the selection when navigating to another folder', async () => {
+        const wrapper = await mountDialog()
+        await wrapper.findAll('.chooser-image')[0].trigger('click')
+        await wrapper.findAll('.chooser-image')[1].trigger('click')
+        listFolder.mockResolvedValue([newImage])
+        await wrapper.find('.chooser-folder').trigger('click')
+        await flushBrowse()
+        expect(wrapper.find('.chooser-image').attributes('aria-pressed')).toBe('false')
+        const chooseButton = wrapper.findAll('button').filter(b => b.text() === 'Choose')[0]
+        expect(chooseButton.attributes('disabled')).toBeDefined()
+        // Back to the files root for the module-level folder memory.
+        listFolder.mockResolvedValue(ROOT_LISTING)
+        await wrapper.find('.crumb-stub').trigger('click')
+        await flushBrowse()
         wrapper.unmount()
     })
 
@@ -180,20 +225,21 @@ describe('ImageChooserDialog', () => {
     it('emits pick directly on double-click', async () => {
         const wrapper = await mountDialog()
         await wrapper.findAll('.chooser-image')[2].trigger('dblclick')
-        expect(wrapper.emitted('pick')[0][0]).toMatchObject({ basename: 'old.jpg' })
+        expect(wrapper.emitted('pick')[0][0][0]).toMatchObject({ basename: 'old.jpg' })
         wrapper.unmount()
     })
 
-    it('restricts the hidden input to media mimetypes and emits upload with the file', async () => {
+    it('restricts the hidden multi-file input to media mimetypes and emits upload with the files', async () => {
         const wrapper = await mountDialog()
         const input = wrapper.find('input[type=file]')
         expect(input.attributes('accept')).toContain('image/jpeg')
         expect(input.attributes('accept')).toContain('video/mp4')
+        expect(input.attributes('multiple')).toBeDefined()
         const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
         Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
         await input.trigger('change')
         expect(wrapper.emitted('upload')).toHaveLength(1)
-        expect(wrapper.emitted('upload')[0][0]).toBe(file)
+        expect(wrapper.emitted('upload')[0][0]).toEqual([file])
         wrapper.unmount()
     })
 
@@ -203,7 +249,20 @@ describe('ImageChooserDialog', () => {
         const file = new File(['bytes'], 'clip.mp4', { type: 'video/mp4' })
         Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
         await input.trigger('change')
-        expect(wrapper.emitted('upload')[0][0]).toBe(file)
+        expect(wrapper.emitted('upload')[0][0]).toEqual([file])
+        wrapper.unmount()
+    })
+
+    it('emits the supported files and toasts once when a multi-upload mixes in an unsupported one', async () => {
+        const wrapper = await mountDialog()
+        const input = wrapper.find('input[type=file]')
+        const photo = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
+        const doc = new File(['bytes'], 'doc.pdf', { type: 'application/pdf' })
+        const clip = new File(['bytes'], 'clip.mp4', { type: 'video/mp4' })
+        Object.defineProperty(input.element, 'files', { value: [photo, doc, clip], configurable: true })
+        await input.trigger('change')
+        expect(showError).toHaveBeenCalledTimes(1)
+        expect(wrapper.emitted('upload')[0][0]).toEqual([photo, clip])
         wrapper.unmount()
     })
 

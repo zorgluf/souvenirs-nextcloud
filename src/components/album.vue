@@ -725,84 +725,137 @@ export default {
                 this.imageChooserPageId = null;
             }
         },
-        onImagePick: async function(entry) {
-            // The chooser offers images and videos (issue #32); a picked video
-            // goes through its own flow (VideoElement + poster capture).
-            if (VIDEO_MIMES.includes(entry.mime)) {
-                return this.onVideoPick(entry);
-            }
-            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
-            if (index < 0 || this.imageChooserSaving) {
-                return;
-            }
+        onImagePick: function(entries) {
+            // The chooser emits the picked media as an array, in selection
+            // order (issue #36).
+            return this.addMediaItems(entries, this.prepareEntryElement);
+        },
+        onImageUpload: function(files) {
+            return this.addMediaItems(files, this.prepareFileElement);
+        },
+        prepareEntryElement: async function(entry) {
+            // Link a picked Nextcloud file into the album (no copy/upload) and
+            // return the element referencing it, or null after showing an
+            // error toast (the caller then keeps the chooser open). Videos get
+            // their poster captured too (issue #32), best-effort.
             const file = { name: entry.basename, size: entry.size, mime: entry.mime };
             if (!file.size) {
                 showError(t("souvenirs","Could not read the selected file."));
-                return;
+                return null;
             }
+            const isVideo = VIDEO_MIMES.includes(entry.mime);
             // Build the element first so we know the in-album asset path to link,
-            // then ask the backend to link the picked file to it (no copy/upload).
-            const element = buildImageElement(file);
-            this.imageChooserSaving = true;
-            var updatedPage;
+            // then ask the backend to link the picked file to it.
+            var element = isVideo ? buildVideoElement(file) : buildImageElement(file);
             try {
-                var res = await searchAsset(this.albumId, element.image, file.name, file.size);
+                var res = await searchAsset(this.albumId, isVideo ? element.video : element.image, file.name, file.size);
                 if (res == null || res.status !== "found") {
-                    // Keep the dialog open so the user can pick another file.
-                    this.imageChooserSaving = false;
-                    showError(t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
-                    return;
+                    showError(isVideo
+                        ? t("souvenirs","Could not link the selected video. It must be located outside the Souvenirs albums folder.")
+                        : t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+                    return null;
                 }
-                updatedPage = addElement(this.pages[index], element);
-                await updatePage(this.albumId, updatedPage);
+                if (isVideo) {
+                    // The poster capture pulls the video bytes once over WebDAV;
+                    // no bytes just means no poster, the element stays usable.
+                    var blob = null;
+                    try {
+                        blob = await getFileBlob(entry.path);
+                    } catch (fetchError) {
+                    }
+                    element = (blob != null)
+                        ? await this.attachVideoPoster(element, blob)
+                        : { ...element, image: '' };
+                }
+                return element;
             } catch (error) {
-                this.imageChooserSaving = false;
-                showError(t("souvenirs","Could not add the image."));
-                return;
+                showError(isVideo ? t("souvenirs","Could not add the video.") : t("souvenirs","Could not add the image."));
+                // GC the link/poster of the never-persisted element.
+                cleanAssets(this.albumId).catch(() => {});
+                return null;
             }
-            this.pages.splice(index, 1, updatedPage);
-            this.imageChooserSaving = false;
-            this.imageChooserPageId = null;
         },
-        onImageUpload: async function(file) {
-            // Same split as onImagePick: uploaded videos have their own flow.
-            if (VIDEO_MIMES.includes(file.type)) {
-                return this.onVideoUpload(file);
-            }
-            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
-            if (index < 0 || this.imageChooserSaving) {
-                return;
-            }
-            const element = buildImageElement({ name: file.name, size: file.size, mime: file.type });
-            this.imageChooserSaving = true;
-            var updatedPage;
+        prepareFileElement: async function(file) {
+            // Upload a local file as a new album asset and return the element
+            // referencing it, or null after showing an error toast. Same flow
+            // as the paint dialog (and the Android app): the probe returns
+            // where the asset lives under the user's files root, the bytes go
+            // up over native WebDAV, and the server must confirm the file
+            // landed before any page starts referencing it.
+            const isVideo = VIDEO_MIMES.includes(file.type);
+            var element = isVideo
+                ? buildVideoElement({ name: file.name, size: file.size, mime: file.type })
+                : buildImageElement({ name: file.name, size: file.size, mime: file.type });
+            const asset = isVideo ? element.video : element.image;
             try {
-                // Same upload flow as the paint dialog (and the Android app):
-                // the probe returns where the asset lives under the user's files
-                // root, the bytes go up over native WebDAV, and the server must
-                // confirm the file landed before the page starts referencing it.
-                var probe = await probeAsset(this.albumId, element.image);
+                var probe = await probeAsset(this.albumId, asset);
                 if (probe == null || !probe.path) {
                     throw new Error("assetprobe returned no upload path");
                 }
                 await uploadAsset(probe.path, file);
-                var check = await probeAsset(this.albumId, element.image);
+                var check = await probeAsset(this.albumId, asset);
                 if (check == null || check.status !== "ok") {
                     throw new Error("uploaded asset not found in the album");
                 }
-                updatedPage = addElement(this.pages[index], element);
-                await updatePage(this.albumId, updatedPage);
+                if (isVideo) {
+                    element = await this.attachVideoPoster(element, file);
+                }
+                return element;
             } catch (error) {
-                // Keep the dialog open so the user can retry; GC any bytes that
-                // landed before the failure (the element was never persisted).
-                this.imageChooserSaving = false;
-                showError(t("souvenirs","Could not upload the image."));
+                // GC any bytes that landed before the failure (the element was
+                // never persisted).
+                showError(isVideo ? t("souvenirs","Could not upload the video.") : t("souvenirs","Could not upload the image."));
                 cleanAssets(this.albumId).catch(() => {});
+                return null;
+            }
+        },
+        addMediaItems: async function(items, prepare) {
+            // Insert the chosen media in order (issue #36): the first one joins
+            // the page the chooser was opened from (as a single pick always
+            // did), each further one gets its own new page right after — one
+            // medium per page.
+            var that = this;
+            var targetIndex = this.pages.findIndex(p => p.id === this.imageChooserPageId);
+            if (targetIndex < 0 || this.imageChooserSaving || items.length === 0) {
                 return;
             }
-            this.pages.splice(index, 1, updatedPage);
+            this.imageChooserSaving = true;
+            var inserted = 0;
+            for (const item of items) {
+                var element = await prepare(item);
+                if (element == null) {
+                    // Error already shown; keep the dialog open (media inserted
+                    // so far stay) so the user can retry or pick something else.
+                    this.imageChooserSaving = false;
+                    return;
+                }
+                try {
+                    if (inserted === 0) {
+                        var updatedPage = addElement(this.pages[targetIndex], element);
+                        await updatePage(this.albumId, updatedPage);
+                        this.pages.splice(targetIndex, 1, updatedPage);
+                    } else {
+                        var pos = targetIndex + inserted;
+                        var page = addElement(buildPage(), element);
+                        await createPage(this.albumId, pos, page);
+                        this.pages.splice(pos, 0, page);
+                    }
+                } catch (error) {
+                    this.imageChooserSaving = false;
+                    showError(element.class === "VideoElement"
+                        ? t("souvenirs","Could not add the video.")
+                        : t("souvenirs","Could not add the image."));
+                    cleanAssets(this.albumId).catch(() => {});
+                    return;
+                }
+                inserted++;
+            }
             this.imageChooserSaving = false;
             this.imageChooserPageId = null;
+            if (inserted > 1) {
+                // Land on the last created page so the whole batch is visible.
+                this.$nextTick(() => { that.showN(targetIndex + inserted - 1); });
+            }
         },
         attachVideoPoster: async function(element, videoBlob) {
             // Capture a poster frame of the video and upload it as the
@@ -828,88 +881,6 @@ export default {
             } catch (error) {
                 return { ...element, image: '' };
             }
-        },
-        onVideoPick: async function(entry) {
-            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
-            if (index < 0 || this.imageChooserSaving) {
-                return;
-            }
-            const file = { name: entry.basename, size: entry.size, mime: entry.mime };
-            if (!file.size) {
-                showError(t("souvenirs","Could not read the selected file."));
-                return;
-            }
-            // Same shape as onImagePick — link the picked file to the element's
-            // video asset (no copy/upload) — plus the poster capture, for which
-            // the video bytes are pulled once over WebDAV.
-            var element = buildVideoElement(file);
-            this.imageChooserSaving = true;
-            var updatedPage;
-            try {
-                var res = await searchAsset(this.albumId, element.video, file.name, file.size);
-                if (res == null || res.status !== "found") {
-                    // Keep the dialog open so the user can pick another file.
-                    this.imageChooserSaving = false;
-                    showError(t("souvenirs","Could not link the selected video. It must be located outside the Souvenirs albums folder."));
-                    return;
-                }
-                var blob = null;
-                try {
-                    blob = await getFileBlob(entry.path);
-                } catch (fetchError) {
-                    // No bytes, no poster: the element is still fully usable.
-                }
-                element = (blob != null)
-                    ? await this.attachVideoPoster(element, blob)
-                    : { ...element, image: '' };
-                updatedPage = addElement(this.pages[index], element);
-                await updatePage(this.albumId, updatedPage);
-            } catch (error) {
-                this.imageChooserSaving = false;
-                showError(t("souvenirs","Could not add the video."));
-                // GC the link/poster of the never-persisted element.
-                cleanAssets(this.albumId).catch(() => {});
-                return;
-            }
-            this.pages.splice(index, 1, updatedPage);
-            this.imageChooserSaving = false;
-            this.imageChooserPageId = null;
-        },
-        onVideoUpload: async function(file) {
-            var index = this.pages.findIndex(p => p.id === this.imageChooserPageId);
-            if (index < 0 || this.imageChooserSaving) {
-                return;
-            }
-            var element = buildVideoElement({ name: file.name, size: file.size, mime: file.type });
-            this.imageChooserSaving = true;
-            var updatedPage;
-            try {
-                // Same upload flow as images (and the Android app): probe for
-                // the WebDAV destination, upload the bytes, and have the server
-                // confirm the video landed before the page references it.
-                var probe = await probeAsset(this.albumId, element.video);
-                if (probe == null || !probe.path) {
-                    throw new Error("assetprobe returned no upload path");
-                }
-                await uploadAsset(probe.path, file);
-                var check = await probeAsset(this.albumId, element.video);
-                if (check == null || check.status !== "ok") {
-                    throw new Error("uploaded asset not found in the album");
-                }
-                element = await this.attachVideoPoster(element, file);
-                updatedPage = addElement(this.pages[index], element);
-                await updatePage(this.albumId, updatedPage);
-            } catch (error) {
-                // Keep the dialog open so the user can retry; GC any bytes that
-                // landed before the failure (the element was never persisted).
-                this.imageChooserSaving = false;
-                showError(t("souvenirs","Could not upload the video."));
-                cleanAssets(this.albumId).catch(() => {});
-                return;
-            }
-            this.pages.splice(index, 1, updatedPage);
-            this.imageChooserSaving = false;
-            this.imageChooserPageId = null;
         },
         resizeEventHandler: function(e) {
             if (window.innerHeight > window.innerWidth) {
