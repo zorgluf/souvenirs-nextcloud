@@ -33,7 +33,6 @@ OC.L10N.register(
     "Could not add the text." : "Não foi possível adicionar o texto.",
     "Could not read the selected file." : "Não foi possível ler o arquivo selecionado.",
     "Could not add the image." : "Não foi possível adicionar a imagem.",
-    "Add image" : "Adicionar imagem",
     "Add text" : "Adicionar texto",
     "Change layout" : "Alterar esquema",
     "Move page left" : "Mover a página para a esquerda",

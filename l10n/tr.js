@@ -22,7 +22,6 @@ OC.L10N.register(
     "Fullscreen" : "Tam ekran",
     "Click to download album in a zip file." : "Albümü zip dosyası olarak indirmek için tıklayın.",
     "Edit" : "Düzenle",
-    "Add image" : "Görsel ekle",
     "Change layout" : "Yerleşimi değiştir",
     "Drag to move" : "Taşımak için sürükleyin",
     "Remove image" : "Görseli kaldır"
