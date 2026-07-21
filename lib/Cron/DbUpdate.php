@@ -9,6 +9,7 @@ use OCP\Files\IRootFolder;
 use OCA\Souvenirs\Controller\Utils;
 use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Db\AlbumMapper;
+use OCA\Souvenirs\Db\ShareMapper;
 use OCP\IConfig;
 
 class DbUpdate extends TimedJob {
@@ -16,8 +17,9 @@ class DbUpdate extends TimedJob {
     private IUserManager $userManager;
     private IRootFolder $rootFolder;
     private AlbumMapper $albumMapper;
+    private ShareMapper $shareMapper;
 
-    public function __construct(ITimeFactory $time, IUserManager $userManager, IRootFolder $rootFolder, IConfig $config, AlbumMapper $albumMapper) {
+    public function __construct(ITimeFactory $time, IUserManager $userManager, IRootFolder $rootFolder, IConfig $config, AlbumMapper $albumMapper, ShareMapper $shareMapper) {
         parent::__construct($time);
 
         // Run once a day
@@ -27,9 +29,13 @@ class DbUpdate extends TimedJob {
         $this->rootFolder = $rootFolder;
         $this->config = $config;
         $this->albumMapper = $albumMapper;
+        $this->shareMapper = $shareMapper;
     }
 
     protected function run($arguments) {
+
+        //remove expired shares (shares with no expiration date are kept)
+        $this->shareMapper->deleteExpired($this->time->getDateTime());
 
         //for all users
         $this->userManager->callForSeenUsers(function (IUser $user): void {

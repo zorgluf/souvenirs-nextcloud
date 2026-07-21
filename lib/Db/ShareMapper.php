@@ -73,7 +73,7 @@ class ShareMapper extends QBMapper {
         } 
     }
 
-    public function createShare(string $user, string $albumId) {
+    public function createShare(string $user, string $albumId, ?\DateTime $validUntil = null) {
 
         //check if share exists
         $res = $this->findByAlbumId($user,$albumId);
@@ -87,8 +87,25 @@ class ShareMapper extends QBMapper {
         $newShare->setToken($newToken);
         $newShare->setUser($user);
         $newShare->setAlbumId($albumId);
+        $newShare->setValidUntil($validUntil ?? new \DateTime('+3 months'));
         $this->insert($newShare);
         return array('action' => 'success', 'share' => $newShare->toArray());
+    }
+
+    /**
+     * Delete every share whose expiration date has passed.
+     * Shares with a NULL valid_until never expire.
+     */
+    public function deleteExpired(\DateTime $now): void {
+        $qb = $this->db->getQueryBuilder();
+        $qb->delete(SHARE_TABLE)
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->isNotNull('valid_until'),
+                    $qb->expr()->lt('valid_until', $qb->createNamedParameter($now, IQueryBuilder::PARAM_DATETIME_MUTABLE))
+                )
+            );
+        $qb->executeStatement();
     }
 
     public function deleteShare(string $user, string $albumId) {
