@@ -3,6 +3,7 @@ namespace OCA\Souvenirs\Controller;
 
 use OCP\IRequest;
 use OCP\IConfig;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
