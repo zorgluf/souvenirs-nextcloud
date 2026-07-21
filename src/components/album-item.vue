@@ -16,8 +16,10 @@
     </router-link>
     <div v-bind:class="[ 'right', isWinPortrait ? 's-action-menu-portrait': 's-action-menu' ]">
         <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
+            <NcActionInput type="date" :is-native-picker="true" :label="sExpiresOn" v-model="shareExpiry" v-if="!(isShared)">{{sExpiresOn}}</NcActionInput>
             <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>
             <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
+            <NcActionText icon="icon-calendar-dark" v-if="isShared && shareExpiryString != ''">{{sExpiresOn}} {{shareExpiryString}}</NcActionText>
             <NcActionButton icon="icon-delete" @click="toggleShare" v-if="isShared" :close-after-click="true">Remove share</NcActionButton>
         </NcActions>
         <NcButton variant="tertiary" :aria-label="sEditAlbum" :title="sEditAlbum" v-on:click="onEditInfo">
@@ -37,9 +39,10 @@
 
 <script>
 
-import { NcActionLink, NcActionButton, NcActions, NcButton } from '@nextcloud/vue'
+import { NcActionLink, NcActionButton, NcActionInput, NcActionText, NcActions, NcButton } from '@nextcloud/vue'
 import { generateUrl, imagePath } from '@nextcloud/router'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
+import { defaultExpiryDate, toApiDate } from '../utils/shareExpiry.js'
 
 export default {
     props: {
@@ -54,12 +57,16 @@ export default {
     data: function() {
         return {
             "sEditAlbum": t("souvenirs","Edit album"),
+            "sExpiresOn": t("souvenirs","Expires on"),
+            "shareExpiry": defaultExpiryDate(),
         }
     },
     components: {
         NcActions,
         NcActionButton,
+        NcActionInput,
         NcActionLink,
+        NcActionText,
         NcButton,
         Pencil,
     },
@@ -78,6 +85,18 @@ export default {
                 return this.shares.find(share => {
                     return share['albumId'] == this.albumId
                 }).token;
+            }
+            return "";
+        },
+        "shareExpiryString": function() {
+            if (this.isShared) {
+                const validUntil = this.shares.find(share => {
+                    return share['albumId'] == this.albumId
+                }).validUntil;
+                if (validUntil) {
+                    moment.locale(window.navigator.language);
+                    return moment(validUntil).format("LL");
+                }
             }
             return "";
         },
@@ -153,7 +172,11 @@ export default {
                         'Content-Type': 'application/json'
                     },
                     method: "POST",
-                    body: JSON.stringify({'albumId': this.albumId})
+                    body: JSON.stringify({
+                        'albumId': this.albumId,
+                        //null lets the server apply its default expiration
+                        'validUntil': this.shareExpiry ? toApiDate(this.shareExpiry) : null,
+                    })
                     })
                 .then(response => {
                     that.$emit('refresh-shares');

@@ -424,13 +424,23 @@ class Api2Controller extends ApiController {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function createShare($albumId) {
+	public function createShare($albumId, $validUntil = null) {
 		//make sure the album actually exists for this user before sharing it
 		$album_db = $this->albumMapper->findByAlbumId($this->userId, $albumId);
 		if (is_null($album_db)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		$results = $this->shareMapper->createShare($this->userId,$albumId);
+		//optional expiration date (YYYY-MM-DD); the share stays valid through that day.
+		//null falls back to the mapper default (+3 months) so older clients keep working.
+		$validUntilDate = null;
+		if (!is_null($validUntil) && $validUntil !== '') {
+			$validUntilDate = \DateTime::createFromFormat('Y-m-d', $validUntil);
+			if ($validUntilDate === false) {
+				return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
+			}
+			$validUntilDate->setTime(23, 59, 59);
+		}
+		$results = $this->shareMapper->createShare($this->userId, $albumId, $validUntilDate);
 		//get shareUrl
 		$shareUrl = $this->urlGen->linkToRouteAbsolute('souvenirs.public.show',array('token' => $results['share']['token']));
 
