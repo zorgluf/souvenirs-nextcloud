@@ -20,6 +20,7 @@ OC.L10N.register(
     "Save" : "Išsaugoti",
     "Could not save the album." : "Nepavyko išsaugoti albumo.",
     "Could not create the album." : "Nepavyko sukurti albumo.",
+    "Expires on" : "Baigia galioti",
     "Start slideshow" : "Pradėti skaidrių rodymą",
     "Stop slideshow" : "Stabdyti skaidrių rodymą",
     "Slideshow speed" : "Skaidrių rodymo greitis",

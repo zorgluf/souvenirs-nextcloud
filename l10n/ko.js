@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "날짜",
     "Create" : "생성",
     "Save" : "Save",
+    "Expires on" : "만료일",
     "Download" : "다운로드",
     "Fullscreen" : "전체 화면",
     "Edit" : "편집",

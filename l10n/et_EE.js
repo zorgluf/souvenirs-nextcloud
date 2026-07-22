@@ -28,6 +28,7 @@ OC.L10N.register(
     "Save" : "Salvesta",
     "Could not save the album." : "Albumi salvestamine ei õnnestunud.",
     "Could not create the album." : "Albumi loomine ei õnnestunud.",
+    "Expires on" : "Aegub",
     "Start slideshow" : "Käivita slaidiesitlus",
     "Stop slideshow" : "Seiska slaidiesitlus",
     "Slideshow speed" : "Slaidiesitluse kiirus",

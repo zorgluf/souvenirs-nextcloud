@@ -14,6 +14,7 @@ OC.L10N.register(
     "Date" : "Tanggal",
     "Create" : "Buat",
     "Save" : "Save",
+    "Expires on" : "Kedaluwarsa pada",
     "Start slideshow" : "Mulai slideshow",
     "Stop slideshow" : "Hentikan slideshow",
     "Slideshow speed" : "Kecepatan slideshow",

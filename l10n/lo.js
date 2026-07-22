@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "Date",
     "Create" : "ສ້າງ",
     "Save" : "Save",
+    "Expires on" : "ໝົດອາຍຸໃນວັນທີ",
     "Download" : "ດາວໂຫລດ",
     "Edit" : "ແກ້ໄຂ",
     "Change layout" : "ປ່ຽນໂຄງຮ່າງ",

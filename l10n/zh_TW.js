@@ -28,6 +28,7 @@ OC.L10N.register(
     "Save" : "儲存",
     "Could not save the album." : "無法儲存相簿",
     "Could not create the album." : "無法建立相簿。",
+    "Expires on" : "過期於",
     "Start slideshow" : "開始幻燈片",
     "Stop slideshow" : "停止幻燈片",
     "Slideshow speed" : "幻燈片速度",

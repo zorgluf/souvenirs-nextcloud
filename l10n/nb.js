@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Dato",
     "Create" : "Opprett",
     "Save" : "Save",
+    "Expires on" : "Utløper den",
     "Start slideshow" : "Start lysbildefremvisning",
     "Stop slideshow" : "Stopp lysbildefremvisning",
     "Slideshow speed" : "Hastighet på lysbildefremvisning",

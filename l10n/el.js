@@ -26,6 +26,7 @@ OC.L10N.register(
     "Save" : "Αποθήκευση",
     "Could not save the album." : "Αδυναμία αποθήκευσης του άλμπουμ.",
     "Could not create the album." : "Αδυναμία δημιουργίας του άλμπουμ.",
+    "Expires on" : "Λήξη στις",
     "Start slideshow" : "Έναρξη παρουσίασης",
     "Stop slideshow" : "Διακοπή παρουσίασης",
     "Slideshow speed" : "Ταχύτητα παρουσίασης",

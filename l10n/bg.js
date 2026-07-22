@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "Дата",
     "Create" : "Създаване",
     "Save" : "Save",
+    "Expires on" : "Изтича на",
     "Start slideshow" : "Стартиране на слайдшоуто",
     "Stop slideshow" : "Спиране на слайдшоуто",
     "Slideshow speed" : "Скорост на слайдшоуто",

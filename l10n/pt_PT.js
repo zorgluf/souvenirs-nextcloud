@@ -17,6 +17,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Could not save the album." : "Não foi possível salvar o álbum.",
     "Could not create the album." : "Não foi possível criar o álbum.",
+    "Expires on" : "Expira em",
     "Start slideshow" : "Começar apresentação de slides",
     "Stop slideshow" : "Parar apresentação de slides",
     "Slideshow speed" : "Velocidade da apresentação de slides",

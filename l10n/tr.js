@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Tarih",
     "Create" : "Oluştur",
     "Save" : "Kaydet",
+    "Expires on" : "Geçerlilik sonu",
     "Start slideshow" : "Slayt sunumunu başlat",
     "Stop slideshow" : "Slayt sunumunu durdur",
     "Slideshow speed" : "Slayt sunumu hızı",

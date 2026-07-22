@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "Päivä",
     "Create" : "Luo",
     "Save" : "Save",
+    "Expires on" : "Vanhenee",
     "Start slideshow" : "Aloita diaesitys",
     "Stop slideshow" : "Pysäytä diaesistys",
     "Slideshow speed" : "Diaesityksen nopeus",

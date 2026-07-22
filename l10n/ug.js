@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "چېسلا",
     "Create" : "قۇر",
     "Save" : "Save",
+    "Expires on" : "ۋاقتى توشىدۇ",
     "Start slideshow" : "تام تەسۋىرنى باشلاڭ",
     "Stop slideshow" : "تام تەسۋىرنى توختىتىڭ",
     "Slideshow speed" : "تام تەسۋىر سۈرئىتى",

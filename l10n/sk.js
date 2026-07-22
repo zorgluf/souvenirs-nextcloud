@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "Dátum",
     "Create" : "Vytvoriť",
     "Save" : "Save",
+    "Expires on" : "Koniec platnosti",
     "Start slideshow" : "Spustiť prehliadku",
     "Stop slideshow" : "Zastaviť prehliadku",
     "Slideshow speed" : "Rýchlosť prehliadky",

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Save" : "Enregistrer",
     "Could not save the album." : "Impossible d’enregistrer l’album.",
     "Could not create the album." : "Impossible de créer l’album.",
+    "Expires on" : "Expire le",
     "Start slideshow" : "Démarrer le diaporama",
     "Stop slideshow" : "Arrêter le diaporama",
     "Slideshow speed" : "Vitesse du diaporama",

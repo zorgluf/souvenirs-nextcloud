@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "日期",
     "Create" : "创建",
     "Save" : "Save",
+    "Expires on" : "过期于",
     "Download" : "下载",
     "Fullscreen" : "全屏",
     "Edit" : "编辑",

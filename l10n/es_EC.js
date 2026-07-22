@@ -13,6 +13,7 @@ OC.L10N.register(
     "New album" : "Nuevo álbum",
     "Create" : "Crear",
     "Save" : "Save",
+    "Expires on" : "Expira el",
     "Start slideshow" : "Iniciar presentación de diapositivas",
     "Stop slideshow" : "Detener presentación de diapositivas",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",

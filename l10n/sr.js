@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Датум",
     "Create" : "Креирање",
     "Save" : "Save",
+    "Expires on" : "Истиче дана",
     "Start slideshow" : "Покрени пројектор слајдова",
     "Stop slideshow" : "Заустави пројектор слајдова",
     "Slideshow speed" : "Брзина пројекције слајдова",

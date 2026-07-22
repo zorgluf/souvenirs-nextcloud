@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Дата",
     "Create" : "Додати",
     "Save" : "Save",
+    "Expires on" : "Термін дії закінчується",
     "Start slideshow" : "Почати показ слайдів",
     "Stop slideshow" : "Зупинити показ слайдів",
     "Slideshow speed" : "Швидкість показу слайдів",

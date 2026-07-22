@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Data",
     "Create" : "Crear",
     "Save" : "Gardar",
+    "Expires on" : "Caduca o",
     "Start slideshow" : "Iniciar o diaporama",
     "Stop slideshow" : "Deter o diaporama",
     "Slideshow speed" : "Velocidade do diaporama",

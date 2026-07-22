@@ -26,6 +26,7 @@ OC.L10N.register(
     "Save" : "Sábháil",
     "Could not save the album." : "Níorbh fhéidir an t-albam a shábháil.",
     "Could not create the album." : "Níorbh fhéidir an t-albam a chruthú.",
+    "Expires on" : "In éag ar",
     "Start slideshow" : "Tosaigh taispeántas sleamhnán",
     "Stop slideshow" : "Stop taispeántas sleamhnán",
     "Slideshow speed" : "Taispeántas sleamhnán luas",

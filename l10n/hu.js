@@ -14,6 +14,7 @@ OC.L10N.register(
     "Date" : "Dátum",
     "Create" : "Létrehozás",
     "Save" : "Save",
+    "Expires on" : "Lejárat:",
     "Start slideshow" : "Diavetítés indítása",
     "Stop slideshow" : "Diavetítés leállítása",
     "Slideshow speed" : "Diavetítés sebessége",

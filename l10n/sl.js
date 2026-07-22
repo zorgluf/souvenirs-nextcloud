@@ -11,6 +11,7 @@ OC.L10N.register(
     "Date" : "Datum",
     "Create" : "Ustvari",
     "Save" : "Save",
+    "Expires on" : "Poteče",
     "Download" : "Prejmi",
     "Fullscreen" : "Celozaslonski način",
     "Edit" : "Uredi",

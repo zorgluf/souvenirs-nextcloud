@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "تاریخ",
     "Create" : "ایجاد",
     "Save" : "ذخیره",
+    "Expires on" : "تاریخ انقضا",
     "Start slideshow" : "شروع نمایش اسلاید",
     "Stop slideshow" : "توقف نمایش اسلاید",
     "Slideshow speed" : "سرعت نمایش اسلاید",

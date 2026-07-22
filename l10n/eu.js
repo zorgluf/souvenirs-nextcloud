@@ -13,6 +13,7 @@ OC.L10N.register(
     "Date" : "Data",
     "Create" : "Sortu",
     "Save" : "Save",
+    "Expires on" : "Iraungitze-data",
     "Start slideshow" : "Hasi diapositiba-aurkezpena",
     "Stop slideshow" : "Gelditu diapositiba-aurkezpena",
     "Slideshow speed" : "Diapositiba-aurkezpenaren abiadura",

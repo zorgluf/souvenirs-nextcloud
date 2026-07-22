@@ -15,6 +15,7 @@ OC.L10N.register(
     "Date" : "Fecha",
     "Create" : "Crear",
     "Save" : "Guardar",
+    "Expires on" : "Caduca en",
     "Start slideshow" : "Iniciar presentación de diapositivas",
     "Stop slideshow" : "Detener presentación de diapositivas",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",

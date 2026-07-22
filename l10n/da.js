@@ -11,6 +11,7 @@ OC.L10N.register(
     "Date" : "Dato",
     "Create" : "Opret",
     "Save" : "Save",
+    "Expires on" : "Udløber den",
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
     "Edit" : "Redigér",
