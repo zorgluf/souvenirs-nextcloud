@@ -1,6 +1,5 @@
 <template>
-	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown.prevent.left="showPrev" v-on:keydown.prevent.right="showNext"
-    v-on:keydown.prevent.up="showPrev" v-on:keydown.prevent.down="showNext" v-on:keydown.prevent.space="diaporama(!diaporamaMode)"
+	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown="onKeydown"
     v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver">
         <div class="top-right">
             <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
@@ -144,14 +143,14 @@ export default {
             "diap_timeout": null,
             "diaporamaSpeed": 5,
             "isWinPortrait": false,
-            "sStartSh": t("souvenirs","Start slideshow"),
-            "sStopSh": t("souvenirs","Stop slideshow"),
+            "sStartSh": t("souvenirs","Start slideshow ( )"),
+            "sStopSh": t("souvenirs","Stop slideshow ( )"),
             "sSpeedSh": t("souvenirs","Slideshow speed"),
             "sDownload": t("souvenirs","Download"),
             "sFullscreen": t("souvenirs","Fullscreen"),
             "sDownloadZip": t("souvenirs","Click to download album in a zip file."),
-            "sEdit": t("souvenirs","Edit"),
-            "sFinishEdit": t("souvenirs","Finish editing"),
+            "sEdit": t("souvenirs","Edit (E)"),
+            "sFinishEdit": t("souvenirs","Finish editing (E)"),
             "sAddPage": t("souvenirs","Add page"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
@@ -424,6 +423,30 @@ export default {
         },
         toggleEdit: function() {
             this.editMode = !this.editMode;
+        },
+        onKeydown: function(event) {
+            // Navigation/slideshow shortcuts don't apply while typing in a
+            // caption or a form field (e.g. the slideshow speed input).
+            var el = event.target;
+            if (el && (el.isContentEditable || el.tagName === "INPUT" || el.tagName === "TEXTAREA")) {
+                return;
+            }
+            switch (event.key) {
+                case "ArrowLeft":
+                case "ArrowUp":
+                    event.preventDefault();
+                    this.showPrev();
+                    break;
+                case "ArrowRight":
+                case "ArrowDown":
+                    event.preventDefault();
+                    this.showNext();
+                    break;
+                case " ":
+                    event.preventDefault();
+                    this.diaporama(!this.diaporamaMode);
+                    break;
+            }
         },
         onEditKey: function(event) {
             // "e" toggles edit mode, but not while typing in a caption (or with a
