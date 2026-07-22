@@ -20,6 +20,13 @@ export default {
     watch: {
         audioUrl(val, oldVal) {
             if (val != "") {
+                // Only one track plays at a time: without this, re-entering a
+                // page with audio stacks a new player on the still-playing old
+                // one. An empty val keeps the previous track playing
+                // (background-music semantics), so only a new track stops it.
+                if (this.audioPlayer != null) {
+                    this.audioPlayer.pause();
+                }
                 this.audioPlayer = new Audio(val);
                 this.audioPlayer.play();
             }

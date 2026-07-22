@@ -5,6 +5,7 @@ vi.mock('@nextcloud/dialogs', () => ({ showError: vi.fn() }))
 vi.mock('../../api/davApi.js', () => ({
     IMAGE_MIMES: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml'],
     VIDEO_MIMES: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'],
+    AUDIO_MIMES: ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/opus', 'audio/wav', 'audio/x-wav', 'audio/flac', 'audio/webm'],
     listFolder: vi.fn(),
     getPreviewUrl: vi.fn(fileid => 'preview-' + fileid),
 }))
@@ -24,8 +25,9 @@ const oldImage = { basename: 'old.jpg', path: 'old.jpg', isFolder: false, mime: 
 const newImage = { basename: 'new.png', path: 'new.png', isFolder: false, mime: 'image/png', size: 20, mtime: 2000, fileid: '11' }
 const notImage = { basename: 'doc.pdf', path: 'doc.pdf', isFolder: false, mime: 'application/pdf', size: 30, mtime: 3000, fileid: '12' }
 const video = { basename: 'clip.mp4', path: 'clip.mp4', isFolder: false, mime: 'video/mp4', size: 40, mtime: 1500, fileid: '13' }
+const audio = { basename: 'song.mp3', path: 'song.mp3', isFolder: false, mime: 'audio/mpeg', size: 50, mtime: 900, fileid: '14' }
 
-const ROOT_LISTING = [oldImage, folderB, notImage, newImage, folderA, video]
+const ROOT_LISTING = [oldImage, folderB, notImage, newImage, folderA, video, audio]
 
 async function mountDialog(props = {}) {
     listFolder.mockReset()
@@ -58,13 +60,13 @@ describe('ImageChooserDialog', () => {
         // by mounting once and navigating home via the root crumb when needed.
     })
 
-    it('lists folders first (alphabetical), then images and videos newest-first, other mimes dropped', async () => {
+    it('lists folders first (alphabetical), then media newest-first, other mimes dropped', async () => {
         const wrapper = await mountDialog()
         // Make the memory-dependent start deterministic: go to the root crumb.
         await wrapper.find('.crumb-stub').trigger('click')
         await flushBrowse()
         const names = wrapper.findAll('.chooser-name').map(n => n.text())
-        expect(names).toEqual(['A-folder', 'b-folder', 'new.png', 'clip.mp4', 'old.jpg'])
+        expect(names).toEqual(['A-folder', 'b-folder', 'new.png', 'clip.mp4', 'old.jpg', 'song.mp3'])
         expect(names).not.toContain('doc.pdf')
         wrapper.unmount()
     })
@@ -72,9 +74,36 @@ describe('ImageChooserDialog', () => {
     it('marks video tiles with a play badge, image tiles without', async () => {
         const wrapper = await mountDialog()
         const tiles = wrapper.findAll('.chooser-image')
-        // newest-first: new.png, clip.mp4, old.jpg
+        // newest-first: new.png, clip.mp4, old.jpg, song.mp3
         expect(tiles[1].find('.chooser-video-badge').exists()).toBe(true)
         expect(tiles[0].find('.chooser-video-badge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('marks audio tiles with a music badge, other tiles without', async () => {
+        const wrapper = await mountDialog()
+        const tiles = wrapper.findAll('.chooser-image')
+        expect(tiles[3].find('.chooser-audio-badge').exists()).toBe(true)
+        expect(tiles[0].find('.chooser-audio-badge').exists()).toBe(false)
+        expect(tiles[1].find('.chooser-audio-badge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('emits pick with the audio entry when an audio file is chosen', async () => {
+        const wrapper = await mountDialog()
+        await wrapper.findAll('.chooser-image')[3].trigger('dblclick')
+        expect(wrapper.emitted('pick')[0][0]).toHaveLength(1)
+        expect(wrapper.emitted('pick')[0][0][0]).toMatchObject({ basename: 'song.mp3', mime: 'audio/mpeg' })
+        wrapper.unmount()
+    })
+
+    it('swaps a broken audio thumbnail for the music-note icon', async () => {
+        const wrapper = await mountDialog()
+        const tile = wrapper.findAll('.chooser-image')[3]
+        await tile.find('.chooser-thumb').trigger('error')
+        expect(tile.find('.chooser-thumb').exists()).toBe(false)
+        // Fallback icon plus the always-on badge.
+        expect(tile.findAll('.music-note-icon').length).toBe(2)
         wrapper.unmount()
     })
 
@@ -234,6 +263,7 @@ describe('ImageChooserDialog', () => {
         const input = wrapper.find('input[type=file]')
         expect(input.attributes('accept')).toContain('image/jpeg')
         expect(input.attributes('accept')).toContain('video/mp4')
+        expect(input.attributes('accept')).toContain('audio/mpeg')
         expect(input.attributes('multiple')).toBeDefined()
         const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
         Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
@@ -247,6 +277,16 @@ describe('ImageChooserDialog', () => {
         const wrapper = await mountDialog()
         const input = wrapper.find('input[type=file]')
         const file = new File(['bytes'], 'clip.mp4', { type: 'video/mp4' })
+        Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
+        await input.trigger('change')
+        expect(wrapper.emitted('upload')[0][0]).toEqual([file])
+        wrapper.unmount()
+    })
+
+    it('accepts an audio file for upload', async () => {
+        const wrapper = await mountDialog()
+        const input = wrapper.find('input[type=file]')
+        const file = new File(['bytes'], 'song.mp3', { type: 'audio/mpeg' })
         Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
         await input.trigger('change')
         expect(wrapper.emitted('upload')[0][0]).toEqual([file])
@@ -296,7 +336,7 @@ describe('ImageChooserDialog', () => {
         await wrapper.find('.chooser-folder').trigger('click')
         await flushBrowse()
         expect(showError).toHaveBeenCalled()
-        expect(wrapper.findAll('.chooser-image')).toHaveLength(3)
+        expect(wrapper.findAll('.chooser-image')).toHaveLength(4)
         wrapper.unmount()
     })
 

@@ -55,9 +55,15 @@
                                 loading="lazy"
                                 v-on:error="failedPreviews[entry.path] = true" />
                             <VideoIcon v-else-if="isVideo(entry)" :size="48" />
+                            <MusicNote v-else-if="isAudio(entry)" :size="48" />
                             <ImageIcon v-else :size="48" />
                             <span v-if="isVideo(entry)" class="chooser-video-badge">
                                 <PlayCircleOutline :size="24" />
+                            </span>
+                            <!-- Audio badge: keeps audio tiles apart even when
+                                 the preview loads (MP3 embedded cover art). -->
+                            <span v-if="isAudio(entry)" class="chooser-audio-badge">
+                                <MusicNote :size="24" />
                             </span>
                             <!-- Selection rank = the page order the media will be
                                  inserted in (issue #36); only meaningful with 2+. -->
@@ -95,13 +101,15 @@ import Folder from 'vue-material-design-icons/Folder.vue'
 import UploadIcon from 'vue-material-design-icons/Upload.vue'
 import ImageIcon from 'vue-material-design-icons/Image.vue'
 import VideoIcon from 'vue-material-design-icons/Video.vue'
+import MusicNote from 'vue-material-design-icons/MusicNote.vue'
 import PlayCircleOutline from 'vue-material-design-icons/PlayCircleOutline.vue'
 import Check from 'vue-material-design-icons/Check.vue'
 import { showError } from '@nextcloud/dialogs'
-import { listFolder, getPreviewUrl, IMAGE_MIMES, VIDEO_MIMES } from '../api/davApi.js'
+import { listFolder, getPreviewUrl, IMAGE_MIMES, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
 
-// Everything the chooser offers: images and, since issue #32, videos.
-const MEDIA_MIMES = IMAGE_MIMES.concat(VIDEO_MIMES)
+// Everything the chooser offers: images, videos (issue #32) and, since
+// issue #33, audio tracks.
+const MEDIA_MIMES = IMAGE_MIMES.concat(VIDEO_MIMES).concat(AUDIO_MIMES)
 
 export default {
     props: {
@@ -123,12 +131,12 @@ export default {
             // their tiles fall back to a generic image icon.
             "failedPreviews": {},
             "acceptMimes": MEDIA_MIMES.join(','),
-            "sTitle": t("souvenirs", "Choose images or videos"),
+            "sTitle": t("souvenirs", "Choose media"),
             "sAllFiles": t("souvenirs", "All files"),
             "sUpload": t("souvenirs", "Upload"),
             "sCancel": t("souvenirs", "Cancel"),
             "sChoose": t("souvenirs", "Choose"),
-            "sEmpty": t("souvenirs", "No images or videos in this folder."),
+            "sEmpty": t("souvenirs", "No media in this folder."),
         }
     },
     components: {
@@ -143,6 +151,7 @@ export default {
         UploadIcon,
         ImageIcon,
         VideoIcon,
+        MusicNote,
         PlayCircleOutline,
         Check,
     },
@@ -211,6 +220,9 @@ export default {
         isVideo: function(entry) {
             return VIDEO_MIMES.includes(entry.mime);
         },
+        isAudio: function(entry) {
+            return AUDIO_MIMES.includes(entry.mime);
+        },
         isSelected: function(entry) {
             return this.selectedPaths.includes(entry.path);
         },
@@ -244,7 +256,7 @@ export default {
             }
             const supported = files.filter(file => MEDIA_MIMES.includes(file.type));
             if (supported.length < files.length) {
-                showError(t("souvenirs", "This file is not a supported image or video."));
+                showError(t("souvenirs", "This file is not a supported image, video or audio file."));
             }
             if (supported.length === 0) {
                 return;
@@ -344,8 +356,9 @@ let lastBrowsedPath = "";
     background-color: var(--color-primary-element, #0082c9);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
-/* Play badge marking video tiles apart from image ones. */
-.chooser-video-badge {
+/* Play/music badges marking video and audio tiles apart from image ones. */
+.chooser-video-badge,
+.chooser-audio-badge {
     position: absolute;
     top: 4px;
     right: 4px;
