@@ -130,6 +130,113 @@ export function buildTextElement() {
     }
 }
 
+function isAudioElement(element) {
+    return element != null && typeof element.class === 'string'
+        && element.class.endsWith('AudioElement')
+}
+
+/**
+ * The page's audio element, or null. Like the Android app, a page holds one
+ * audio track (players play the first AudioElement), so the first match wins.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @returns {object|null}
+ */
+export function getAudioElement(page) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return elements.find(isAudioElement) || null
+}
+
+/**
+ * Whether the page shows anything: audio elements render nothing, everything
+ * else (image/video/text/paint/unknown) does. Used by the "removing the last
+ * element deletes the page" rule, so an invisible audio track alone does not
+ * keep a blank (but music-playing) page alive.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @returns {boolean}
+ */
+export function hasVisibleElements(page) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return elements.some(element => !isAudioElement(element))
+}
+
+/**
+ * Build a fresh AudioElement for a picked Nextcloud file, following the
+ * on-disk format produced by the Android app (`audio` + `stop`, full-page
+ * geometry). As for images, `name`/`size` keep the original file's identity so
+ * the asset-reuse endpoints (assetsearch/clean) can match it. Audio takes no
+ * layout slot, so the caller sets it via `setPageAudioElement` (no re-layout),
+ * not `addElement`.
+ *
+ * @param {object} file - the picked file: `{ name, size, mime }`
+ * @returns {object} a new AudioElement object (not yet placed in a page)
+ */
+export function buildAudioElement({ name, size, mime }) {
+    const dot = name.lastIndexOf('.')
+    const extension = dot >= 0 ? name.slice(dot) : ''
+    return {
+        class: 'AudioElement',
+        id: uuidv4(),
+        audio: 'data/' + uuidv4() + extension,
+        mime: mime,
+        name: name,
+        size: size,
+        stop: false,
+        top: 0,
+        left: 0,
+        right: 100,
+        bottom: 100,
+    }
+}
+
+/**
+ * Return a copy of `page` holding exactly one audio element — `element`
+ * (e.g. from `buildAudioElement`). An existing audio element is replaced in
+ * its array slot (exceeding ones are dropped — a page holds 0 or 1); when the
+ * page had none, the new one goes before any paint element (paint stays last
+ * in the array, as in `addElement`). The other elements are left completely
+ * untouched: audio takes no layout slot, so no re-layout happens and manual
+ * geometry survives.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @param {object} element - the AudioElement to set
+ * @returns {object} a new page object with the single audio element in place
+ */
+export function setPageAudioElement(page, element) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    const first = elements.find(isAudioElement)
+    if (first == null) {
+        const paintIndex = elements.findIndex(isPaintElement)
+        const insertAt = paintIndex >= 0 ? paintIndex : elements.length
+        const added = [...elements]
+        added.splice(insertAt, 0, element)
+        return { ...page, elements: added }
+    }
+    return {
+        ...page,
+        elements: elements
+            .filter(e => !isAudioElement(e) || e === first)
+            .map(e => (e === first ? element : e)),
+    }
+}
+
+/**
+ * Return a copy of `page` with every audio element removed. Unlike
+ * `removeElement`, the remaining elements are NOT re-laid-out: audio takes no
+ * layout slot, so removing it must not touch anyone's geometry.
+ *
+ * @param {object} page - a page object, expected to contain an `elements` array
+ * @returns {object} a new page object without audio elements
+ */
+export function removeAudioElements(page) {
+    const elements = Array.isArray(page.elements) ? page.elements : []
+    return {
+        ...page,
+        elements: elements.filter(element => !isAudioElement(element)),
+    }
+}
+
 function isPaintElement(element) {
     return element != null && typeof element.class === 'string'
         && element.class.endsWith('PaintElement')

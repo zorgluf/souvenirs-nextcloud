@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildVideoElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, buildPaintElement, setPagePaintElement, removePaintElements } from '../albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, relayoutElements, removeElement, buildImageElement, buildVideoElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, buildPaintElement, setPagePaintElement, removePaintElements, getAudioElement, hasVisibleElements, buildAudioElement, setPageAudioElement, removeAudioElements } from '../albumEdit.js'
 
 describe('setElementText', () => {
     const makePage = () => ({
@@ -496,6 +496,141 @@ describe('removePaintElements', () => {
 
     it('tolerates a page without an elements array', () => {
         expect(removePaintElements({ id: 'p' }).elements).toEqual([])
+    })
+})
+
+describe('getAudioElement', () => {
+    it('returns the first audio element of the page', () => {
+        const audio = { id: 'au', class: 'AudioElement', audio: 'data/a.mp3' }
+        const page = { id: 'p', elements: [{ id: 'el-1', class: 'ImageElement' }, audio] }
+        expect(getAudioElement(page)).toBe(audio)
+    })
+
+    it('matches namespaced class names too', () => {
+        const audio = { id: 'au', class: 'fr.nuage.souvenirs.model.AudioElement' }
+        expect(getAudioElement({ elements: [audio] })).toBe(audio)
+    })
+
+    it('returns null when the page has no audio element', () => {
+        expect(getAudioElement({ elements: [{ id: 'el-1', class: 'ImageElement' }] })).toBeNull()
+        expect(getAudioElement({ id: 'p' })).toBeNull()
+    })
+})
+
+describe('hasVisibleElements', () => {
+    it('is false for an empty page and for an audio-only page', () => {
+        expect(hasVisibleElements({ id: 'p', elements: [] })).toBe(false)
+        expect(hasVisibleElements({ id: 'p' })).toBe(false)
+        expect(hasVisibleElements({ id: 'p', elements: [{ id: 'au', class: 'AudioElement' }] })).toBe(false)
+    })
+
+    it('is true as soon as any non-audio element exists (paint renders too)', () => {
+        expect(hasVisibleElements({ elements: [{ id: 'el-1', class: 'ImageElement' }] })).toBe(true)
+        expect(hasVisibleElements({ elements: [{ id: 'pt', class: 'PaintElement' }] })).toBe(true)
+        expect(hasVisibleElements({
+            elements: [{ id: 'au', class: 'AudioElement' }, { id: 'tx', class: 'TextElement' }],
+        })).toBe(true)
+    })
+})
+
+describe('buildAudioElement', () => {
+    it('builds a full-page AudioElement matching the on-disk schema', () => {
+        const el = buildAudioElement({ name: 'song.mp3', size: 4242, mime: 'audio/mpeg' })
+        expect(el.class).toBe('AudioElement')
+        expect(el.audio).toMatch(/^data\/[0-9a-f-]+\.mp3$/)
+        expect(el.id).toBeTruthy()
+        expect(el).toMatchObject({
+            mime: 'audio/mpeg', name: 'song.mp3', size: 4242, stop: false,
+            top: 0, left: 0, right: 100, bottom: 100,
+        })
+    })
+
+    it('tolerates a file name without an extension', () => {
+        const el = buildAudioElement({ name: 'song', size: 1, mime: 'audio/mpeg' })
+        expect(el.audio).toMatch(/^data\/[0-9a-f-]+$/)
+    })
+
+    it('gives each call a distinct element id and asset path', () => {
+        const a = buildAudioElement({ name: 's.mp3', size: 1, mime: 'audio/mpeg' })
+        const b = buildAudioElement({ name: 's.mp3', size: 1, mime: 'audio/mpeg' })
+        expect(a.id).not.toBe(b.id)
+        expect(a.audio).not.toBe(b.audio)
+    })
+})
+
+describe('setPageAudioElement', () => {
+    // An image with a hand-resized (non-default) geometry: it must never be
+    // re-laid-out by audio operations.
+    const image = () => ({ id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', size: 10, top: 12, left: 8, right: 77, bottom: 63 })
+    const audio = () => ({ id: 'au', class: 'AudioElement', audio: 'data/old.mp3', stop: false })
+    const fresh = () => ({ id: 'au-new', class: 'AudioElement', audio: 'data/new.mp3', stop: false })
+
+    it('appends the audio element when the page has none', () => {
+        const result = setPageAudioElement({ id: 'p', elements: [image()] }, fresh())
+        expect(result.elements.map(e => e.id)).toEqual(['el-1', 'au-new'])
+    })
+
+    it('inserts before a paint element so paint stays last', () => {
+        const paint = { id: 'pt', class: 'PaintElement', image: 'data/p.png' }
+        const result = setPageAudioElement({ id: 'p', elements: [image(), paint] }, fresh())
+        expect(result.elements.map(e => e.id)).toEqual(['el-1', 'au-new', 'pt'])
+    })
+
+    it('replaces an existing audio element in its array slot', () => {
+        const result = setPageAudioElement({ id: 'p', elements: [audio(), image()] }, fresh())
+        expect(result.elements.map(e => e.id)).toEqual(['au-new', 'el-1'])
+    })
+
+    it('drops exceeding audio elements, a page holds one track', () => {
+        const extra = { id: 'au2', class: 'AudioElement', audio: 'data/extra.mp3' }
+        const result = setPageAudioElement({ id: 'p', elements: [audio(), image(), extra] }, fresh())
+        expect(result.elements.map(e => e.id)).toEqual(['au-new', 'el-1'])
+    })
+
+    it('never re-lays-out the other elements', () => {
+        const replaced = setPageAudioElement({ id: 'p', elements: [image(), audio()] }, fresh())
+        expect(replaced.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+        const appended = setPageAudioElement({ id: 'p', elements: [image()] }, fresh())
+        expect(appended.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+    })
+
+    it('preserves unknown page-level fields and does not mutate the input', () => {
+        const page = { id: 'p', customPageField: 'keep-me', elements: [audio()] }
+        const result = setPageAudioElement(page, fresh())
+        expect(result.customPageField).toBe('keep-me')
+        expect(page.elements[0].id).toBe('au')
+    })
+
+    it('tolerates a page without an elements array', () => {
+        const result = setPageAudioElement({ id: 'p' }, fresh())
+        expect(result.elements.map(e => e.id)).toEqual(['au-new'])
+    })
+})
+
+describe('removeAudioElements', () => {
+    it('removes every audio element and nothing else', () => {
+        const page = {
+            id: 'p',
+            elements: [
+                { id: 'el-1', class: 'ImageElement', image: 'data/a.jpg', top: 12, left: 8, right: 77, bottom: 63 },
+                { id: 'au', class: 'AudioElement', audio: 'data/a.mp3' },
+                { id: 'au2', class: 'fr.nuage.souvenirs.model.AudioElement', audio: 'data/b.mp3' },
+            ],
+        }
+        const result = removeAudioElements(page)
+        expect(result.elements.map(e => e.id)).toEqual(['el-1'])
+        // no re-layout: the survivor keeps its hand-set geometry
+        expect(result.elements[0]).toMatchObject({ top: 12, left: 8, right: 77, bottom: 63 })
+    })
+
+    it('does not mutate the original page', () => {
+        const page = { id: 'p', elements: [{ id: 'au', class: 'AudioElement' }] }
+        removeAudioElements(page)
+        expect(page.elements).toHaveLength(1)
+    })
+
+    it('tolerates a page without an elements array', () => {
+        expect(removeAudioElements({ id: 'p' }).elements).toEqual([])
     })
 })
 

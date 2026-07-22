@@ -33,7 +33,7 @@
             v-on:add-image="onAddImage"
             v-on:add-text="onAddText" v-on:paint="onPaint" v-on:cycle-layout="onCycleLayout"
             v-on:add-page="onAddPage" v-on:move-page="onMovePage"
-            v-on:element-drop="onElementDrop">
+            v-on:element-drop="onElementDrop" v-on:remove-audio="onRemoveAudio">
 	    </page>
 	    <i v-bind:class="isWinPortrait ? 'arrow-bottom': 'arrow-right'" v-on:click="showNext" v-if="!isTouchDevice"
             v-bind:style="{ visibility: aRightVisible ? 'visible' : 'hidden', }"></i>
@@ -48,7 +48,7 @@
         <videofull v-if="videoFullOn" v-bind:videoUrl="videoFullUrl"
             v-on:click="closeVideoFull" v-on:closevideofull="closeVideoFull">
         </videofull>
-        <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd"></AudioPlayer>
+        <AudioPlayer v-bind:audioUrl="audioUrl" v-bind:stop="isStopCmd || audioForceStop"></AudioPlayer>
         <div v-if="loading" class="center-page">
             <NcLoadingIcon :size="64">
             </NcLoadingIcon>
@@ -76,6 +76,10 @@
         <image-chooser-dialog v-if="imageChooserPageId != null" :saving="imageChooserSaving"
             v-on:close="closeImageChooser" v-on:pick="onImagePick" v-on:upload="onImageUpload">
         </image-chooser-dialog>
+        <NcDialog v-if="audioRemovePageId != null" :name="sRemoveAudioTitle"
+            :message="sRemoveAudioMsg" :buttons="removeAudioButtons"
+            @update:open="onRemoveAudioDialogOpen">
+        </NcDialog>
         <NcModal v-if="downloadModal" @close="closeDownload" size="small">
             <p class="center">{{ sDownloadZip }}</p>
             <div v-if="!downloadActive" class="downloadIcon center" v-on:click="download"></div>
@@ -90,14 +94,14 @@ import Page from './page.vue'
 import Imagefull from './imagefull.vue'
 import Videofull from './videofull.vue'
 import AudioPlayer from './audio_player.vue'
-import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator, NcButton } from '@nextcloud/vue'
+import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar, NcModal, NcActionSeparator, NcButton, NcDialog } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildVideoElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements } from '../utils/albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildVideoElement, buildAudioElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements, getAudioElement, setPageAudioElement, removeAudioElements, hasVisibleElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { captureVideoPoster } from '../utils/videoPoster.js'
-import { getFileBlob, VIDEO_MIMES } from '../api/davApi.js'
+import { getFileBlob, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../api/albumApi.js'
 import PaintDialog from './PaintDialog.vue'
@@ -158,6 +162,14 @@ export default {
             // Same pair for the image chooser dialog.
             "imageChooserPageId": null,
             "imageChooserSaving": false,
+            // Id of the page whose audio-removal confirmation dialog is open
+            // (null = closed), and a forced stop of the audio player after a
+            // removal (the player deliberately keeps playing when the track
+            // URL goes away — background-music semantics).
+            "audioRemovePageId": null,
+            "audioForceStop": false,
+            "sRemoveAudioTitle": t("souvenirs","Remove audio"),
+            "sRemoveAudioMsg": t("souvenirs","Remove this page's audio? The music will no longer play when the page is displayed."),
             // Timestamp of the last page turn triggered by dragging an element
             // near the album edge (throttles the edge navigation).
             "dragNavLast": 0,
@@ -196,6 +208,11 @@ export default {
             } else {
                 clearTimeout(this.diap_timeout);
             }
+        },
+        audioUrl(newValue, oldValue) {
+            // Any track change (new page, re-added audio) cancels the forced
+            // stop from a removal, so the next track plays normally.
+            this.audioForceStop = false;
         }
     },
     computed: {
@@ -242,6 +259,15 @@ export default {
                 }
             }
             return false;
+        },
+        "removeAudioButtons": function() {
+            // NcDialog buttons: a callback that does not return false closes
+            // the dialog after running.
+            var that = this;
+            return [
+                { label: t("souvenirs","Cancel") },
+                { label: t("souvenirs","Remove"), variant: "error", callback: function() { that.confirmRemoveAudio(); } },
+            ];
         },
     },
     methods: {
@@ -442,10 +468,11 @@ export default {
             }
             var that = this;
             var updatedPage = removeElement(this.pages[index], elementId);
-            // Removing the last element of a page deletes the page itself - unless
-            // it is the only page left, which we keep (empty) so the album is not
+            // Removing the last visible element of a page deletes the page itself
+            // (an invisible audio track alone must not keep a blank page alive) -
+            // unless it is the only page left, which we keep so the album is not
             // left with no pages and no way to add one.
-            if (updatedPage.elements.length === 0 && this.pages.length > 1) {
+            if (!hasVisibleElements(updatedPage) && this.pages.length > 1) {
                 this.blockWhile(deletePage(this.albumId, pageId)
                     .then(() => {
                         that.pages.splice(index, 1);
@@ -567,9 +594,10 @@ export default {
             // the element at worst exists on both pages instead of being lost.
             this.blockWhile(updatePage(this.albumId, updatedDest)
                 .then(() => {
-                    // Moving the last element away deletes the emptied page (same
-                    // rule as onRemoveElement), unless it is the only page left.
-                    if (updatedSrc.elements.length === 0 && that.pages.length > 1) {
+                    // Moving the last visible element away deletes the emptied
+                    // page (same rule as onRemoveElement), unless it is the
+                    // only page left.
+                    if (!hasVisibleElements(updatedSrc) && that.pages.length > 1) {
                         return deletePage(that.albumId, srcPageId).then(() => {
                             var i = that.pages.findIndex(p => p.id === srcPageId);
                             if (i >= 0) {
@@ -578,6 +606,9 @@ export default {
                             if (that.displayedPage >= that.pages.length) {
                                 that.displayedPage = that.pages.length - 1;
                             }
+                            // Best-effort GC of the deleted page's assets
+                            // (e.g. its audio track).
+                            return cleanAssets(that.albumId).catch(() => {});
                         });
                     }
                     var i = that.pages.findIndex(p => p.id === srcPageId);
@@ -719,6 +750,42 @@ export default {
             this.imageChooserSaving = false;
             this.imageChooserPageId = pageId;
         },
+        onRemoveAudio: function(pageId) {
+            // Open the confirmation dialog; the actual removal happens in
+            // confirmRemoveAudio (the dialog's Remove button).
+            this.audioRemovePageId = pageId;
+        },
+        onRemoveAudioDialogOpen: function(open) {
+            // Fired when the dialog closes (X, Esc, outside click, or after a
+            // button callback ran).
+            if (!open) {
+                this.audioRemovePageId = null;
+            }
+        },
+        confirmRemoveAudio: function() {
+            var pageId = this.audioRemovePageId;
+            this.audioRemovePageId = null;
+            var index = this.pages.findIndex(p => p.id === pageId);
+            if (index < 0) {
+                return;
+            }
+            var that = this;
+            // No re-layout: audio takes no layout slot, so the visible
+            // elements' geometry must survive the removal.
+            var updatedPage = removeAudioElements(this.pages[index]);
+            this.pages.splice(index, 1, updatedPage);
+            this.blockWhile(updatePage(this.albumId, updatedPage)
+                .then(() => {
+                    // The player deliberately keeps playing when its URL goes
+                    // away; a removed track must actually stop.
+                    that.audioForceStop = true;
+                    // Best-effort GC of the now-unreferenced audio asset.
+                    return cleanAssets(that.albumId).catch(() => {});
+                })
+                .catch(error => {
+                    showError(t("souvenirs","Could not remove the audio."));
+                }));
+        },
         closeImageChooser: function() {
             // Ignore the dialog's close while a chosen image is being saved.
             if (!this.imageChooserSaving) {
@@ -744,15 +811,20 @@ export default {
                 return null;
             }
             const isVideo = VIDEO_MIMES.includes(entry.mime);
+            const isAudio = AUDIO_MIMES.includes(entry.mime);
             // Build the element first so we know the in-album asset path to link,
             // then ask the backend to link the picked file to it.
-            var element = isVideo ? buildVideoElement(file) : buildImageElement(file);
+            var element = isVideo ? buildVideoElement(file)
+                : isAudio ? buildAudioElement(file)
+                : buildImageElement(file);
             try {
-                var res = await searchAsset(this.albumId, isVideo ? element.video : element.image, file.name, file.size);
+                var res = await searchAsset(this.albumId, isVideo ? element.video : (isAudio ? element.audio : element.image), file.name, file.size);
                 if (res == null || res.status !== "found") {
                     showError(isVideo
                         ? t("souvenirs","Could not link the selected video. It must be located outside the Souvenirs albums folder.")
-                        : t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
+                        : isAudio
+                            ? t("souvenirs","Could not link the selected audio. It must be located outside the Souvenirs albums folder.")
+                            : t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
                     return null;
                 }
                 if (isVideo) {
@@ -769,7 +841,7 @@ export default {
                 }
                 return element;
             } catch (error) {
-                showError(isVideo ? t("souvenirs","Could not add the video.") : t("souvenirs","Could not add the image."));
+                showError(this.mediaErrorString(element));
                 // GC the link/poster of the never-persisted element.
                 cleanAssets(this.albumId).catch(() => {});
                 return null;
@@ -783,10 +855,12 @@ export default {
             // up over native WebDAV, and the server must confirm the file
             // landed before any page starts referencing it.
             const isVideo = VIDEO_MIMES.includes(file.type);
-            var element = isVideo
-                ? buildVideoElement({ name: file.name, size: file.size, mime: file.type })
-                : buildImageElement({ name: file.name, size: file.size, mime: file.type });
-            const asset = isVideo ? element.video : element.image;
+            const isAudio = AUDIO_MIMES.includes(file.type);
+            const picked = { name: file.name, size: file.size, mime: file.type };
+            var element = isVideo ? buildVideoElement(picked)
+                : isAudio ? buildAudioElement(picked)
+                : buildImageElement(picked);
+            const asset = isVideo ? element.video : (isAudio ? element.audio : element.image);
             try {
                 var probe = await probeAsset(this.albumId, asset);
                 if (probe == null || !probe.path) {
@@ -804,23 +878,37 @@ export default {
             } catch (error) {
                 // GC any bytes that landed before the failure (the element was
                 // never persisted).
-                showError(isVideo ? t("souvenirs","Could not upload the video.") : t("souvenirs","Could not upload the image."));
+                showError(isVideo
+                    ? t("souvenirs","Could not upload the video.")
+                    : isAudio
+                        ? t("souvenirs","Could not upload the audio.")
+                        : t("souvenirs","Could not upload the image."));
                 cleanAssets(this.albumId).catch(() => {});
                 return null;
             }
         },
+        mediaErrorString: function(element) {
+            return element.class === "VideoElement"
+                ? t("souvenirs","Could not add the video.")
+                : element.class === "AudioElement"
+                    ? t("souvenirs","Could not add the audio.")
+                    : t("souvenirs","Could not add the image.");
+        },
         addMediaItems: async function(items, prepare) {
-            // Insert the chosen media in order (issue #36): the first one joins
-            // the page the chooser was opened from (as a single pick always
-            // did), each further one gets its own new page right after — one
-            // medium per page.
+            // Insert the chosen media in order (issue #36): the first visual
+            // medium joins the page the chooser was opened from (as a single
+            // pick always did), each further one gets its own new page right
+            // after — one medium per page. Audio (issue #33) is not a tile: it
+            // becomes the audio track of the page the batch is currently on,
+            // replacing any existing track (last one wins).
             var that = this;
             var targetIndex = this.pages.findIndex(p => p.id === this.imageChooserPageId);
             if (targetIndex < 0 || this.imageChooserSaving || items.length === 0) {
                 return;
             }
             this.imageChooserSaving = true;
-            var inserted = 0;
+            var visualCount = 0;
+            var audioReplaced = false;
             for (const item of items) {
                 var element = await prepare(item);
                 if (element == null) {
@@ -830,31 +918,45 @@ export default {
                     return;
                 }
                 try {
-                    if (inserted === 0) {
+                    if (element.class === "AudioElement") {
+                        // The page the batch is currently on: the target page
+                        // until a visual medium has created a new one. Read the
+                        // page at application time — earlier iterations may
+                        // have replaced the object in `pages`.
+                        var currentIndex = targetIndex + Math.max(0, visualCount - 1);
+                        var current = this.pages[currentIndex];
+                        audioReplaced = audioReplaced || (getAudioElement(current) != null);
+                        var withAudio = setPageAudioElement(current, element);
+                        await updatePage(this.albumId, withAudio);
+                        this.pages.splice(currentIndex, 1, withAudio);
+                    } else if (visualCount === 0) {
                         var updatedPage = addElement(this.pages[targetIndex], element);
                         await updatePage(this.albumId, updatedPage);
                         this.pages.splice(targetIndex, 1, updatedPage);
+                        visualCount++;
                     } else {
-                        var pos = targetIndex + inserted;
+                        var pos = targetIndex + visualCount;
                         var page = addElement(buildPage(), element);
                         await createPage(this.albumId, pos, page);
                         this.pages.splice(pos, 0, page);
+                        visualCount++;
                     }
                 } catch (error) {
                     this.imageChooserSaving = false;
-                    showError(element.class === "VideoElement"
-                        ? t("souvenirs","Could not add the video.")
-                        : t("souvenirs","Could not add the image."));
+                    showError(this.mediaErrorString(element));
                     cleanAssets(this.albumId).catch(() => {});
                     return;
                 }
-                inserted++;
+            }
+            if (audioReplaced) {
+                // Replaced tracks leave their old audio asset orphaned.
+                cleanAssets(this.albumId).catch(() => {});
             }
             this.imageChooserSaving = false;
             this.imageChooserPageId = null;
-            if (inserted > 1) {
+            if (visualCount > 1) {
                 // Land on the last created page so the whole batch is visible.
-                this.$nextTick(() => { that.showN(targetIndex + inserted - 1); });
+                this.$nextTick(() => { that.showN(targetIndex + visualCount - 1); });
             }
         },
         attachVideoPoster: async function(element, videoBlob) {
@@ -905,6 +1007,7 @@ export default {
         "paint-dialog": PaintDialog,
         "image-chooser-dialog": ImageChooserDialog,
         NcModal,
+        NcDialog,
         NcProgressBar,
         NcActions,
         NcActionButton,
@@ -918,15 +1021,6 @@ export default {
     },
 }
 
-var getAudioElement = function(page) {
-    for (let i = 0; i < page.elements.length; i++) {
-        var element = page.elements[i];
-        if (element.class == "AudioElement") {
-            return element;
-        }
-    }
-    return null;
-}
 function basename(path) {
    return path.split('/').reverse()[0];
 }

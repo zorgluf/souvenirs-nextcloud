@@ -27,6 +27,13 @@
             <button class="page-insert__btn"><Plus :size="20" /></button>
             <div class="page-insert__line"></div>
         </div>
+        <div v-if="editMode && audioElement" class="page-audio-badge">
+            <NcButton type="primary" :aria-label="sRemoveAudio" :title="sRemoveAudio" v-on:click="onRemoveAudio">
+                <template #icon>
+                    <MusicNote :size="20" />
+                </template>
+            </NcButton>
+        </div>
         <div v-if="editMode && sNum > 0" class="page-move page-move--left">
             <NcButton type="primary" :aria-label="sMoveLeft" :title="sMoveLeft" v-on:click="onMoveLeft">
                 <template #icon>
@@ -80,7 +87,9 @@ import Brush from 'vue-material-design-icons/Brush.vue'
 import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
 import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
 import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
+import MusicNote from 'vue-material-design-icons/MusicNote.vue'
 import { canCycleLayout } from '../utils/tilePageLayout.js'
+import { getAudioElement } from '../utils/albumEdit.js'
 import { isElementDrag, getElementDragData } from '../utils/elementDrag.js'
 
 export default {
@@ -108,6 +117,7 @@ export default {
             "sAddPage": t("souvenirs","Add page"),
             "sMoveLeft": t("souvenirs","Move page left"),
             "sMoveRight": t("souvenirs","Move page right"),
+            "sRemoveAudio": t("souvenirs","Remove audio"),
         }
     },
     computed: {
@@ -120,6 +130,9 @@ export default {
         },
         "canCycle": function() {
           return canCycleLayout(this.elements);
+        },
+        "audioElement": function() {
+          return getAudioElement({ elements: this.elements });
         }
     },
     watch: {
@@ -145,6 +158,7 @@ export default {
         ViewDashboardVariantOutline,
         ChevronLeft,
         ChevronRight,
+        MusicNote,
     },
     methods: {
       openImgFull: function(imageUrl,isPhotosphere) {
@@ -223,6 +237,10 @@ export default {
       },
       onMoveRight: function() {
         this.$emit("move-page", this.sNum, 1);
+      },
+      onRemoveAudio: function() {
+        // Ask the album to confirm and remove this page's audio track.
+        this.$emit("remove-audio", this.sId);
       }
     },
     mounted: function() {
@@ -313,6 +331,16 @@ function isFullyVisible(el) {
 
 .page-move--left { left: 16px; }
 .page-move--right { right: 16px; }
+
+/* Audio badge (NcButton): marks a page carrying an audio track in edit mode;
+   clicking it removes the audio (after confirmation). Top-left corner is free
+   (move buttons sit at the bottom, the album menu at the viewport top-right). */
+.page-audio-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 9;
+}
 
 .page-insert__btn {
   pointer-events: all;

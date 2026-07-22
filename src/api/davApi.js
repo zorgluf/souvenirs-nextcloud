@@ -41,6 +41,26 @@ export const VIDEO_MIMES = [
 ]
 
 /**
+ * The audio mimetypes an album page can play (issue #33): what HTML5
+ * `Audio` commonly decodes and the Android app records/picks. Both the
+ * PROPFIND spelling and the browser `File.type` spelling are listed where
+ * they differ (wav, m4a). Shared by the chooser's grid filter and its
+ * upload input's `accept` attribute, like IMAGE_MIMES.
+ */
+export const AUDIO_MIMES = [
+    'audio/mpeg',
+    'audio/mp4',
+    'audio/x-m4a',
+    'audio/aac',
+    'audio/ogg',
+    'audio/opus',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/flac',
+    'audio/webm',
+]
+
+/**
  * Encode a user-files-relative path for use in a WebDAV URL: per-segment
  * percent-encoding, empty segments dropped so the URL never contains a double
  * slash (same rules as albumApi.js uploadAsset).
