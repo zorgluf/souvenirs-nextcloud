@@ -30,9 +30,12 @@ Albums are stored as plain folders and files on your own Nextcloud. No third-par
     <website>https://github.com/zorgluf/souvenirs-nextcloud</website>
     <bugs>https://github.com/zorgluf/souvenirs-nextcloud/issues</bugs>
     <repository>https://github.com/zorgluf/souvenirs-nextcloud</repository>
-    <screenshot small-thumbnail="https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/small.png">https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/10.png</screenshot>
-    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/11.png</screenshot>
-    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/12.png</screenshot>
+    <screenshot small-thumbnail="https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/small.png">https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/1-album-list.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/2-share.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/3-album-slideshow.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/4-edit-mode.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/5-paint.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/6-photosphere.png</screenshot>
     <dependencies>
         <nextcloud min-version="31" max-version="34"/>
     </dependencies>
