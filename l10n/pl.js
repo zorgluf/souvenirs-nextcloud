@@ -14,7 +14,7 @@ OC.L10N.register(
     "Expires on" : "Wygasa",
     "Download" : "Pobierz",
     "Fullscreen" : "Pełny ekran",
-    "Edit" : "Edycja",
+    "Remove" : "Usuń",
     "Change layout" : "Zmień układ",
     "Drag to move" : "Przeciągnij, aby przenieść",
     "Remove image" : "Usuń zdjęcie"

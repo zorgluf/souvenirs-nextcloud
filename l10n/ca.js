@@ -13,7 +13,6 @@ OC.L10N.register(
     "Save" : "Desa",
     "Download" : "Baixada",
     "Fullscreen" : "Pantalla completa",
-    "Edit" : "Edició",
     "Change layout" : "Canviar diseny",
     "Remove image" : "Suprimir imatge"
 },

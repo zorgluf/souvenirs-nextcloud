@@ -10,7 +10,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Shkarko",
     "Fullscreen" : "I gjithë ekrani",
-    "Edit" : "Përpuno",
+    "Remove" : "Hiqe",
     "Remove image" : "Hiqe figurën"
 },
 "nplurals=2; plural=(n != 1);");

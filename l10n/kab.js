@@ -12,7 +12,7 @@ OC.L10N.register(
     "Save" : "Sekles",
     "Download" : "Sider",
     "Fullscreen" : "Plein écran",
-    "Edit" : "Ẓreg",
+    "Remove" : "Kkes",
     "Change layout" : "Snifel taneγruft"
 },
 "nplurals=2; plural=(n != 1);");

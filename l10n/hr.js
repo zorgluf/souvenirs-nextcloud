@@ -13,7 +13,7 @@ OC.L10N.register(
     "Save" : "Spremi",
     "Download" : "Preuzmi",
     "Fullscreen" : "Cijeli zaslon",
-    "Edit" : "Uredi",
+    "Remove" : "Ukloni",
     "Drag to move" : "Povucite za premještanje",
     "Remove image" : "Ukloni sliku"
 },

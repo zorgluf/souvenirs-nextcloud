@@ -7,11 +7,8 @@ OC.L10N.register(
     "Choose" : "Seç",
     "Confirm" : "Təsdiq edin",
     "Save" : "Save",
-    "Start slideshow" : "Slayd şouya başlayın",
-    "Stop slideshow" : "Slayd şounu dayandırın",
     "Slideshow speed" : "Slayd şounun sürəti",
     "Download" : "Yüklə",
-    "Edit" : "Dəyişiklik et",
     "Remove image" : "Şəkili sil"
 },
 "nplurals=2; plural=(n != 1);");

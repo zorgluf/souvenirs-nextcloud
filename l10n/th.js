@@ -10,7 +10,7 @@ OC.L10N.register(
     "Create" : "สร้าง",
     "Save" : "Save",
     "Download" : "ดาวน์โหลด",
-    "Edit" : "แก้ไข",
+    "Remove" : "ลบออก",
     "Remove image" : "ลบรูปภาพ"
 },
 "nplurals=1; plural=0;");

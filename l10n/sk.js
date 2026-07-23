@@ -13,12 +13,10 @@ OC.L10N.register(
     "Create" : "Vytvoriť",
     "Save" : "Save",
     "Expires on" : "Koniec platnosti",
-    "Start slideshow" : "Spustiť prehliadku",
-    "Stop slideshow" : "Zastaviť prehliadku",
     "Slideshow speed" : "Rýchlosť prehliadky",
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku",
-    "Edit" : "Upraviť",
+    "Remove" : "Odobrať",
     "Change layout" : "Zmeniť rozloženie",
     "Remove image" : "Zmazať obrázok"
 },

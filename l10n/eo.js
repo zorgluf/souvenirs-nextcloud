@@ -9,7 +9,6 @@ OC.L10N.register(
     "Date" : "Dato",
     "Save" : "Save",
     "Download" : "Elŝuti",
-    "Edit" : "Modifi",
     "Remove image" : "Forigi bildon"
 },
 "nplurals=2; plural=(n != 1);");

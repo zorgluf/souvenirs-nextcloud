@@ -14,13 +14,10 @@ OC.L10N.register(
     "Create" : "Crear",
     "Save" : "Save",
     "Expires on" : "Expira el",
-    "Start slideshow" : "Iniciar presentación de diapositivas",
-    "Stop slideshow" : "Detener presentación de diapositivas",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",
     "Download" : "Descargar",
     "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Haz clic para descargar el álbum en un archivo zip.",
-    "Edit" : "Editar",
     "Remove image" : "Eliminar imagen"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

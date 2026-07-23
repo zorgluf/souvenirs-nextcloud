@@ -4,7 +4,6 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "منتخب کریں",
     "Save" : "Save",
-    "Download" : "ڈاؤن لوڈ",
-    "Edit" : "تدوین کریں"
+    "Download" : "ڈاؤن لوڈ"
 },
 "nplurals=2; plural=(n != 1);");

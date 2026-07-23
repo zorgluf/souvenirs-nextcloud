@@ -7,6 +7,6 @@ OC.L10N.register(
     "Date" : "Date",
     "Save" : "Save",
     "Download" : "பதிவிறக்குக",
-    "Edit" : "தொகுக்க"
+    "Remove" : "அகற்றுக"
 },
 "nplurals=2; plural=(n != 1);");

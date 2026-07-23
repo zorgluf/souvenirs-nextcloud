@@ -12,13 +12,11 @@
     "Date" : "Datum",
     "Create" : "Creëer",
     "Save" : "Save",
-    "Start slideshow" : "Start diavoorstelling",
-    "Stop slideshow" : "Stop diavoorstelling",
     "Slideshow speed" : "Diavoorstelling snelheid",
     "Download" : "Download",
     "Fullscreen" : "Volledig scherm",
     "Click to download album in a zip file." : "Klik om het album in een zip-bestand te downloaden.",
-    "Edit" : "Bewerken",
+    "Remove" : "Verwijderen",
     "Change layout" : "Wijzig opmaak",
     "Remove image" : "Afbeelding verwijderen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

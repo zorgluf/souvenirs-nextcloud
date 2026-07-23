@@ -13,7 +13,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Sækja",
     "Fullscreen" : "Fylla skjáinn",
-    "Edit" : "Breyta",
+    "Remove" : "Fjarlægja",
     "Remove image" : "Fjarlægja mynd"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

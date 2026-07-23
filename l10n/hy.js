@@ -6,7 +6,6 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "Ընտրել",
     "Save" : "Save",
-    "Download" : "Ներբեռնել",
-    "Edit" : "մշակել"
+    "Download" : "Ներբեռնել"
 },
 "nplurals=2; plural=(n != 1);");

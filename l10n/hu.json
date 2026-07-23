@@ -13,13 +13,11 @@
     "Create" : "Létrehozás",
     "Save" : "Save",
     "Expires on" : "Lejárat:",
-    "Start slideshow" : "Diavetítés indítása",
-    "Stop slideshow" : "Diavetítés leállítása",
     "Slideshow speed" : "Diavetítés sebessége",
     "Download" : "Letöltés",
     "Fullscreen" : "Teljes képernyő",
     "Click to download album in a zip file." : "Kattintson az album ZIP-fájlban való letöltéséhez.",
-    "Edit" : "Szerkesztés",
+    "Remove" : "Eltávolítás",
     "Change layout" : "Elrendezés módosítása",
     "Remove image" : "Kép eltávolítása"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

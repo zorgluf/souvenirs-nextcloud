@@ -12,13 +12,11 @@
     "Create" : "Sortu",
     "Save" : "Save",
     "Expires on" : "Iraungitze-data",
-    "Start slideshow" : "Hasi diapositiba-aurkezpena",
-    "Stop slideshow" : "Gelditu diapositiba-aurkezpena",
     "Slideshow speed" : "Diapositiba-aurkezpenaren abiadura",
     "Download" : "Deskargatu",
     "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
-    "Edit" : "Editatu",
+    "Remove" : "Kendu",
     "Change layout" : "Aldatu diseinua",
     "Remove image" : "Kendu irudia"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

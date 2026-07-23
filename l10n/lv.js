@@ -10,12 +10,10 @@ OC.L10N.register(
     "Album name" : "Albuma nosaukums",
     "Date" : "Datums",
     "Save" : "Save",
-    "Start slideshow" : "Sākt slīdrādi",
-    "Stop slideshow" : "Apturēt slīdrādi",
     "Slideshow speed" : "Slīdrādes ātrums",
     "Download" : "Lejupielādēt",
     "Fullscreen" : "Pilnekrāna",
-    "Edit" : "Labot",
+    "Remove" : "Noņemt",
     "Remove image" : "Novākt attēlu"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

@@ -15,13 +15,11 @@ OC.L10N.register(
     "Create" : "Tengeneza",
     "Save" : "Hifadhi",
     "Expires on" : "Inaisha muda ",
-    "Start slideshow" : "Anza onyesho la slaidi",
-    "Stop slideshow" : "Simamisha onyesho la slaidi",
     "Slideshow speed" : "Kasi ya onyesho la slaidi",
     "Download" : "Pakua",
     "Fullscreen" : "Skrini nzima",
     "Click to download album in a zip file." : "Bofya ili kupakua albamu katika faili ya zip.",
-    "Edit" : "Hariri",
+    "Remove" : "Ondoa",
     "Change layout" : "Badilisha mpangilio"
 },
 "nplurals=2; plural=(n != 1);");

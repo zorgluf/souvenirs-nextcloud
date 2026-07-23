@@ -15,7 +15,7 @@ OC.L10N.register(
     "Expires on" : "过期于",
     "Download" : "下载",
     "Fullscreen" : "全屏",
-    "Edit" : "编辑",
+    "Remove" : "移除",
     "Change layout" : "更变布局",
     "Remove image" : "删除图片"
 },

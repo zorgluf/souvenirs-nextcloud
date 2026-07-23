@@ -6,7 +6,6 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "﻿ಆಯ್ಕೆ",
     "Save" : "Save",
-    "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ",
-    "Edit" : "ಸಂಪಾದಿಸು"
+    "Download" : "ಪ್ರತಿಯನ್ನು ಸ್ಥಳೀಯವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳಿ"
 },
 "nplurals=2; plural=(n > 1);");

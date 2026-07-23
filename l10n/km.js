@@ -7,7 +7,6 @@ OC.L10N.register(
     "Date" : "កាលបរិច្ឆេទ",
     "Save" : "Save",
     "Download" : "ទាញយក",
-    "Edit" : "កែប្រែ",
     "Remove image" : "ដក​រូបភាព​ចេញ"
 },
 "nplurals=1; plural=0;");

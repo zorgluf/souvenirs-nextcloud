@@ -15,7 +15,7 @@ OC.L10N.register(
     "Expires on" : "만료일",
     "Download" : "다운로드",
     "Fullscreen" : "전체 화면",
-    "Edit" : "편집",
+    "Remove" : "삭제",
     "Remove image" : "그림 삭제"
 },
 "nplurals=1; plural=0;");

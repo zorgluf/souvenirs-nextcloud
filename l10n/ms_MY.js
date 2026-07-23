@@ -4,7 +4,6 @@ OC.L10N.register(
     "Upload" : "Muat naik",
     "Cancel" : "Cancel",
     "Save" : "Save",
-    "Download" : "Muat turun",
-    "Edit" : "Sunting"
+    "Download" : "Muat turun"
 },
 "nplurals=1; plural=0;");

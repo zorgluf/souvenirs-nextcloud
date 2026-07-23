@@ -16,13 +16,10 @@ OC.L10N.register(
     "Create" : "Vytvářet",
     "Save" : "Uložit",
     "Expires on" : "Platnost skončí",
-    "Start slideshow" : "Spustit promítání",
-    "Stop slideshow" : "Zastavit promítání",
     "Slideshow speed" : "Rychlost promítání",
     "Download" : "Stáhnout",
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
-    "Edit" : "Upravit",
     "Change layout" : "Změnit rozvržení",
     "Drag to move" : "Přesuňte přetažením",
     "Remove image" : "Odebrat obrázek"

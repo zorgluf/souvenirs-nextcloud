@@ -14,7 +14,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Expires on" : "ໝົດອາຍຸໃນວັນທີ",
     "Download" : "ດາວໂຫລດ",
-    "Edit" : "ແກ້ໄຂ",
+    "Remove" : "ລຶບອອກ",
     "Change layout" : "ປ່ຽນໂຄງຮ່າງ",
     "Drag to move" : "ລາກເພື່ອຍ້າຍ"
 },

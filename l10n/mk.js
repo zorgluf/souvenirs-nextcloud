@@ -14,7 +14,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Преземи",
     "Fullscreen" : "Цел екран",
-    "Edit" : "Уреди",
+    "Remove" : "Отстрани ",
     "Remove image" : "Отстрани ја фотографијата"
 },
 "nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;");

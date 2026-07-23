@@ -11,7 +11,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Tải xuống",
     "Fullscreen" : "Toàn màn hình",
-    "Edit" : "Chỉnh sửa",
+    "Remove" : "Xoá",
     "Remove image" : "Xóa "
 },
 "nplurals=1; plural=0;");

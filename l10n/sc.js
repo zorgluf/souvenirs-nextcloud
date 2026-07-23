@@ -12,7 +12,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Iscàrriga",
     "Fullscreen" : "Totu ischermu",
-    "Edit" : "Modìfica",
+    "Remove" : "Boga",
     "Remove image" : "Boga•nche s'imàgine"
 },
 "nplurals=2; plural=(n != 1);");

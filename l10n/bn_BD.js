@@ -6,7 +6,6 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "বেছে নিন",
     "Save" : "Save",
-    "Download" : "ডাউনলোড",
-    "Edit" : "সম্পাদনা"
+    "Download" : "ডাউনলোড"
 },
 "nplurals=2; plural=(n != 1);");

@@ -14,7 +14,6 @@ OC.L10N.register(
     "Expires on" : "Udløber den",
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
-    "Edit" : "Redigér",
     "Change layout" : "Ændre layout",
     "Remove image" : "Fjern billede"
 },

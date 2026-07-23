@@ -14,13 +14,11 @@
     "Create" : "قۇر",
     "Save" : "Save",
     "Expires on" : "ۋاقتى توشىدۇ",
-    "Start slideshow" : "تام تەسۋىرنى باشلاڭ",
-    "Stop slideshow" : "تام تەسۋىرنى توختىتىڭ",
     "Slideshow speed" : "تام تەسۋىر سۈرئىتى",
     "Download" : "چۈشۈر",
     "Fullscreen" : "تولۇق ئېكران",
     "Click to download album in a zip file." : "Zip ھۆججىتىدىكى پىلاستىنكىنى چۈشۈرۈش ئۈچۈن چېكىڭ.",
-    "Edit" : "تەھرىر",
+    "Remove" : "ئۆچۈرۈڭ",
     "Change layout" : "ئورۇنلاشتۇرۇش",
     "Drag to move" : "سۆرەپ يۆتكىڭ"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

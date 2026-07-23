@@ -13,7 +13,7 @@ OC.L10N.register(
     "Save" : "保存する",
     "Download" : "ダウンロード",
     "Fullscreen" : "全画面",
-    "Edit" : "編集",
+    "Remove" : "削除",
     "Drag to move" : "ドラッグして移動",
     "Remove image" : "画像を削除"
 },

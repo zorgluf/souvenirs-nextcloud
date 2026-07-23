@@ -10,6 +10,6 @@ OC.L10N.register(
     "Create" : "Create",
     "Save" : "Save",
     "Download" : "Download",
-    "Edit" : "Edit"
+    "Remove" : "Remove"
 },
 "nplurals=2; plural=(n!=1);");

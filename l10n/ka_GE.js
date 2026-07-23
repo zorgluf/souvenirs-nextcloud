@@ -9,7 +9,6 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "ჩამოტვირთვა",
     "Fullscreen" : "მთელი ეკრანი",
-    "Edit" : "შეცვლა",
     "Remove image" : "სურათის წაშლა"
 },
 "nplurals=2; plural=(n!=1);");

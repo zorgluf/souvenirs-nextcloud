@@ -7,7 +7,6 @@ OC.L10N.register(
     "Choose" : "Auswielen",
     "Confirm" : "Konfirméieren",
     "Save" : "Save",
-    "Download" : "Eroflueden",
-    "Edit" : "Änneren"
+    "Download" : "Eroflueden"
 },
 "nplurals=2; plural=(n != 1);");
