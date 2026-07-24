@@ -1,3 +1,20 @@
+## 2.4.0 - 2026-07-24
+### Added
+- Add videos to albums from the web editor [#41](https://github.com/zorgluf/souvenirs-nextcloud/pull/41)
+- Add audio to album pages from the web editor [#44](https://github.com/zorgluf/souvenirs-nextcloud/pull/44)
+- Add multiple media at once from the web editor [#42](https://github.com/zorgluf/souvenirs-nextcloud/pull/42)
+- Expiration date on public shares [#43](https://github.com/zorgluf/souvenirs-nextcloud/pull/43)
+
+### Changed
+- Reset button toggles between cover fit and whole-image fit [#46](https://github.com/zorgluf/souvenirs-nextcloud/pull/46)
+- Blocking loading state during edit API calls [#40](https://github.com/zorgluf/souvenirs-nextcloud/pull/40)
+- New appstore screenshots, one per feature [#38](https://github.com/zorgluf/souvenirs-nextcloud/pull/38)
+
+### Fixed
+- Keyboard shortcuts no longer trigger while editing a text element
+- Fill the hidden-footer band on public share pages
+- Keep upload button clear of the modal close button in media chooser
+
 ## 2.3.0 - 2026-07-14
 ### Added
 - Mosaic image chooser dialog with direct upload [#37](https://github.com/zorgluf/souvenirs-nextcloud/pull/37)
