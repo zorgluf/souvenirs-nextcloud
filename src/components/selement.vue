@@ -18,10 +18,11 @@
 				<CursorMove :size="20" />
 			</template>
 		</NcButton>
-		<!-- Back to the default framing (cover-fit: zoom 100, no offset) after
-		     pan & zoom gestures. -->
+		<!-- Toggles the framing (issue #45): back to the default cover-fit
+		     (zoom 100, no offset) after pan & zoom gestures, or — when already
+		     at the default — to a centered contain-fit showing the whole image. -->
 		<NcButton v-if="editMode && sClass.endsWith('ImageElement')" class="s-element-pan-reset" type="primary"
-			:aria-label="sResetPanZoom" :title="sResetPanZoom" v-on:click="onPanZoomReset">
+			:aria-label="resetPanZoomTitle" :title="resetPanZoomTitle" v-on:click="onPanZoomReset">
 			<template #icon>
 				<FitToScreen :size="20" />
 			</template>
@@ -91,7 +92,7 @@ import Delete from 'vue-material-design-icons/Delete.vue'
 import CursorMove from 'vue-material-design-icons/CursorMove.vue'
 import FitToScreen from 'vue-material-design-icons/FitToScreen.vue'
 import { setElementDragData, isElementDrag, getElementDragData } from '../utils/elementDrag.js'
-import { initialPanZoom, panBy, zoomAt, roundPanZoom } from '../utils/imagePanZoom.js'
+import { initialPanZoom, panBy, zoomAt, roundPanZoom, containPanZoom } from '../utils/imagePanZoom.js'
 
 // Zoom speed of the mouse wheel: multiplicative factor e^(-deltaY * this).
 // 0.002 gives ~±22% per classic 100-unit wheel notch.
@@ -146,7 +147,6 @@ export default {
             "panZoomPreview": null,
             "sDragToMove": t("souvenirs","Drag to move"),
             "sDragToResize": t("souvenirs","Drag to resize"),
-            "sResetPanZoom": t("souvenirs","Reset zoom and position"),
             "resizeCorners": ['nw', 'ne', 'sw', 'se'],
             // State of the corner drag in progress (pointer id, start position,
             // page size in px, original geometry), null when not resizing.
@@ -274,6 +274,26 @@ export default {
         },
         'effectiveZoom': function() {
             return this.panZoomPreview != null ? this.panZoomPreview.zoom : this.sZoom;
+        },
+        'isCommittedCoverFit': function() {
+            // The committed props render as the default framing: zoom-offset at
+            // the defaults, or center-crop (the same rendering).
+            return (this.sTransformType === IMG_ZOOMOFFSET && this.sZoom === 100
+                    && this.sOffsetX === 0 && this.sOffsetY === 0)
+                || this.sTransformType === IMG_CENTERCROP;
+        },
+        'isEffectiveCoverFit': function() {
+            // What the user currently sees: the pending preview when there is
+            // one, the committed props otherwise.
+            if (this.panZoomPreview != null) {
+                return this.panZoomPreview.zoom === 100 && this.panZoomPreview.offsetX === 0
+                    && this.panZoomPreview.offsetY === 0;
+            }
+            return this.isCommittedCoverFit;
+        },
+        'resetPanZoomTitle': function() {
+            return this.isEffectiveCoverFit ? t("souvenirs","Fit whole image")
+                : t("souvenirs","Reset zoom and position");
         },
         'canPanZoom': function() {
             // Pan & zoom applies to image elements in edit mode (issue #27),
@@ -600,27 +620,48 @@ export default {
                 { zoom: rounded.zoom, offsetX: rounded.offsetX, offsetY: rounded.offsetY, transformType: IMG_ZOOMOFFSET });
         },
         onPanZoomReset: function() {
-            // Back to the default framing: drop any gesture in progress and any
-            // pending wheel commit, then persist plain cover-fit — unless the
-            // committed element already renders that way (zoom-offset at
-            // 100/0/0, or center-crop, which is the same rendering).
+            // Toggle the framing (issue #45), dropping any gesture in progress
+            // and any pending wheel commit first. Away from the default the
+            // button persists plain cover-fit, as before; from the default
+            // framing it fits the whole image in the tile instead (centered
+            // contain, over the blurred backdrop).
             if (this.wheelCommitTimer != null) {
                 clearTimeout(this.wheelCommitTimer);
                 this.wheelCommitTimer = null;
             }
             this.panZoomGesture = null;
-            var isDefault = (this.sTransformType === IMG_ZOOMOFFSET && this.sZoom === 100
-                    && this.sOffsetX === 0 && this.sOffsetY === 0)
-                || this.sTransformType === IMG_CENTERCROP;
-            if (isDefault) {
+            if (!this.isEffectiveCoverFit) {
+                // A non-default preview over default committed props just gets
+                // discarded: the committed rendering is already cover-fit.
+                if (this.isCommittedCoverFit) {
+                    this.panZoomPreview = null;
+                    this.refreshImageStyle();
+                    return;
+                }
+                this.panZoomPreview = { zoom: 100, offsetX: 0, offsetY: 0 };
+                this.refreshImageStyle();
+                this.$emit("pan-zoom-element", this.sId,
+                    { zoom: 100, offsetX: 0, offsetY: 0, transformType: IMG_ZOOMOFFSET });
+                return;
+            }
+            if (this.imgSize == null || this.imgSize.width <= 0 || this.imgSize.height <= 0) {
+                return;
+            }
+            var box = this.$refs.eldiv.getBoundingClientRect();
+            if (box.width <= 0 || box.height <= 0) {
+                return;
+            }
+            var fit = roundPanZoom(containPanZoom(box, this.imgSize));
+            // Aspect ratios match: contain-fit is cover-fit, nothing to change.
+            if (fit.zoom === 100) {
                 this.panZoomPreview = null;
                 this.refreshImageStyle();
                 return;
             }
-            this.panZoomPreview = { zoom: 100, offsetX: 0, offsetY: 0 };
+            this.panZoomPreview = fit;
             this.refreshImageStyle();
             this.$emit("pan-zoom-element", this.sId,
-                { zoom: 100, offsetX: 0, offsetY: 0, transformType: IMG_ZOOMOFFSET });
+                { zoom: fit.zoom, offsetX: fit.offsetX, offsetY: fit.offsetY, transformType: IMG_ZOOMOFFSET });
         },
         onResizeStart: function(event, corner) {
             if (!this.isResizable || this.resizing != null) {

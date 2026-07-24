@@ -182,14 +182,41 @@ describe('selement pan & zoom reset button', () => {
         ])
     })
 
-    it('does not persist anything when the element already renders as cover-fit', async () => {
+    it('fits the whole image when the element already renders as cover-fit', async () => {
         // Zoom-offset at the defaults, and center-crop (the same rendering).
-        const zoomOffset = await mountImageTile()
-        await zoomOffset.find('.s-element-pan-reset').trigger('click')
-        expect(zoomOffset.emitted('pan-zoom-element')).toBeFalsy()
-        const centerCrop = await mountImageTile({ sTransformType: 1, sZoom: 0 })
-        await centerCrop.find('.s-element-pan-reset').trigger('click')
-        expect(centerCrop.emitted('pan-zoom-element')).toBeFalsy()
+        // 2000x1000 image in the 500x500 box: contain-fit is zoom 50, centered
+        // by offsets of 50 * (100/50 - 1) = 50% on both axes.
+        for (const props of [{}, { sTransformType: 1, sZoom: 0 }]) {
+            const wrapper = await mountImageTile(props)
+            wrapper.vm.imgSize = { width: 2000, height: 1000 }
+            await wrapper.vm.$nextTick()
+            await wrapper.find('.s-element-pan-reset').trigger('click')
+            expect(wrapper.emitted('pan-zoom-element')).toEqual([
+                ['el-1', { zoom: 50, offsetX: 50, offsetY: 50, transformType: 2 }],
+            ])
+        }
+    })
+
+    it('does not persist a fit that matches cover-fit (same aspect ratios)', async () => {
+        // The default fixture is a square image in the square box.
+        const wrapper = await mountImageTile()
+        await wrapper.find('.s-element-pan-reset').trigger('click')
+        expect(wrapper.emitted('pan-zoom-element')).toBeFalsy()
+    })
+
+    it('toggles back to cover-fit from the fitted state', async () => {
+        const wrapper = await mountImageTile({ sZoom: 50, sOffsetX: 50, sOffsetY: 50 })
+        await wrapper.find('.s-element-pan-reset').trigger('click')
+        expect(wrapper.emitted('pan-zoom-element')).toEqual([
+            ['el-1', { zoom: 100, offsetX: 0, offsetY: 0, transformType: 2 }],
+        ])
+    })
+
+    it('labels the button with the framing the next press applies', async () => {
+        const atDefault = await mountImageTile()
+        expect(atDefault.find('.s-element-pan-reset').attributes('title')).toBe('Fit whole image')
+        const zoomed = await mountImageTile({ sZoom: 180 })
+        expect(zoomed.find('.s-element-pan-reset').attributes('title')).toBe('Reset zoom and position')
     })
 
     it('discards a pending wheel preview instead of committing it', async () => {
