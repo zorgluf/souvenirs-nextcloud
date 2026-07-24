@@ -64,11 +64,30 @@ function clampState(state, box, img) {
 }
 
 /**
+ * The zoom-offset state that shows the whole image centered in the box
+ * (contain-fit, like CSS object-fit: contain). The zoom is the contain/cover
+ * scale ratio; since the rendered layout is scaled about the box's top-left
+ * (P(q) above), keeping the image centered needs matching offsets, from
+ * P(0) = (box - cover*z)/2: offset% = 50 * (100/zoom - 1) on both axes.
+ *
+ * @param {{width: number, height: number}} box
+ * @param {{width: number, height: number}} img
+ * @returns {{zoom: number, offsetX: number, offsetY: number}}
+ */
+export function containPanZoom(box, img) {
+    const contain = Math.min(box.width / img.width, box.height / img.height)
+    const cover = Math.max(box.width / img.width, box.height / img.height)
+    const zoom = clamp(100 * contain / cover, ZOOM_MIN, ZOOM_MAX)
+    const offset = 50 * (100 / zoom - 1)
+    return { zoom: zoom, offsetX: offset, offsetY: offset }
+}
+
+/**
  * The pan/zoom state a gesture starts from, for any of the three transform
  * types. Zoom-offset elements keep their stored values; center-crop is exactly
  * zoom-offset at (100, 0, 0); fill (contain) converts to the equivalent
- * zoom-offset zoom (100 * containScale / coverScale), so switching the element
- * to zoom-offset on the first gesture does not visually jump.
+ * centered contain-fit state, so switching the element to zoom-offset on the
+ * first gesture does not visually jump.
  *
  * @param {{transformType: number, zoom: number, offsetX: number, offsetY: number}} element
  * @param {{width: number, height: number}} box
@@ -84,9 +103,7 @@ export function initialPanZoom(element, box, img) {
         }, box, img)
     }
     if (element.transformType === IMG_FILL) {
-        const contain = Math.min(box.width / img.width, box.height / img.height)
-        const cover = Math.max(box.width / img.width, box.height / img.height)
-        return clampState({ zoom: 100 * contain / cover, offsetX: 0, offsetY: 0 }, box, img)
+        return clampState(containPanZoom(box, img), box, img)
     }
     // IMG_CENTERCROP (and anything unknown): plain cover-fit.
     return { zoom: 100, offsetX: 0, offsetY: 0 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { initialPanZoom, panBy, zoomAt, roundPanZoom, ZOOM_MIN, ZOOM_MAX } from '../imagePanZoom.js'
+import { initialPanZoom, panBy, zoomAt, roundPanZoom, containPanZoom, ZOOM_MIN, ZOOM_MAX } from '../imagePanZoom.js'
 
 // A square image in a square box: cover-fit fills the box exactly, which makes
 // the expected values easy to derive by hand.
@@ -22,10 +22,31 @@ describe('initialPanZoom', () => {
             .toEqual({ zoom: 100, offsetX: 0, offsetY: 0 })
     })
 
-    it('maps fill (contain) to the visually equivalent zoom', () => {
+    it('maps fill (contain) to the visually equivalent centered state', () => {
         // 2000x1000 image in a 1000x1000 box: contain scale 0.5, cover scale 1.
         expect(initialPanZoom({ transformType: 0, zoom: 0, offsetX: 0, offsetY: 0 }, BOX, { width: 2000, height: 1000 }))
-            .toEqual({ zoom: 50, offsetX: 0, offsetY: 0 })
+            .toEqual({ zoom: 50, offsetX: 50, offsetY: 50 })
+    })
+})
+
+describe('containPanZoom', () => {
+    it('fits the whole image centered in the box', () => {
+        // 2000x1000 image in a 1000x1000 box: contain scale 0.5, cover scale 1,
+        // and centering needs offsets of 50 * (100/50 - 1) = 50% on both axes
+        // (the layout scales about the box's top-left corner).
+        expect(containPanZoom(BOX, { width: 2000, height: 1000 }))
+            .toEqual({ zoom: 50, offsetX: 50, offsetY: 50 })
+    })
+
+    it('is the identity when the aspect ratios match', () => {
+        expect(containPanZoom(BOX, IMG)).toEqual({ zoom: 100, offsetX: 0, offsetY: 0 })
+    })
+
+    it('clamps the zoom to ZOOM_MIN for extreme aspect ratios', () => {
+        // 20000x1000 image: contain/cover would be zoom 5, below the minimum;
+        // the offsets center the image at the clamped zoom.
+        expect(containPanZoom(BOX, { width: 20000, height: 1000 }))
+            .toEqual({ zoom: ZOOM_MIN, offsetX: 450, offsetY: 450 })
     })
 })
 
