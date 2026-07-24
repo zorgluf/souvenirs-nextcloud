@@ -14,6 +14,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Slideshow speed" : "Velocidá de la proyeición",
     "Download" : "Baxar",
-    "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP."
+    "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
+    "Remove" : "Quitar"
 },
 "nplurals=2; plural=(n != 1);");

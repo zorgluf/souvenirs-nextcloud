@@ -17,6 +17,7 @@ OC.L10N.register(
     "Download" : "Изтегляне",
     "Fullscreen" : "Цял екран",
     "Click to download album in a zip file." : "Кликване/щракване/ за изтегляне на албума в zip файл.",
+    "Remove" : "Премахване",
     "Change layout" : "Промени разположението",
     "Remove image" : "Премахни изображението"
 },

@@ -20,6 +20,7 @@ OC.L10N.register(
     "Download" : "تنزيل",
     "Fullscreen" : "وضع ملء الشاشة",
     "Click to download album in a zip file." : "إضغط لتنزيل الألبوم في ملف zip.",
+    "Remove" : "حذف",
     "Change layout" : "غيِّر مُخطّط العرض",
     "Remove image" : "إزالة الصورة"
 },
