@@ -20,6 +20,7 @@ OC.L10N.register(
     "Download" : "Stáhnout",
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
+    "Remove" : "Odebrat",
     "Change layout" : "Změnit rozvržení",
     "Drag to move" : "Přesuňte přetažením",
     "Remove image" : "Odebrat obrázek"
