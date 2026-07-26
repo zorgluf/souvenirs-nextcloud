@@ -72,6 +72,7 @@ OC.L10N.register(
     "Move page right" : "Seite nach rechts verschieben",
     "Drag to move" : "Ziehen zum Verschieben",
     "Drag to resize" : "Zum Größenänderung ziehen",
+    "Fit whole image" : "Gesamtbild anpassen",
     "Reset zoom and position" : "Zoom und Position zurücksetzen",
     "Remove text" : "Text entfernen",
     "Remove image" : "Bild entfernen"
