@@ -72,6 +72,7 @@ OC.L10N.register(
     "Move page right" : "向右移動頁面",
     "Drag to move" : "拖動以移動",
     "Drag to resize" : "拖曳以調整大小",
+    "Fit whole image" : "調整為完整圖片",
     "Reset zoom and position" : "重設縮放及位置",
     "Remove text" : "移除文字",
     "Remove image" : "移除圖像"

@@ -6,8 +6,10 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "Vel",
     "Date" : "Dato",
+    "Create" : "Opprett",
     "Save" : "Save",
     "Download" : "Last ned",
+    "Remove" : "Fjern",
     "Remove image" : "Fjern bilete"
 },
 "nplurals=2; plural=(n != 1);");
