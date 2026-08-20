@@ -16,7 +16,7 @@ OC.L10N.register(
     "Paint on page" : "Paint on page",
     "Pen" : "Pen",
     "Eraser" : "Eraser",
-    "Pen color" : "Pen color",
+    "Pen color" : "Pen colour",
     "Confirm" : "Confirm",
     "The previous drawing is missing on the server, starting with a blank page." : "The previous drawing is missing on the server, starting with a blank page.",
     "Could not load the existing drawing." : "Could not load the existing drawing.",
