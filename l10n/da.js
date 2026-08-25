@@ -10,7 +10,7 @@ OC.L10N.register(
     "New album" : "Nyt album",
     "Date" : "Dato",
     "Create" : "Opret",
-    "Save" : "Save",
+    "Save" : "Gem",
     "Expires on" : "Udløber den",
     "Download" : "Download",
     "Fullscreen" : "Fuldskærm",
