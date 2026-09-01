@@ -4,7 +4,10 @@
     "Cancel" : "Cancel",
     "Choose" : "Auswielen",
     "Confirm" : "Konfirméieren",
+    "Date" : "Datum",
+    "Create" : "Erstellen",
     "Save" : "Save",
-    "Download" : "Eroflueden"
+    "Download" : "Eroflueden",
+    "Remove" : "Ewechhuelen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -6,7 +6,10 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "Auswielen",
     "Confirm" : "Konfirméieren",
+    "Date" : "Datum",
+    "Create" : "Erstellen",
     "Save" : "Save",
-    "Download" : "Eroflueden"
+    "Download" : "Eroflueden",
+    "Remove" : "Ewechhuelen"
 },
 "nplurals=2; plural=(n != 1);");
