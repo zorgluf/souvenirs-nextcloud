@@ -1,3 +1,8 @@
+## 2.4.1 - 2026-09-02
+### Fixed
+- Write integer geometry and zoom values into album.json so the Android app can parse albums edited on the web
+- Return 404 instead of a server error when an album cannot be resolved by id or path
+
 ## 2.4.0 - 2026-07-24
 ### Added
 - Add videos to albums from the web editor [#41](https://github.com/zorgluf/souvenirs-nextcloud/pull/41)
