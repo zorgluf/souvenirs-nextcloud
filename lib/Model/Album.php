@@ -374,7 +374,7 @@ class Album {
                 unset($albumArray[$key]);
             }
         }
-        return $this->contentArray;
+        return $albumArray;
     }
 
     public function setValues($valuesArray) {

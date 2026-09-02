@@ -101,4 +101,18 @@ class AlbumTest extends TestCase {
         $this->assertArrayHasKey('pages', $full);
         $this->assertSame('keep-me', $full['customAlbumField']);
     }
+
+    public function testToArrayFullStripsStaleShareFields(): void {
+        $content = $this->sampleContent();
+        // stale values written to album.json by old app versions; the live ones
+        // come from the shares table and are re-added by the controller
+        $content['isShared'] = true;
+        $content['shareToken'] = 'stale-token';
+        $album = $this->albumFrom($content);
+
+        $full = $album->toArrayFull();
+
+        $this->assertArrayNotHasKey('isShared', $full);
+        $this->assertArrayNotHasKey('shareToken', $full);
+    }
 }

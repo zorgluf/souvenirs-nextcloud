@@ -5,7 +5,9 @@ use OCP\IRequest;
 use OCP\IConfig;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\ApiController;
+use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\AppFramework\Http;
 use OCP\IURLGenerator;
@@ -38,6 +40,31 @@ class Api2Controller extends ApiController {
 		$this->albumMapper = $albumMapper;
 		$this->urlGen = $urlGen;
 		$this->config = $config;
+	}
+
+	/**
+	 * Resolve an album from an explicit user-relative path (web SPA) or, failing that,
+	 * from the id -> path DB index (API clients). Returns null when the album cannot be
+	 * resolved: missing index row, stale/deleted path, folder without album.json, ...
+	 */
+	private function findAlbum($id, $apath = null) {
+		try {
+			if ($apath !== null) {
+				$folder = $this->userFolder->get($apath);
+			} else {
+				$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
+				if (is_null($album_db) || is_null($album_db->getPath())) {
+					return null;
+				}
+				$folder = $this->rootFolder->get($album_db->getPath());
+			}
+		} catch (NotFoundException $e) {
+			return null;
+		}
+		if (!($folder instanceof Folder) || !Album::isAlbum($folder)) {
+			return null;
+		}
+		return Album::withFolder($folder);
 	}
 
 	/**
@@ -81,15 +108,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function getAlbum($id,$apath) {
-		if ($apath !== null) {
-			$album = Album::withFolder($this->userFolder->get($apath));
-		} else {
-			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-			$album_path = $album_db->getPath();
-			if (! is_null($album_path)) {
-				$album = Album::withFolder($this->rootFolder->get($album_path));
-			}
-		}
+		$album = $this->findAlbum($id, $apath);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -112,15 +131,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function getAlbumFull($id,$apath) {
-		if ($apath !== null) {
-			$album = Album::withFolder($this->userFolder->get($apath));
-		} else {
-			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-			$album_path = $album_db->getPath();
-			if (! is_null($album_path)) {
-				$album = Album::withFolder($this->rootFolder->get($album_path));
-			}
-		}
+		$album = $this->findAlbum($id, $apath);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -148,15 +159,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function getAlbumAssets($id,$apath) {
-		if ($apath !== null) {
-			$album = Album::withFolder($this->userFolder->get($apath));
-		} else {
-			$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-			$album_path = $album_db->getPath();
-			if (! is_null($album_path)) {
-				$album = Album::withFolder($this->rootFolder->get($album_path));
-			}
-		}
+		$album = $this->findAlbum($id, $apath);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -171,11 +174,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postAlbum($id) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -198,11 +197,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function deleteAlbum($id) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -221,11 +216,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function assetExistsInAlbum($id,$asset_path) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -255,11 +246,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function assetSearch($id,$asset,$asset_name,$asset_size) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -278,11 +265,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function cleanAssets($id) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -300,11 +283,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function createPage($album_id,$page_pos) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -330,11 +309,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function DeletePage($album_id,$page_id) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -354,11 +329,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postPage($album_id,$page_id) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
@@ -383,11 +354,7 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function movePage($album_id,$page_id,$page_pos) {
-		$album_db = $this->albumMapper->findByAlbumId($this->userId, $album_id);
-		$album_path = $album_db->getPath();
-		if (! is_null($album_path)) {
-			$album = Album::withFolder($this->rootFolder->get($album_path));
-		}
+		$album = $this->findAlbum($album_id);
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
