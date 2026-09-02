@@ -92,9 +92,9 @@ describe('selement image pan & zoom (edit mode)', () => {
         const emitted = wrapper.emitted('pan-zoom-element')
         expect(emitted).toHaveLength(1)
         expect(emitted[0][0]).toBe('el-1')
-        expect(emitted[0][1].zoom).toBeCloseTo(122.14, 2)
-        expect(emitted[0][1].offsetX).toBeCloseTo(-9.06, 2)
-        expect(emitted[0][1].offsetY).toBeCloseTo(-9.06, 2)
+        expect(emitted[0][1].zoom).toBe(122)
+        expect(emitted[0][1].offsetX).toBe(-9)
+        expect(emitted[0][1].offsetY).toBe(-9)
         expect(emitted[0][1].transformType).toBe(2)
     })
 
@@ -107,7 +107,7 @@ describe('selement image pan & zoom (edit mode)', () => {
         const emitted = wrapper.emitted('pan-zoom-element')
         expect(emitted).toHaveLength(1)
         // Top-left anchor: pure zoom, e^0.2 twice.
-        expect(emitted[0][1].zoom).toBeCloseTo(149.18, 2)
+        expect(emitted[0][1].zoom).toBe(149)
         expect(emitted[0][1].offsetX).toBe(0)
     })
 

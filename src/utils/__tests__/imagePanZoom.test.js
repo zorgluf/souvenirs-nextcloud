@@ -106,8 +106,8 @@ describe('zoomAt', () => {
 })
 
 describe('roundPanZoom', () => {
-    it('rounds all values to 2 decimals', () => {
-        expect(roundPanZoom({ zoom: 122.140275, offsetX: -9.06346, offsetY: 0.005 }))
-            .toEqual({ zoom: 122.14, offsetX: -9.06, offsetY: 0.01 })
+    it('rounds all values to integers (the Android app parses them as int)', () => {
+        expect(roundPanZoom({ zoom: 122.140275, offsetX: -9.06346, offsetY: 0.505 }))
+            .toEqual({ zoom: 122, offsetX: -9, offsetY: 1 })
     })
 })

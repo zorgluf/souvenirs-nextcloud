@@ -57,8 +57,10 @@ function isLayoutElement(element) {
     return isImageLike(element) || isText(element)
 }
 
+// Integer page percentages only: the Android app parses geometry as int and
+// fails to sync albums containing fractional values.
 function round(value) {
-    return Math.round(value * 10000) / 10000
+    return Math.round(value)
 }
 
 /**

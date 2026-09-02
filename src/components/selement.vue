@@ -854,7 +854,9 @@ function clampPct(value, min, max) {
         // can only grow, never shrink further.
         max = min;
     }
-    return Math.round(Math.min(Math.max(value, min), max) * 100) / 100;
+    // Integer page percentages only: the Android app parses geometry as int
+    // and fails to sync albums containing fractional values.
+    return Math.round(Math.min(Math.max(value, min), max));
 }
 
 function basename(path) {

@@ -154,13 +154,13 @@ export function zoomAt(state, factor, anchor, box, img) {
 }
 
 /**
- * Round a state to 2 decimals for persistence, like the geometry values
- * (album.json stores plain numbers; sub-percent precision is plenty).
+ * Round a state to integers for persistence, like the geometry values: the
+ * Android app parses zoom/offsetX/offsetY as int and fails to sync albums
+ * containing fractional values (percent precision is plenty anyway).
  *
  * @param {{zoom: number, offsetX: number, offsetY: number}} state
  * @returns {{zoom: number, offsetX: number, offsetY: number}}
  */
 export function roundPanZoom(state) {
-    const round2 = value => Math.round(value * 100) / 100
-    return { zoom: round2(state.zoom), offsetX: round2(state.offsetX), offsetY: round2(state.offsetY) }
+    return { zoom: Math.round(state.zoom), offsetX: Math.round(state.offsetX), offsetY: Math.round(state.offsetY) }
 }
