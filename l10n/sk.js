@@ -17,6 +17,7 @@ OC.L10N.register(
     "Download" : "Sťahovanie",
     "Fullscreen" : "Na celú obrazovku",
     "Remove" : "Odobrať",
+    "Add media" : "Pridať médiá",
     "Change layout" : "Zmeniť rozloženie",
     "Remove image" : "Zmazať obrázok"
 },
