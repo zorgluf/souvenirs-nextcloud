@@ -19,6 +19,7 @@ OC.L10N.register(
     "Remove" : "Odobrať",
     "Add media" : "Pridať médiá",
     "Change layout" : "Zmeniť rozloženie",
+    "Drag to move" : "Potiahnutím presuniete",
     "Remove image" : "Zmazať obrázok"
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");
