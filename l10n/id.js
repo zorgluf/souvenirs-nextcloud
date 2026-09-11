@@ -20,6 +20,7 @@ OC.L10N.register(
     "Fullscreen" : "Layar penuh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Remove" : "Hapus",
+    "Change layout" : "Ubah tata letak",
     "Drag to move" : "Seret untuk memindahkan",
     "Remove image" : "Hapus gambar"
 },

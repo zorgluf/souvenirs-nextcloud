@@ -12,6 +12,7 @@ OC.L10N.register(
     "Loading album list…" : "Načítání seznamu alb …",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Není k dispozici žádné album. Je třeba je nahrát z Android aplikace Suvenýry (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Nové album",
+    "Edit album" : "Upravit album",
     "Album name" : "Název alba",
     "Date" : "Datum",
     "Create" : "Vytvářet",
@@ -21,10 +22,13 @@ OC.L10N.register(
     "Download" : "Stáhnout",
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
+    "Add page" : "Přidat stránku",
     "Remove" : "Odebrat",
+    "Add text" : "Přidat text",
     "Paint" : "Malovat",
     "Change layout" : "Změnit rozvržení",
     "Drag to move" : "Přesuňte přetažením",
+    "Remove text" : "Odebrat text",
     "Remove image" : "Odebrat obrázek"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");
