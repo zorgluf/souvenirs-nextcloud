@@ -19,6 +19,7 @@ OC.L10N.register(
     "Fullscreen" : "Volledig scherm",
     "Click to download album in a zip file." : "Klik om het album in een zip-bestand te downloaden.",
     "Remove" : "Verwijderen",
+    "Add media" : "Media toevoegen",
     "Change layout" : "Wijzig opmaak",
     "Remove image" : "Afbeelding verwijderen"
 },
