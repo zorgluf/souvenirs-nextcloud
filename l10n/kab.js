@@ -13,6 +13,7 @@ OC.L10N.register(
     "Download" : "Sider",
     "Fullscreen" : "Plein écran",
     "Remove" : "Kkes",
+    "Add media" : "Rnu amidya",
     "Change layout" : "Snifel taneγruft"
 },
 "nplurals=2; plural=(n != 1);");
