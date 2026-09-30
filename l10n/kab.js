@@ -6,6 +6,7 @@ OC.L10N.register(
     "Cancel" : "Semmet",
     "Choose" : "Fren",
     "Confirm" : "Sergeg",
+    "New album" : "Album amaynut",
     "Album name" : "Isem n walbum",
     "Date" : "Azemz",
     "Create" : "Snulfu-d",
