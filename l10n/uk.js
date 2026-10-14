@@ -21,6 +21,7 @@ OC.L10N.register(
     "Fullscreen" : "На весь екран",
     "Click to download album in a zip file." : "Натисніть, щоб звантажити архів ZIP з альбомом.",
     "Remove" : "Вилучити",
+    "Add media" : "Додати мультимедію",
     "Change layout" : "Змінити макет",
     "Drag to move" : "Потягніть, щоб пересунути",
     "Remove image" : "Вилучити зображення"
