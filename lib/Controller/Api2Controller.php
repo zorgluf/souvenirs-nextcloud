@@ -84,6 +84,24 @@ class Api2Controller extends ApiController {
 	}
 
 	/**
+	* list albums of current user with their details (same as get album), in one call
+	* @CORS
+	* @NoAdminRequired
+	* @NoCSRFRequired
+	*/
+	public function listAlbumsDetails() {
+		$ret_list = array();
+		foreach ($this->albumMapper->findAllByUser($this->userId) as $album_db) {
+			$album = $this->findAlbum($album_db->getAlbumId());
+			//skip unresolvable albums, as get album returns 404 for them
+			if (!is_null($album)) {
+				$ret_list[] = $this->albumToApiArray($album, $album_db->getAlbumId());
+			}
+		}
+		return new JSONResponse($ret_list);
+	}
+
+	/**
 	 * create blank album
 	 * @CORS
 	 * @NoAdminRequired
@@ -112,6 +130,13 @@ class Api2Controller extends ApiController {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
+		return new JSONResponse($this->albumToApiArray($album, $id));
+	}
+
+	/**
+	 * album as returned by get album : album.json without pages, plus path and share
+	 */
+	private function albumToApiArray(Album $album, $id) {
 		$albumArray = $album->toArray();
 		//add path of album
 		$albumArray["path"] = $this->userFolder->getRelativePath($album->getPath());
@@ -121,7 +146,7 @@ class Api2Controller extends ApiController {
 			$albumArray["isShared"] = true;
 			$albumArray["shareToken"] = $share->getToken();
 		}
-		return new JSONResponse($albumArray);
+		return $albumArray;
 	}
 
 	/**
