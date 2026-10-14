@@ -1,3 +1,7 @@
+## 2.5.0 - 2026-10-14
+### Added
+- API endpoint `GET apiv2/albums` listing all albums with their details in one call, so the Android app no longer fetches albums one by one ([souvenirs-android#37](https://github.com/zorgluf/souvenirs-android/issues/37))
+
 ## 2.4.1 - 2026-09-02
 ### Fixed
 - Write integer geometry and zoom values into album.json so the Android app can parse albums edited on the web
