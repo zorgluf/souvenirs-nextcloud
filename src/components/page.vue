@@ -49,29 +49,25 @@
             </NcButton>
         </div>
         <div v-if="editMode" class="page-edit-toolbar">
-            <NcButton type="primary" v-on:click="onAddImage">
+            <NcButton type="primary" :aria-label="sAddMedia" :title="sAddMedia" v-on:click="onAddImage">
                 <template #icon>
                     <Plus :size="20" />
                 </template>
-                {{ sAddMedia }}
             </NcButton>
-            <NcButton type="primary" v-on:click="onAddText">
+            <NcButton type="primary" :aria-label="sAddText" :title="sAddText" v-on:click="onAddText">
                 <template #icon>
                     <TextBoxPlusOutline :size="20" />
                 </template>
-                {{ sAddText }}
             </NcButton>
-            <NcButton type="primary" v-on:click="onPaint">
+            <NcButton type="primary" :aria-label="sPaint" :title="sPaint" v-on:click="onPaint">
                 <template #icon>
                     <Brush :size="20" />
                 </template>
-                {{ sPaint }}
             </NcButton>
-            <NcButton v-if="canCycle" type="secondary" v-on:click="onCycleLayout">
+            <NcButton v-if="canCycle" type="secondary" :aria-label="sChangeLayout" :title="sChangeLayout" v-on:click="onCycleLayout">
                 <template #icon>
                     <ViewDashboardVariantOutline :size="20" />
                 </template>
-                {{ sChangeLayout }}
             </NcButton>
         </div>
     </div>
@@ -300,6 +296,9 @@ function isFullyVisible(el) {
   left: 50%;
   transform: translateX(-50%);
   z-index: 8;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
 }
 
 /* Insert-page affordance: a "+" button vertically centered on a full-height
