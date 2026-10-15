@@ -66,9 +66,12 @@
                                 <MusicNote :size="24" />
                             </span>
                             <!-- Selection rank = the page order the media will be
-                                 inserted in (issue #36); only meaningful with 2+. -->
-                            <span v-if="selectedPaths.length > 1 && selectionOrder(entry) > 0"
-                                class="chooser-order-badge">{{ selectionOrder(entry) }}</span>
+                                 inserted in (issue #36); only meaningful with 2+, so a
+                                 lone selection gets a check mark instead (issue #49). -->
+                            <span v-if="isSelected(entry)" class="chooser-order-badge">
+                                <template v-if="selectedPaths.length > 1">{{ selectionOrder(entry) }}</template>
+                                <Check v-else :size="16" />
+                            </span>
                             <span class="chooser-name">{{ entry.basename }}</span>
                         </button>
                     </li>
@@ -328,9 +331,17 @@ let lastBrowsedPath = "";
 .chooser-tile:focus-visible {
     outline: 2px solid var(--color-main-text);
 }
-.chooser-image.selected {
-    outline: 3px solid var(--color-primary-element);
-    outline-offset: -3px;
+/* Selection frame, drawn by an overlay rather than the tile's outline: core's
+   button :hover/:focus rules (inputs.css) reset `outline` with a higher
+   specificity, which hid the frame on the tile just clicked (issue #49). Being
+   the last positioned child, it also paints over the name bar. */
+.chooser-image.selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 4px solid var(--color-primary-element);
+    border-radius: inherit;
+    pointer-events: none;
 }
 .chooser-thumb {
     width: 100%;

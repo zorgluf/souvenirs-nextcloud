@@ -217,11 +217,16 @@ describe('ImageChooserDialog', () => {
         wrapper.unmount()
     })
 
-    it('hides the order badge for a single selection', async () => {
+    it('badges a single selection with a check mark instead of a rank', async () => {
         const wrapper = await mountDialog()
-        const tile = wrapper.findAll('.chooser-image')[0]
-        await tile.trigger('click')
-        expect(tile.find('.chooser-order-badge').exists()).toBe(false)
+        const tiles = wrapper.findAll('.chooser-image')
+        expect(tiles[0].find('.chooser-order-badge').exists()).toBe(false)
+        await tiles[0].trigger('click')
+        const badge = tiles[0].find('.chooser-order-badge')
+        expect(badge.exists()).toBe(true)
+        expect(badge.text()).toBe('')
+        expect(badge.find('svg').exists()).toBe(true)
+        expect(tiles[1].find('.chooser-order-badge').exists()).toBe(false)
         wrapper.unmount()
     })
 
