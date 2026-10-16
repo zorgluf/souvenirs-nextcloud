@@ -21,7 +21,7 @@ OC.L10N.register(
     "The previous drawing is missing on the server, starting with a blank page." : "Предыдущий рисунок отсутствует на сервере, начинаем с пустой страницы.",
     "Could not load the existing drawing." : "Не удалось загрузить существующий рисунок.",
     "Loading album list…" : "Загрузка списка альбомов…",
-    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Альбомов нет. Загрузите их из приложения Souvenirs для Android (https://github.com/zorgluf/souvenirs-android).",
+    "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "Нет ни одного доступного альбома. Загрузите их из приложения Souvenirs для Android (https://github.com/zorgluf/souvenirs-android).",
     "New album" : "Создать альбом",
     "Edit album" : "Изменить альбом",
     "Album name" : "Название альбома",
