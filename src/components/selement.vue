@@ -19,8 +19,8 @@
 			</template>
 		</NcButton>
 		<!-- Toggles the framing (issue #45): back to the default cover-fit
-		     (zoom 100, no offset) after pan & zoom gestures, or — when already
-		     at the default — to a centered contain-fit showing the whole image. -->
+		     (zoom 100, no offset) after pan & zoom gestures, or â when already
+		     at the default â to a centered contain-fit showing the whole image. -->
 		<NcButton v-if="editMode && sClass.endsWith('ImageElement')" class="s-element-pan-reset" type="primary"
 			:aria-label="resetPanZoomTitle" :title="resetPanZoomTitle" v-on:click="onPanZoomReset">
 			<template #icon>
@@ -95,7 +95,7 @@ import { setElementDragData, isElementDrag, getElementDragData } from '../utils/
 import { initialPanZoom, panBy, zoomAt, roundPanZoom, containPanZoom } from '../utils/imagePanZoom.js'
 
 // Zoom speed of the mouse wheel: multiplicative factor e^(-deltaY * this).
-// 0.002 gives ~±22% per classic 100-unit wheel notch.
+// 0.002 gives ~Â±22% per classic 100-unit wheel notch.
 const WHEEL_ZOOM_SPEED = 0.002;
 // A wheel gesture has no end event: commit after this much wheel silence.
 const WHEEL_COMMIT_DELAY_MS = 500;
@@ -180,7 +180,7 @@ export default {
         "panZoomKey": function() {
             // The committed pan/zoom props caught up with (or replaced) the
             // preview: hand the rendering back to them. Not while a pointer
-            // gesture is running — it keeps driving the preview.
+            // gesture is running â it keeps driving the preview.
             if (this.panZoomGesture == null) {
                 this.panZoomPreview = null;
             }
@@ -235,7 +235,7 @@ export default {
     created: function() {
             // Plain properties, not data(): wrapping the Photo Sphere Viewer
             // plugin in a reactive proxy is useless and fragile. Same for the
-            // pan & zoom gesture bookkeeping (pointer positions at 60+ Hz) —
+            // pan & zoom gesture bookkeeping (pointer positions at 60+ Hz) â
             // the reactive rendering is driven by panZoomPreview alone.
             this.autorotate = null;
             this.panoReady = false;
@@ -297,7 +297,7 @@ export default {
         },
         'canPanZoom': function() {
             // Pan & zoom applies to image elements in edit mode (issue #27),
-            // once the image is loaded (the math needs its natural size) — and
+            // once the image is loaded (the math needs its natural size) â and
             // only on the currently displayed page: on a peeking neighbor page
             // a touch drag must keep scrolling the album, not pan the image.
             return this.editMode && this.isFocus
@@ -322,7 +322,7 @@ export default {
         },
         'isDraggable': function() {
             // The visible tiles that can be removed can be dragged (Audio and
-            // unknown elements have no visual box to grab) — except paint
+            // unknown elements have no visual box to grab) â except paint
             // elements, which are static foregrounds: they keep their position
             // (as in the page layouts) and never move or resize. Not being
             // draggable also keeps them pointer-transparent, so they cannot be
@@ -413,9 +413,9 @@ export default {
                     url = 'preview?apath=' + this.albumPath + '&file=' + this.sImage;
                 }
             } else if (this.token != "") {
-                url = this.token+'/preview?file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
+                url = this.token+'/preview?file=' + this.sImage + '&width=' + previewBucket(this.sWidth) + '&height=' + previewBucket(this.sHeight);
             } else {
-                url = 'preview?apath=' + this.albumPath + '&file=' + this.sImage + '&width=' + this.sWidth + '&height=' + this.sHeight;
+                url = 'preview?apath=' + this.albumPath + '&file=' + this.sImage + '&width=' + previewBucket(this.sWidth) + '&height=' + previewBucket(this.sHeight);
             }
             if (this.sClass != null && this.sClass.endsWith('PaintElement') && this.sSize) {
                 // Cache-buster: the paint PNG is overwritten in place on
@@ -823,6 +823,14 @@ function getImageZoomOffsetStyle(zoom, offsetX, offsetY, destWidth, destHeight, 
 // (in page percentages, i.e. 5% of the page side).
 const MIN_ELEMENT_SIZE_PCT = 5;
 
+// Tile previews are requested at a bucketed size instead of the exact tile
+// size (issue #50): rounding up to a multiple of 64 lets the server and the
+// browser cache reuse one preview across slight layout/resize changes,
+// instead of regenerating one per distinct pixel size.
+function previewBucket(px) {
+    return Math.max(64, Math.ceil(px/64)*64);
+}
+
 // Geometry (in page percentages) of an ongoing corner resize: the two edges
 // meeting at the grabbed corner follow the pointer, clamped to the page bounds
 // and to the minimum tile size; the opposite edges stay put.
@@ -876,7 +884,7 @@ function basename(path) {
     overflow: hidden;
 }
 
-/* Editable tiles (edit mode) must receive pointer/drag events — as drop
+/* Editable tiles (edit mode) must receive pointer/drag events â as drop
    targets and for the pan & zoom gestures; the base .s-element disables them
    (children normally opt back in). No grab cursor here: moving the tile is
    done from the handle button only. */

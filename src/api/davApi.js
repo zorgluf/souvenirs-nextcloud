@@ -28,7 +28,7 @@ export const IMAGE_MIMES = [
 
 /**
  * The video mimetypes an album element can play (issue #32): what HTML5
- * `<video>` commonly decodes — which the poster capture also relies on — and
+ * `<video>` commonly decodes â which the poster capture also relies on â and
  * the Android app records/picks. Shared by the chooser's grid filter and its
  * upload input's `accept` attribute, like IMAGE_MIMES.
  */
@@ -119,7 +119,7 @@ function davIsCollection(parent) {
 /**
  * List a folder of the user's files over WebDAV (PROPFIND Depth: 1).
  *
- * Returns the raw entries — no image filtering or sorting, that is the
+ * Returns the raw entries â no image filtering or sorting, that is the
  * caller's presentation concern. Each entry is
  * `{ basename, path, isFolder, mime, size, mtime, fileid }` with `path`
  * relative to the user's files root and `mtime` in epoch milliseconds.
@@ -242,4 +242,24 @@ export function getPreviewUrl(fileid, size = 256) {
     return generateUrl('/core/preview')
         + '?fileId=' + encodeURIComponent(fileid)
         + '&x=' + size + '&y=' + size + '&a=1'
+}
+
+/**
+ * Fetch a preview of an arbitrary user file as a Blob, via the same core
+ * preview endpoint as getPreviewUrl (issue #50): pulling the whole file over
+ * WebDAV just to capture a poster frame is wasted bytes on slow storage.
+ *
+ * @param {string} fileid - the file's oc:fileid as returned by listFolder
+ * @param {number} size - requested bounding box in pixels
+ * @returns {Promise<Blob>}
+ */
+export function getFilePreviewBlob(fileid, size = 512) {
+    return fetch(getPreviewUrl(fileid, size), {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Preview GET failed with status ' + response.status)
+        }
+        return response.blob()
+    })
 }

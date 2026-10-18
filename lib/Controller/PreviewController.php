@@ -44,11 +44,11 @@ class PreviewController extends Controller {
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
 		try {
-			$album = Album::withFolder($userFolder->get($apath));
-			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+			//resolve the asset without loading the album conf file
+			$realFilePath = Album::resolveAssetPath($userFolder->get($apath), DATA_DIR . "/" . $file);
 			$node = $this->rootFolder->get($realFilePath);
 		} catch (\Exception $exception) {
-			//also covers getAssetRealPath returning "unknown" for a missing asset
+			//also covers resolveAssetPath returning "unknown" for a missing asset
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -78,8 +78,8 @@ class PreviewController extends Controller {
 	public function getPreview($apath, $file, $width=-1, $height=-1) {
 
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get($apath));
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		//resolve the asset without loading the album conf file
+		$realFilePath = Album::resolveAssetPath($userFolder->get($apath), DATA_DIR . "/" . $file);
 		return $this->preview($realFilePath, $width, $height);
 	}
 	

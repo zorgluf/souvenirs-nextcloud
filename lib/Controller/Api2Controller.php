@@ -245,15 +245,17 @@ class Api2Controller extends ApiController {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		//search locally
-		if ($album->hasAsset($asset_path)) {
-			$asset_relative_path = $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path));
+		//search locally (single node lookup instead of nodeExists + get)
+		$assetNode = $album->getAssetNode($asset_path);
+		if (!is_null($assetNode)) {
+			$asset_relative_path = $this->userFolder->getRelativePath($assetNode->getPath());
 			return new JSONResponse(array("status" => "ok",
 										"path" => $asset_relative_path,
-									"size" => $this->userFolder->get($asset_relative_path)->getSize() ));
+									"size" => $assetNode->getSize() ));
 		}
-		//search local link
-		if ($album->hasAssetLink($asset_path)) {
+		//search local link (single node lookup instead of nodeExists + get)
+		$linkNode = $album->getLinkTargetNode($asset_path);
+		if (!is_null($linkNode)) {
 			$asset_link = $album->getAssetLink($asset_path);
 			$asset_relative_path = $this->userFolder->getRelativePath($asset_link->getAssetPath());
 			return new JSONResponse(array("status" => "ok",

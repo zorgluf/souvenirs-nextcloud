@@ -2,12 +2,14 @@
 namespace OCA\Souvenirs\Model;
 
 use OCP\Files\Folder;
+use OCP\Files\NotFoundException;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Model\AssetLink;
 use OCA\Souvenirs\Model\AlbumList;
 
 define("ALBUM_CONF_FILENAME","album.json");
 define("DATA_DIR","data");
+define("ASSET_CHECKS_FILENAME","assets_checked.json");
 
 class Album {
 
@@ -42,12 +44,15 @@ class Album {
     }
 
     protected function loadByFolder(Folder $albumNode) {
-        if ($albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
-            //get album conf
+        try {
+            //get album conf (single node lookup, no nodeExists check before)
             $jsonAlbum = $albumNode->get(ALBUM_CONF_FILENAME)->getContent();
-            $this->contentArray = json_decode($jsonAlbum,true);
-            $this->albumNode = $albumNode;
+        } catch (NotFoundException $e) {
+            //not an album folder
+            return;
         }
+        $this->contentArray = json_decode($jsonAlbum,true);
+        $this->albumNode = $albumNode;
     }
 
     public function delete() {
@@ -229,17 +234,72 @@ class Album {
     }
 
     /**
+     * get the node of an asset stored in the album data folder
+     * @return \OCP\Files\File|\OCP\Files\Folder|null
+     */
+    public function getAssetNode($assetPath) {
+        try {
+            return $this->albumNode->get($assetPath);
+        } catch (NotFoundException $e) {
+            return NULL;
+        }
+    }
+
+    /**
+     * get the node an asset link points to, checking the target really exists
+     * @return \OCP\Files\Node|null
+     */
+    public function getLinkTargetNode($assetPath) {
+        $link = $this->getAssetLink($assetPath);
+        if (is_null($link)) {
+            return NULL;
+        }
+        //check if link points to an existing file
+        $root = $this->albumNode;
+        while (substr_count($root->getPath(),"/") > 2) {
+            $root = $root->getParent();
+        }
+        try {
+            return $root->get($root->getRelativePath($link->getAssetPath()));
+        } catch (NotFoundException $e) {
+            return NULL;
+        }
+    }
+
+    /**
      * get real file path of an asset
      */
     public function getAssetRealPath($assetPath) {
-        if ($this->hasAsset($assetPath)) {
-            return $this->albumNode->get($assetPath)->getPath();
+        $assetNode = $this->getAssetNode($assetPath);
+        if (!is_null($assetNode)) {
+            return $assetNode->getPath();
         }
-        if ($this->hasAssetLink($assetPath)) {
-            $link = $this->getAssetLink($assetPath);
+        $link = $this->getAssetLink($assetPath);
+        if (!is_null($link)) {
             return $link->getAssetPath();
         }
         return "unknown";
+    }
+
+    /**
+     * resolve the real path of an album asset without loading album.json:
+     * the data file itself first, then the target of its .lnk file.
+     * @param Folder $albumNode the album folder node
+     * @param string $assetPath path of the asset relative to the album node
+     * @return string the real path, or "unknown" when neither exists
+     */
+    public static function resolveAssetPath(Folder $albumNode, $assetPath) {
+        try {
+            return $albumNode->get($assetPath)->getPath();
+        } catch (NotFoundException $e) {
+            //no local data file, try the link
+        }
+        try {
+            $link = AssetLink::createFromFile($albumNode->get($assetPath . ".lnk"));
+        } catch (NotFoundException $e) {
+            return "unknown";
+        }
+        return $link->getAssetPath();
     }
 
     public function buildFullAssetPath($assetPath) {
@@ -247,6 +307,15 @@ class Album {
     }
 
     public function cleanAssets($userFolder) {
+        $this->cleanOrphanAssets();
+        $this->searchDuplicatedAssets($userFolder);
+        return true;
+    }
+
+    /**
+     * delete the data folder files no longer referenced by the album pages
+     */
+    public function cleanOrphanAssets() {
         //list data dir
         $dataFiles = $this->albumNode->get(DATA_DIR)->search("%");
         //loop on page/element to check if assets still in use
@@ -269,20 +338,91 @@ class Album {
         foreach ($dataFiles as $file) {
             $file->delete();
         }
-        //search for duplicated files in user root FS and create assetLinks
+        return true;
+    }
+
+    /**
+     * search for duplicated files in user root FS and create assetLinks.
+     * Already searched assets are memoized in a sidecar file, so a full user
+     * tree search is not redone for them on every album edit.
+     */
+    public function searchDuplicatedAssets($userFolder) {
+        //load the memoized map (assetPath => size at the time of the search)
+        $checkedAssets = $this->loadCheckedAssets();
+        $dirty = false;
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
                 if ($element->isVideo()) {
                     //search only for video asset, preview image is generated, so not present elsewhere
-                    $this->searchAssetAndLink($userFolder,$element->getContent("video"),$element->getContent("name"),$element->getContent("size"));
+                    $assets = array($element->getContent("video"));
                 } else {
-                    foreach ($element->getAssets() as $asset) {
-                        $this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$element->getContent("size"));
+                    $assets = $element->getAssets();
+                }
+                foreach ($assets as $asset) {
+                    $asset_size = $element->getContent("size");
+                    if (array_key_exists($asset,$checkedAssets) && $checkedAssets[$asset] === $asset_size) {
+                        //already searched in a previous run with the same size
+                        continue;
+                    }
+                    if ($this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$asset_size)) {
+                        $checkedAssets[$asset] = $asset_size;
+                        $dirty = true;
                     }
                 }
             }
         }
+        if ($dirty) {
+            $this->saveCheckedAssets($checkedAssets);
+        }
         return true;
+    }
+
+    /**
+     * asset paths (and album image) referenced by the album pages
+     */
+    private function referencedAssetPaths() {
+        $paths = array();
+        foreach ($this->getPages() as $page) {
+            foreach ($page->getElements() as $element) {
+                foreach ($element->getAssets() as $asset) {
+                    $paths[$asset] = true;
+                }
+            }
+        }
+        if (!is_null($this->getAlbumImage())) {
+            $paths[$this->getAlbumImage()] = true;
+        }
+        return $paths;
+    }
+
+    /**
+     * load the sidecar map of assets already searched for duplicates
+     * (key: assetPath, value: asset size)
+     */
+    private function loadCheckedAssets() {
+        try {
+            $json = $this->albumNode->get(ASSET_CHECKS_FILENAME)->getContent();
+        } catch (NotFoundException $e) {
+            return array();
+        }
+        $checked = json_decode($json,true);
+        return is_array($checked) ? $checked : array();
+    }
+
+    /**
+     * save the sidecar map, pruning entries no longer referenced by the album
+     */
+    private function saveCheckedAssets($checkedAssets) {
+        $referencedPaths = $this->referencedAssetPaths();
+        $checkedAssets = array_filter($checkedAssets,function ($assetPath) use ($referencedPaths) {
+            return array_key_exists($assetPath,$referencedPaths);
+        },ARRAY_FILTER_USE_KEY);
+        if ($this->albumNode->nodeExists(ASSET_CHECKS_FILENAME)) {
+            $file = $this->albumNode->get(ASSET_CHECKS_FILENAME);
+        } else {
+            $file = $this->albumNode->newFile(ASSET_CHECKS_FILENAME);
+        }
+        $file->putContent(json_encode($checkedAssets));
     }
 
     public function getAssets() {
@@ -309,7 +449,10 @@ class Album {
             return FALSE;
         }
         //if name and size look for similar file
-        $nodesSameName = $userFolder->search($asset_name);
+        //search is a wildcard match: keep only nodes with the exact same name
+        $nodesSameName = array_filter($userFolder->search($asset_name),function ($node) use ($asset_name) {
+            return ($node->getName() === $asset_name);
+        });
         foreach ($nodesSameName as $node) {
             //do not link if in an other album
             if (str_starts_with($node->getPath(),$this->albumNode->getParent()->getPath())) {
@@ -347,9 +490,9 @@ class Album {
      */
     public function save() {
         $json = json_encode($this->contentArray);
-        if ($this->albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
+        try {
             $file = $this->albumNode->get(ALBUM_CONF_FILENAME);
-        } else {
+        } catch (NotFoundException $e) {
             $file = $this->albumNode->newFile(ALBUM_CONF_FILENAME);
         }
         $file->putContent($json);
