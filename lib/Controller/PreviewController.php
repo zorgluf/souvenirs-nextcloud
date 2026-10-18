@@ -44,10 +44,12 @@ class PreviewController extends Controller {
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
 		try {
-			$realFilePath = $this->resolveUserAsset($userFolder, $apath, $file);
-			$node = $this->rootFolder->get($realFilePath);
+			$node = Album::openInUserFolder($userFolder, $this->resolveUserAsset($userFolder, $apath, $file));
+			if (is_null($node)) {
+				throw new \OCP\Files\NotFoundException($file);
+			}
 		} catch (\Exception $exception) {
-			//also covers resolveUserAsset returning "unknown" for a missing asset
+			//also covers a missing asset or a link pointing outside the user's files
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -82,7 +84,7 @@ class PreviewController extends Controller {
 		} catch (\Exception $exception) {
 			$realFilePath = "unknown";
 		}
-		return $this->preview($realFilePath, $width, $height);
+		return $this->preview($userFolder, $realFilePath, $width, $height);
 	}
 
 	/**
@@ -94,8 +96,7 @@ class PreviewController extends Controller {
 	 * @throws \Exception when the album folder or the asset cannot be resolved
 	 */
 	private function resolveUserAsset($userFolder, $apath, $file) {
-		if (!is_string($file) || $file === '' || $file === '.' || $file === '..'
-			|| str_contains($file, '/') || str_contains($file, '\\') || str_contains($file, "\0")) {
+		if (!Album::isPlainAssetName($file)) {
 			throw new \InvalidArgumentException('Invalid asset name');
 		}
 		$albumNode = $userFolder->get($apath);
@@ -140,8 +141,8 @@ class PreviewController extends Controller {
 		if (is_null($album)) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 		}
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-		return $this->preview($realFilePath, $width, $height);
+		$realFilePath = Album::isPlainAssetName($file) ? $album->getAssetRealPath(DATA_DIR . "/" . $file) : "unknown";
+		return $this->preview($userFolder, $realFilePath, $width, $height);
 	}
 
 	/**
@@ -169,10 +170,15 @@ class PreviewController extends Controller {
 			$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
 			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($share->getAlbumId());
-			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-			$node = $this->rootFolder->get($realFilePath);
+			if (!Album::isPlainAssetName($file)) {
+				throw new \InvalidArgumentException('Invalid asset name');
+			}
+			$node = Album::openInUserFolder($userFolder, $album->getAssetRealPath(DATA_DIR . "/" . $file));
+			if (is_null($node)) {
+				throw new \OCP\Files\NotFoundException($file);
+			}
 		} catch (\Exception $exception) {
-			//also covers getAssetRealPath returning "unknown" for a missing asset
+			//also covers a missing asset or a link pointing outside the owner's files
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -190,9 +196,13 @@ class PreviewController extends Controller {
 	/*
 	* internal get preview image function
 	*/
-	private function preview($filePath, $width=-1, $height=-1) {
+	private function preview($userFolder, $filePath, $width=-1, $height=-1) {
 		try {
-			$fileObj = $this->rootFolder->get($filePath);
+			//only files of the album owner (see Album::openInUserFolder)
+			$fileObj = Album::openInUserFolder($userFolder, $filePath);
+			if (is_null($fileObj)) {
+				throw new \OCP\Files\NotFoundException((string)$filePath);
+			}
 		} catch (\Exception $exception) {
 			return new JSONResponse(
 				[

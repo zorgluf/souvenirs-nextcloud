@@ -14,14 +14,26 @@ function httpError(status) {
 }
 
 describe('isRetryable', () => {
-    it('retries a busy album, gateway errors and network failures only', () => {
+    it('always retries a busy album: the server applied nothing', () => {
         expect(isRetryable(httpError(423))).toBe(true)
-        expect(isRetryable(httpError(503))).toBe(true)
-        expect(isRetryable(new TypeError('Failed to fetch'))).toBe(true)
-        expect(isRetryable(httpError(404))).toBe(false)
-        expect(isRetryable(httpError(400))).toBe(false)
-        expect(isRetryable(httpError(500))).toBe(false)
-        expect(isRetryable(new Error('bug'))).toBe(false)
+        expect(isRetryable(httpError(423), true)).toBe(true)
+    })
+
+    it('retries gateway errors and network failures of idempotent writes only', () => {
+        // the server may have applied the write before the gateway gave up
+        expect(isRetryable(httpError(504))).toBe(false)
+        expect(isRetryable(new TypeError('Failed to fetch'))).toBe(false)
+        expect(isRetryable(httpError(503), true)).toBe(true)
+        expect(isRetryable(new TypeError('Failed to fetch'), true)).toBe(true)
+    })
+
+    it('never retries real failures', () => {
+        for (const idempotent of [false, true]) {
+            expect(isRetryable(httpError(404), idempotent)).toBe(false)
+            expect(isRetryable(httpError(400), idempotent)).toBe(false)
+            expect(isRetryable(httpError(500), idempotent)).toBe(false)
+            expect(isRetryable(new Error('bug'), idempotent)).toBe(false)
+        }
     })
 })
 
@@ -107,10 +119,27 @@ describe('SaveQueue', () => {
         expect(attempts).toBe(3)
     })
 
+    it('does not repeat a non-idempotent write after a gateway error', async () => {
+        const queue = new SaveQueue({ retryDelaysMs: [10] })
+        let attempts = 0
+        await expect(queue.run(() => { attempts++; return Promise.reject(httpError(504)) })).rejects.toBeTruthy()
+        expect(attempts).toBe(1)
+    })
+
+    it('retries debounced writes, which are idempotent, after a gateway error', async () => {
+        const queue = new SaveQueue({ retryDelaysMs: [10] })
+        let attempts = 0
+        queue.schedule('page:1', () => (++attempts < 2 ? Promise.reject(httpError(504)) : Promise.resolve()))
+        queue.flush()
+        await vi.runAllTimersAsync()
+        await queue.idle()
+        expect(attempts).toBe(2)
+    })
+
     it('gives up after the last retry', async () => {
         const queue = new SaveQueue({ retryDelaysMs: [10] })
         let attempts = 0
-        const result = queue.run(() => { attempts++; return Promise.reject(httpError(503)) })
+        const result = queue.run(() => { attempts++; return Promise.reject(httpError(503)) }, { idempotent: true })
         const assertion = expect(result).rejects.toMatchObject({ status: 503 })
         await vi.runAllTimersAsync()
         await assertion

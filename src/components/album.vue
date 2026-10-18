@@ -513,16 +513,18 @@ export default {
             this.savingCount++;
             return promise.finally(function() { that.savingCount--; });
         },
-        runSave: function(task) {
+        runSave: function(task, options) {
             // Run an album write after every pending one (debounced page saves
             // included), never concurrently with another (issue #50).
+            // `options.idempotent`: the write can safely be repeated on a
+            // gateway or network error (see saveQueue).
             this.saveQueue.flush();
-            return this.saveQueue.run(task);
+            return this.saveQueue.run(task, options);
         },
-        runBlocking: function(task) {
+        runBlocking: function(task, options) {
             // Same, behind the saving overlay: for structural actions whose
             // local result is only applied once the server accepted them.
-            return this.blockWhile(this.runSave(task));
+            return this.blockWhile(this.runSave(task, options));
         },
         queuePageSave: function(pageId) {
             // Background, debounced save of one page (issue #50): a burst of
@@ -570,7 +572,7 @@ export default {
                     that.scheduleClean();
                     return;
                 }
-                that.runSave(function() { return cleanAssets(that.albumId); }).catch(() => {});
+                that.runSave(function() { return cleanAssets(that.albumId); }, { idempotent: true }).catch(() => {});
             }, 5000);
         },
         onEditText: function(pageId, elementId, newText) {
@@ -615,7 +617,7 @@ export default {
                     });
             }
             this.pages.splice(index, 1, updatedPage);
-            return this.runBlocking(() => updatePage(this.albumId, updatedPage))
+            return this.runBlocking(() => updatePage(this.albumId, updatedPage), { idempotent: true })
                 .then(() => {
                     that.scheduleClean();
                 })
@@ -819,7 +821,7 @@ export default {
                 var cleared = removePaintElements(page);
                 this.paintSaving = true;
                 try {
-                    await this.runSave(() => updatePage(this.albumId, cleared));
+                    await this.runSave(() => updatePage(this.albumId, cleared), { idempotent: true });
                 } catch (error) {
                     this.paintSaving = false;
                     showError(t("souvenirs","Could not save the drawing."));
@@ -843,7 +845,7 @@ export default {
                 // Upload before persisting the page, so a failed upload never
                 // leaves an element pointing at a missing asset.
                 await this.uploadNewAsset(element.image, blob);
-                await this.runSave(() => updatePage(this.albumId, updatedPage));
+                await this.runSave(() => updatePage(this.albumId, updatedPage), { idempotent: true });
             } catch (error) {
                 // Keep the dialog open so the drawing is not lost.
                 this.paintSaving = false;
@@ -884,7 +886,7 @@ export default {
             // elements' geometry must survive the removal.
             var updatedPage = removeAudioElements(this.pages[index]);
             this.pages.splice(index, 1, updatedPage);
-            return this.runBlocking(() => updatePage(this.albumId, updatedPage))
+            return this.runBlocking(() => updatePage(this.albumId, updatedPage), { idempotent: true })
                 .then(() => {
                     // The player deliberately keeps playing when its URL goes
                     // away; a removed track must actually stop.

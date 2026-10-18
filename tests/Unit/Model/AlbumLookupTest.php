@@ -117,4 +117,49 @@ class AlbumLookupTest extends TestCase {
 		$this->assertSame(1, $this->fs->count('nodeExists'));
 		$this->assertSame(0, $this->fs->count('getParent'));
 	}
+
+	// --- confinement of the asset endpoints --------------------------------------------
+
+	public function testOpenInUserFolderServesTheOwnersFiles(): void {
+		$this->makeAlbum();
+		$this->fs->addFile(self::USER_ROOT . '/Photos/beach.jpg', 'jpeg');
+		$this->fs->addFile(self::ALBUM . '/data/b.jpg.lnk',
+			json_encode(['assetPath' => self::USER_ROOT . '/Photos/beach.jpg', 'assetSize' => 4]));
+		$userFolder = $this->fs->folder(self::USER_ROOT);
+
+		$path = Album::resolveAssetPath($this->fs->folder(self::ALBUM), 'data/b.jpg');
+		$file = Album::openInUserFolder($userFolder, $path);
+
+		$this->assertNotNull($file);
+		$this->assertSame(self::USER_ROOT . '/Photos/beach.jpg', $file->getPath());
+	}
+
+	public function testOpenInUserFolderRefusesALinkToAnotherUsersFile(): void {
+		// a link file is user content: it can be written by hand over WebDAV
+		$this->makeAlbum();
+		$this->fs->addFile('/bob/files/secret.jpg', 'private');
+		$this->fs->addFile(self::ALBUM . '/data/x.jpg.lnk',
+			json_encode(['assetPath' => '/bob/files/secret.jpg', 'assetSize' => 7]));
+
+		$path = Album::resolveAssetPath($this->fs->folder(self::ALBUM), 'data/x.jpg');
+
+		$this->assertSame('/bob/files/secret.jpg', $path);
+		$this->assertNull(Album::openInUserFolder($this->fs->folder(self::USER_ROOT), $path));
+		$this->assertNull(Album::openInUserFolder($this->fs->folder(self::USER_ROOT), '/alice/files_trashbin/x.jpg'));
+	}
+
+	public function testOpenInUserFolderHandlesMissingAndUnknownAssets(): void {
+		$userFolder = $this->fs->addFolder(self::USER_ROOT);
+
+		$this->assertNull(Album::openInUserFolder($userFolder, 'unknown'));
+		$this->assertNull(Album::openInUserFolder($userFolder, self::USER_ROOT . '/none.jpg'));
+		$this->assertNull(Album::openInUserFolder($userFolder, self::USER_ROOT . '/Photos'));
+	}
+
+	public function testOnlyPlainAssetNamesAreAccepted(): void {
+		$this->assertTrue(Album::isPlainAssetName('3f2a-b1.jpg'));
+		foreach (['', '.', '..', '../album.json', 'a/b.jpg', 'a\\b.jpg', "a\0.jpg", null, 12] as $bad) {
+			$this->assertFalse(Album::isPlainAssetName($bad), var_export($bad, true));
+		}
+	}
 }

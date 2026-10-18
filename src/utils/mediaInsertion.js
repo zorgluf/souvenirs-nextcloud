@@ -88,6 +88,10 @@ export function applyPageOperationsLocally(pages, operations) {
             if (index >= 0) {
                 pages.splice(index, 1)
             }
+        } else {
+            // 'move' uses the server's remove-then-reinsert position convention;
+            // not needed by the callers so far, so refuse rather than desync.
+            throw new Error('applyPageOperationsLocally: unsupported operation ' + operation.op)
         }
     }
 }

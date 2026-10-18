@@ -16,9 +16,13 @@
  * - flush(): sends every debounced write now. Structural actions (delete a
  *   page, move an element to another page) call it first, so pending edits
  *   reach the server before them, in order.
- * - Transient failures (423 album busy, 502/503/504, network errors) are
- *   retried a few times; other failures reject run(), or are reported to
- *   onError for debounced writes.
+ * - Transient failures are retried a few times; other failures reject
+ *   run(), or are reported to onError for debounced writes. Only a busy
+ *   album (423: the server applied nothing) is retried by default, since a
+ *   502/504 or a dropped connection may come after the server did the
+ *   write: retrying a page creation or a move would apply it twice. Tasks
+ *   that can safely run twice (a page save sends the whole page, a cleanup)
+ *   pass { idempotent: true } and are retried on those errors too.
  */
 
 export const DEFAULT_DEBOUNCE_MS = 400
@@ -32,14 +36,20 @@ export const DEFAULT_RETRY_DELAYS_MS = [300, 1000, 3000]
  * @param {Error} error
  * @returns {boolean}
  */
-export function isRetryable(error) {
+export function isRetryable(error, idempotent = false) {
     if (error == null) {
+        return false
+    }
+    if (error.status === 423) {
+        return true
+    }
+    if (!idempotent) {
         return false
     }
     if (error.status === undefined) {
         return error instanceof TypeError
     }
-    return error.status === 423 || error.status === 502 || error.status === 503 || error.status === 504
+    return error.status === 502 || error.status === 503 || error.status === 504
 }
 
 export class SaveQueue {
@@ -84,10 +94,12 @@ export class SaveQueue {
      * Run `task` after every task submitted before it.
      *
      * @param {Function} task - () => Promise
+     * @param {object} [options]
+     * @param {boolean} [options.idempotent] - safe to run twice (see above)
      * @returns {Promise} the task's result, after retries
      */
-    run(task) {
-        return this.enqueue(task, null)
+    run(task, { idempotent = false } = {}) {
+        return this.enqueue(task, null, idempotent)
     }
 
     /**
@@ -95,10 +107,10 @@ export class SaveQueue {
      * @param {Function|null} report - when set, failures are handed to it
      *        (inside the queue, before idle() resolves) instead of rejecting
      */
-    enqueue(task, report) {
+    enqueue(task, report, idempotent = false) {
         this.queued++
         this.notify()
-        const result = this.chain.then(() => this.attempt(task, 0))
+        const result = this.chain.then(() => this.attempt(task, 0, idempotent))
         // A failure must not stop the tasks queued after it.
         const settled = result.then(() => {}, error => {
             if (report) {
@@ -112,13 +124,13 @@ export class SaveQueue {
         return report ? settled : result
     }
 
-    async attempt(task, retry) {
+    async attempt(task, retry, idempotent) {
         try {
             return await task()
         } catch (error) {
-            if (isRetryable(error) && retry < this.retryDelaysMs.length) {
+            if (isRetryable(error, idempotent) && retry < this.retryDelaysMs.length) {
                 await new Promise(resolve => this.setTimer(resolve, this.retryDelaysMs[retry]))
-                return this.attempt(task, retry + 1)
+                return this.attempt(task, retry + 1, idempotent)
             }
             throw error
         }
@@ -127,6 +139,8 @@ export class SaveQueue {
     /**
      * Debounced run(): `task` runs once no other task was scheduled under
      * the same key for `debounceMs`. Only the last task of a burst runs.
+     * Debounced tasks must be idempotent (they are retried as such): the
+     * last one of a burst replaces the others.
      *
      * @param {string} key - e.g. "page:<id>"
      * @param {Function} task - () => Promise
@@ -147,7 +161,7 @@ export class SaveQueue {
             return
         }
         this.timers.delete(key)
-        this.enqueue(entry.task, error => this.onError(error, key))
+        this.enqueue(entry.task, error => this.onError(error, key), true)
     }
 
     /** Drop a debounced write, e.g. of a page that is being deleted. */

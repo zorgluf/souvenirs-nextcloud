@@ -65,6 +65,10 @@ describe('applyPageOperationsLocally', () => {
         expect(pages[4].id).toBe('p2')
     })
 
+    it('refuses operations it cannot reproduce locally', () => {
+        expect(() => applyPageOperationsLocally(album(), [{ op: 'move', id: 'p1', pos: 3 }])).toThrow()
+    })
+
     it('applies deletes', () => {
         const pages = album()
         applyPageOperationsLocally(pages, [{ op: 'delete', id: 'p1' }])

@@ -338,6 +338,40 @@ class Album {
         });
     }
 
+    /**
+     * Open the real file of an asset (see resolveAssetPath) through the user
+     * files root of the album owner, never through the root folder: a link
+     * file is plain user content (it can be written over WebDAV), so the path
+     * it holds must not give access to anything outside that user's files.
+     * @param Folder $userFolder the album owner's files root
+     * @param string $realPath absolute path from resolveAssetPath
+     * @return File|null the file, or null when missing or out of bounds
+     */
+    public static function openInUserFolder($userFolder, $realPath) {
+        if (!is_string($realPath) || $realPath === "unknown") {
+            return NULL;
+        }
+        $relativePath = $userFolder->getRelativePath($realPath);
+        if (is_null($relativePath)) {
+            return NULL;
+        }
+        try {
+            $node = $userFolder->get($relativePath);
+        } catch (NotFoundException $e) {
+            return NULL;
+        }
+        return ($node instanceof File) ? $node : NULL;
+    }
+
+    /**
+     * whether a client-given asset file name is a plain name (no path), so
+     * that "data/<name>" stays inside the album data folder
+     */
+    public static function isPlainAssetName($name) {
+        return is_string($name) && $name !== '' && $name !== '.' && $name !== '..'
+            && !str_contains($name, '/') && !str_contains($name, '\\') && !str_contains($name, "\0");
+    }
+
     public function buildFullAssetPath($assetPath) {
         return $this->albumNode->getFullPath($assetPath);
     }
@@ -429,7 +463,7 @@ class Album {
     }
 
     private static function isRecent(Node $node) {
-        $written = max((int)$node->getMTime(), (int)$node->getUploadTime());
+        $written = max((int)$node->getMTime(), (int)$node->getUploadTime(), (int)$node->getCreationTime());
         return $written > (time() - self::ORPHAN_GRACE_SECONDS);
     }
 
