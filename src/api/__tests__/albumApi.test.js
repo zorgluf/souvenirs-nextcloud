@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { updatePage, updateAlbum, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../albumApi.js'
+import { updatePage, updateAlbum, searchAsset, searchAssets, cleanAssets, createPage, deletePage, movePage, pageOperations, probeAsset, uploadAsset } from '../albumApi.js'
 
 describe('albumApi', () => {
     beforeEach(() => {
@@ -192,6 +192,69 @@ describe('albumApi', () => {
             const [url, options] = globalThis.fetch.mock.calls[0]
             expect(url).toBe('apiv2/album/album-3/clean')
             expect(options.headers.requesttoken).toBe('test-token')
+        })
+    })
+
+    describe('error status', () => {
+        it('exposes the HTTP status on the rejection, e.g. 423 for a busy album', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 423 }))
+            await expect(updatePage('a', { id: 'p', elements: [] })).rejects.toMatchObject({ status: 423 })
+        })
+    })
+
+    describe('pageOperations', () => {
+        beforeEach(() => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({
+                ok: true, status: 200, json: () => Promise.resolve({ results: [{}, {}] }),
+            }))
+        })
+
+        it('POSTs all operations to the batch endpoint in one request', async () => {
+            const res = await pageOperations('album 3', [
+                { op: 'update', page: { id: 'p1', elements: [{ id: 'e' }], lastEditDate: 'x', layout: 'local' } },
+                { op: 'delete', id: 'p2' },
+                { op: 'create', pos: 3, page: { id: 'p3', elements: [] } },
+            ])
+            expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album%203/pages')
+            expect(options.method).toBe('POST')
+            expect(JSON.parse(options.body)).toEqual({ operations: [
+                // like updatePage, only id and elements of an updated page
+                { op: 'update', page: { id: 'p1', elements: [{ id: 'e' }] } },
+                { op: 'delete', id: 'p2' },
+                { op: 'create', pos: 3, page: { id: 'p3', elements: [] } },
+            ] })
+            expect(res.results).toHaveLength(2)
+        })
+
+        it('rejects on error', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404 }))
+            await expect(pageOperations('a', [{ op: 'delete', id: 'x' }])).rejects.toMatchObject({ status: 404 })
+        })
+    })
+
+    describe('searchAssets', () => {
+        beforeEach(() => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({
+                ok: true, status: 200, json: () => Promise.resolve({ results: [{ status: 'found' }, { status: 'notfound' }] }),
+            }))
+        })
+
+        it('links every picked file in one request and returns the statuses in order', async () => {
+            const statuses = await searchAssets('album-3', [
+                { asset: 'data/a.jpg', name: 'a.jpg', size: 10, source: '/Photos/a.jpg' },
+                { asset: 'data/b.jpg', name: 'b.jpg', size: 20 },
+            ])
+            expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toBe('apiv2/album/album-3/assetsearch')
+            expect(options.method).toBe('POST')
+            expect(JSON.parse(options.body)).toEqual({ assets: [
+                { asset: 'data/a.jpg', asset_name: 'a.jpg', asset_size: 10, source: '/Photos/a.jpg' },
+                { asset: 'data/b.jpg', asset_name: 'b.jpg', asset_size: 20 },
+            ] })
+            expect(statuses).toEqual(['found', 'notfound'])
         })
     })
 })

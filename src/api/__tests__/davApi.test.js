@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { listFolder, getPreviewUrl, getFileBlob, IMAGE_MIMES, VIDEO_MIMES } from '../davApi.js'
+import { listFolder, getPreviewUrl, getFileBlob, getFileUrl, getFilePreviewBlob, IMAGE_MIMES, VIDEO_MIMES } from '../davApi.js'
 
 // A realistic Nextcloud PROPFIND multistatus: the listed collection itself
 // (must be skipped), a subfolder, and two images — one with a space + UTF-8
@@ -176,6 +176,38 @@ describe('davApi', () => {
         it('rejects on an HTTP error status', async () => {
             globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404 }))
             await expect(getFileBlob('gone.mp4')).rejects.toThrow('404')
+        })
+    })
+
+    describe('getFileUrl', () => {
+        it('gives the encoded WebDAV URL of a user file, usable as a <video> src', () => {
+            expect(getFileUrl('Photos/Vacances 2024/clip été.mp4'))
+                .toMatch(/\/remote\.php\/webdav\/Photos\/Vacances%202024\/clip%20%C3%A9t%C3%A9.mp4$/)
+        })
+    })
+
+    describe('getFilePreviewBlob', () => {
+        it('fetches the core preview of a file as a blob', async () => {
+            const blob = new Blob(['jpeg'])
+            globalThis.fetch = vi.fn(() => Promise.resolve({
+                ok: true, status: 200, headers: { get: () => 'image/jpeg' }, blob: () => Promise.resolve(blob),
+            }))
+            const result = await getFilePreviewBlob('42', 512)
+            const [url, options] = globalThis.fetch.mock.calls[0]
+            expect(url).toContain('fileId=42')
+            expect(url).toContain('x=512')
+            expect(options.headers.requesttoken).toBe('test-token')
+            expect(result).toBe(blob)
+        })
+
+        it('rejects when the server has no preview for it (e.g. no video provider)', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 404, headers: { get: () => 'application/json' } }))
+            await expect(getFilePreviewBlob('42')).rejects.toThrow('404')
+        })
+
+        it('rejects a non-image answer', async () => {
+            globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, status: 200, headers: { get: () => 'text/html' } }))
+            await expect(getFilePreviewBlob('42')).rejects.toThrow()
         })
     })
 })
