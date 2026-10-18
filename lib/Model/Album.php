@@ -536,18 +536,135 @@ class Album {
      * @param Node|null $assetNode existing data file node, when already known
      */
     private function linkAsset($assetPath, Node $target, $linkNode = null, $assetNode = null) {
-        $linkPath = $assetPath . ".lnk";
-        if (!($linkNode instanceof File)) {
-            try {
-                $linkNode = $this->albumNode->get($linkPath);
-            } catch (NotFoundException $e) {
-                $linkNode = $this->albumNode->newFile($linkPath);
-            }
+        $json = AssetLink::jsonFor($target);
+        if ($linkNode instanceof File) {
+            $linkNode->putContent($json);
+        } else {
+            //creates or overwrites the link file in one write
+            $this->albumNode->newFile($assetPath . ".lnk", $json);
         }
-        AssetLink::createLink($linkNode, $target);
         if ($assetNode instanceof File) {
             $assetNode->delete();
         }
+    }
+
+    /**
+     * link $assetPath to the user file the client picked, given by its path
+     * relative to the user root: no search at all (issue #50). Rejected when
+     * the file is missing, is not a file, lives in the albums folder, or does
+     * not have the expected size.
+     * The asset path must be a new one (no data file to replace), as built
+     * by the editor when adding media.
+     * @return bool true when the link was created
+     */
+    public function linkAssetToSource($userFolder, $assetPath, $sourcePath, $expectedSize = null) {
+        try {
+            $source = $userFolder->get($sourcePath);
+        } catch (NotFoundException $e) {
+            return FALSE;
+        }
+        if (!$this->isLinkableSource($source)) {
+            return FALSE;
+        }
+        if (!is_null($expectedSize) && (int)$expectedSize !== $source->getSize()) {
+            return FALSE;
+        }
+        $this->linkAsset($assetPath, $source);
+        return TRUE;
+    }
+
+    /**
+     * Apply a list of page operations in order, as one album change
+     * (issue #50: the batch endpoint, one album.json read and write for e.g.
+     * a cross-page move or N added media). Same semantics as the single
+     * page endpoints:
+     *   ["op" => "update", "page" => [...]]            postPage (fields merged)
+     *   ["op" => "create", "pos" => int, "page" => [...]] createPage
+     *   ["op" => "delete", "id" => string]              DeletePage
+     *   ["op" => "move", "id" => string, "pos" => int]  movePage
+     * Nothing is applied unless every operation is valid: the caller saves
+     * only on success.
+     * @return array{results: array, pageLastEditDate: ?string}
+     * @throws \InvalidArgumentException on a malformed operation
+     * @throws \OutOfBoundsException when a page does not exist
+     */
+    public function applyPageOperations(array $operations) {
+        $results = array();
+        $pagesChanged = false;
+        foreach (array_values($operations) as $i => $operation) {
+            $type = is_array($operation) ? ($operation["op"] ?? null) : null;
+            switch ($type) {
+                case "update":
+                    $values = self::pageArrayOf($operation, $i);
+                    $page = $this->getPage($values["id"]);
+                    if (is_null($page)) {
+                        throw new \OutOfBoundsException("operation $i: unknown page");
+                    }
+                    unset($values["id"]);
+                    $page->setValues($values);
+                    $lastEditDate = $page->setLastEditDate();
+                    $this->updatePage($page);
+                    $results[] = array("lastEditDate" => $lastEditDate);
+                    break;
+                case "create":
+                    $values = self::pageArrayOf($operation, $i);
+                    if (!is_null($this->getPage($values["id"]))) {
+                        throw new \InvalidArgumentException("operation $i: page already exists");
+                    }
+                    $page = new Page($values);
+                    $lastEditDate = $page->setLastEditDate();
+                    $this->insertPage($page, self::posOf($operation, $i));
+                    $pagesChanged = true;
+                    $results[] = array("lastEditDate" => $lastEditDate);
+                    break;
+                case "delete":
+                    if (!$this->deletePage(self::idOf($operation, $i))) {
+                        throw new \OutOfBoundsException("operation $i: unknown page");
+                    }
+                    $pagesChanged = true;
+                    $results[] = array();
+                    break;
+                case "move":
+                    $page = $this->getPage(self::idOf($operation, $i));
+                    if (is_null($page)) {
+                        throw new \OutOfBoundsException("operation $i: unknown page");
+                    }
+                    $this->movePage($page, self::posOf($operation, $i));
+                    $pagesChanged = true;
+                    $results[] = array();
+                    break;
+                default:
+                    throw new \InvalidArgumentException("operation $i: unknown op");
+            }
+        }
+        return array(
+            "results" => $results,
+            "pageLastEditDate" => $pagesChanged ? $this->setPageLastEditDate() : NULL,
+        );
+    }
+
+    private static function pageArrayOf($operation, $i) {
+        $page = $operation["page"] ?? null;
+        if (!is_array($page) || !isset($page["id"]) || !is_string($page["id"]) || $page["id"] === "") {
+            throw new \InvalidArgumentException("operation $i: page with an id expected");
+        }
+        return $page;
+    }
+
+    private static function idOf($operation, $i) {
+        $id = $operation["id"] ?? null;
+        if (!is_string($id) || $id === "") {
+            throw new \InvalidArgumentException("operation $i: page id expected");
+        }
+        return $id;
+    }
+
+    private static function posOf($operation, $i) {
+        $pos = $operation["pos"] ?? null;
+        if (!is_int($pos) && !(is_string($pos) && ctype_digit($pos))) {
+            throw new \InvalidArgumentException("operation $i: position expected");
+        }
+        return max(0, (int)$pos);
     }
 
     /**

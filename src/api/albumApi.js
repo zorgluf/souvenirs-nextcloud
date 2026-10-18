@@ -29,7 +29,10 @@ function jsonHeaders() {
  */
 function ensureOk(response) {
     if (!response.ok) {
-        throw new Error('Souvenirs API request failed with status ' + response.status)
+        const error = new Error('Souvenirs API request failed with status ' + response.status)
+        // Lets callers tell a busy album (423, retryable) from a real failure.
+        error.status = response.status
+        throw error
     }
     return response
 }
@@ -164,6 +167,64 @@ export function searchAsset(albumId, asset, name, size) {
     return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/assetsearch?' + params.toString(), {
         headers: { 'requesttoken': OC.requestToken },
     }).then(ensureOk).then(response => response.json())
+}
+
+/**
+ * Apply several page operations as ONE album write (issue #50): the batch
+ * endpoint (Api2Controller::batchPages) loads album.json once, applies the
+ * operations in order, and writes it once - all or nothing. Used for
+ * cross-page moves and for adding several media, which used to take one
+ * request (and one album.json rewrite) per page.
+ *
+ * Operations, same semantics as the single-page endpoints:
+ *   { op: 'update', page }        // page = { id, elements, ... } (updatePage)
+ *   { op: 'create', pos, page }   // createPage
+ *   { op: 'delete', id }          // deletePage
+ *   { op: 'move', id, pos }       // movePage (same `pos` convention)
+ *
+ * Only `id` and `elements` of an updated page are sent, like updatePage.
+ *
+ * @param {string} albumId - the album id
+ * @param {Array<object>} operations - the operations, applied in order
+ * @returns {Promise<object>} the parsed JSON, `{ results: [...], pageLastEditDate? }`
+ */
+export function pageOperations(albumId, operations) {
+    const body = operations.map(operation => (operation.op === 'update'
+        ? { op: 'update', page: { id: operation.page.id, elements: operation.page.elements } }
+        : operation))
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/pages', {
+        method: 'POST',
+        headers: jsonHeaders(),
+        body: JSON.stringify({ operations: body }),
+    }).then(ensureOk).then(response => response.json())
+}
+
+/**
+ * Link several picked Nextcloud files into the album in one request
+ * (issue #50, Api2Controller::assetSearchBatch). Each item may carry
+ * `source`, the picked file's path relative to the user's files root: the
+ * backend then links that very file without searching the user's files,
+ * falling back to the name + size search of searchAsset otherwise.
+ *
+ * @param {string} albumId - the album id
+ * @param {Array<{asset: string, name: string, size: number, source?: string}>} items
+ * @returns {Promise<string[]>} one status per item, in order: "found" | "notfound" | "invalid"
+ */
+export function searchAssets(albumId, items) {
+    const assets = items.map(item => {
+        const out = { asset: item.asset, asset_name: item.name, asset_size: item.size }
+        if (item.source) {
+            out.source = item.source
+        }
+        return out
+    })
+    return fetch('apiv2/album/' + encodeURIComponent(albumId) + '/assetsearch', {
+        method: 'POST',
+        headers: jsonHeaders(),
+        body: JSON.stringify({ assets }),
+    }).then(ensureOk)
+        .then(response => response.json())
+        .then(data => (data.results || []).map(result => result.status))
 }
 
 /**

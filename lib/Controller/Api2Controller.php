@@ -17,9 +17,13 @@ use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Controller\Utils;
+use OCA\Souvenirs\Service\AlbumLock;
 use OCA\Souvenirs\Service\Profiler;
+use OCP\Lock\LockedException;
 
 define("ALBUM_LIST_PAGE_SIZE",10);
+//upper bound of operations/assets in one batch request (issue #50)
+define("BATCH_MAX_ITEMS",500);
 
 
 class Api2Controller extends ApiController {
@@ -29,9 +33,13 @@ class Api2Controller extends ApiController {
 	private $shareMapper;
 	private $urlGen;
 	private $config;
+	private $rootFolder;
+	private $albumMapper;
+	private $albumLock;
 
 	public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, IL10N $il10n, 
-								ShareMapper $shareMapper, IURLGenerator $urlGen, IConfig $config, AlbumMapper $albumMapper) {
+								ShareMapper $shareMapper, IURLGenerator $urlGen, IConfig $config, AlbumMapper $albumMapper,
+								AlbumLock $albumLock) {
 		parent::__construct($AppName, $request);
 		$this->userId = $UserId;
 		$this->userFolder = $rootFolder->getUserFolder($UserId);
@@ -41,6 +49,7 @@ class Api2Controller extends ApiController {
 		$this->albumMapper = $albumMapper;
 		$this->urlGen = $urlGen;
 		$this->config = $config;
+		$this->albumLock = $albumLock;
 	}
 
 	/**
@@ -49,10 +58,20 @@ class Api2Controller extends ApiController {
 	 * resolved: missing index row, stale/deleted path, folder without album.json, ...
 	 */
 	private function findAlbum($id, $apath = null) {
-		return Profiler::measure('resolve', fn () => $this->doFindAlbum($id, $apath));
+		$folder = $this->findAlbumFolder($id, $apath);
+		//null when the folder holds no album.json (single lookup, issue #50)
+		return is_null($folder) ? null : Album::tryLoad($folder);
 	}
 
-	private function doFindAlbum($id, $apath) {
+	/**
+	 * Same resolution as findAlbum, without loading album.json yet: the folder
+	 * an album should live in, or null.
+	 */
+	private function findAlbumFolder($id, $apath = null) {
+		return Profiler::measure('resolve', fn () => $this->doFindAlbumFolder($id, $apath));
+	}
+
+	private function doFindAlbumFolder($id, $apath) {
 		try {
 			if ($apath !== null) {
 				$folder = $this->userFolder->get($apath);
@@ -66,11 +85,33 @@ class Api2Controller extends ApiController {
 		} catch (NotFoundException $e) {
 			return null;
 		}
-		if (!($folder instanceof Folder)) {
-			return null;
+		return ($folder instanceof Folder) ? $folder : null;
+	}
+
+	/**
+	 * Run a read-modify-write of album.json under the album lock (issue #50):
+	 * the album is loaded once the lock is held, so concurrent writers (two
+	 * tabs, web and Android) cannot overwrite each other's changes.
+	 *
+	 * @param callable(Album): JSONResponse $fn
+	 */
+	private function writeAlbum($id, callable $fn) {
+		$folder = $this->findAlbumFolder($id);
+		if (is_null($folder)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		//null when the folder holds no album.json (single lookup, issue #50)
-		return Album::tryLoad($folder);
+		try {
+			return $this->albumLock->run($folder->getPath(), function () use ($folder, $fn) {
+				$album = Album::tryLoad($folder);
+				if (is_null($album)) {
+					return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+				}
+				return $fn($album);
+			});
+		} catch (LockedException $e) {
+			//still busy after AlbumLock::WAIT_MS: the client may retry
+			return new JSONResponse(array(), Http::STATUS_LOCKED);
+		}
 	}
 
 	/**
@@ -205,20 +246,17 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postAlbum($id) {
-		$album = $this->findAlbum($id);
-		if (is_null($album)) {
-			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
-		}
 		$albumValues = $this->request->params;
 		//remove conflicting values
 		unset($albumValues["isShared"]);
 		unset($albumValues["shareToken"]);
-		//set values to model
-		$album->setValues($albumValues);
-		$lastEditDate = $album->setLastEditDate();
-		$album->save();
-		$albumArray = $album->toArray();
-		return new JSONResponse(array("lastEditDate" => $lastEditDate));
+		return $this->writeAlbum($id, function (Album $album) use ($albumValues) {
+			//set values to model
+			$album->setValues($albumValues);
+			$lastEditDate = $album->setLastEditDate();
+			$album->save();
+			return new JSONResponse(array("lastEditDate" => $lastEditDate));
+		});
 	}
 
 	/**
@@ -290,6 +328,47 @@ class Api2Controller extends ApiController {
 	}
 
 	/**
+	 * link several picked files into the album in one call (issue #50).
+	 * Each item: {asset, asset_name, asset_size, source?}. With `source` (the
+	 * picked file's path relative to the user root, known by the web chooser)
+	 * the link is created without any search; otherwise, or when that file
+	 * does not qualify, the same name + size search as GET assetsearch runs.
+	 * Responds {results: [{status: "found"|"notfound"|"invalid"}]} in order.
+	 * @CORS
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function assetSearchBatch($id, $assets = array()) {
+		if (!is_array($assets) || count($assets) > BATCH_MAX_ITEMS) {
+			return new JSONResponse(array("message" => "assets: array of at most " . BATCH_MAX_ITEMS . " items expected"), Http::STATUS_BAD_REQUEST);
+		}
+		$album = $this->findAlbum($id);
+		if (is_null($album)) {
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		}
+		$results = array();
+		foreach ($assets as $item) {
+			$asset = is_array($item) ? ($item["asset"] ?? null) : null;
+			//only new album data files: data/<file name>
+			if (!is_string($asset) || !preg_match('#^' . DATA_DIR . '/[^/\\\\]+$#', $asset) || str_contains($asset, "\0")
+				|| basename($asset) === '.' || basename($asset) === '..') {
+				$results[] = array("status" => "invalid");
+				continue;
+			}
+			$name = $item["asset_name"] ?? null;
+			$size = isset($item["asset_size"]) ? (int)$item["asset_size"] : null;
+			$source = $item["source"] ?? null;
+			$found = is_string($source) && $source !== ''
+				&& $album->linkAssetToSource($this->userFolder, $asset, $source, $size);
+			if (!$found) {
+				$found = $album->searchAssetAndLink($this->userFolder, $asset, $name, (int)$size);
+			}
+			$results[] = array("status" => $found ? "found" : "notfound");
+		}
+		return new JSONResponse(array("results" => $results));
+	}
+
+	/**
 	 * clean assets
 	 * @CORS
 	 * @NoAdminRequired
@@ -314,23 +393,21 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function createPage($album_id,$page_pos) {
-		$album = $this->findAlbum($album_id);
-		if (is_null($album)) {
-			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
-		}
 		$pageArray = $this->request->params;
 		unset($pageArray["album_id"]);
 		unset($pageArray["page_pos"]);
-		$page = new Page($pageArray);
-		$lastEditDate = $page->setLastEditDate();
-		$res = $album->insertPage($page,$page_pos);
-		if ($res) {
-			$pageLastEditDate = $album->setPageLastEditDate();
-			$album->save();
-			return new JSONResponse(array("lastEditDate" => $lastEditDate, "pageLastEditDate" => $pageLastEditDate));
-		} else {
-			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
-		}
+		return $this->writeAlbum($album_id, function (Album $album) use ($pageArray, $page_pos) {
+			$page = new Page($pageArray);
+			$lastEditDate = $page->setLastEditDate();
+			$res = $album->insertPage($page,$page_pos);
+			if ($res) {
+				$pageLastEditDate = $album->setPageLastEditDate();
+				$album->save();
+				return new JSONResponse(array("lastEditDate" => $lastEditDate, "pageLastEditDate" => $pageLastEditDate));
+			} else {
+				return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
+			}
+		});
 	}
 
 	/**
@@ -340,17 +417,15 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function DeletePage($album_id,$page_id) {
-		$album = $this->findAlbum($album_id);
-		if (is_null($album)) {
-			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
-		}
-		if ($album->deletePage($page_id)) {
-			$pageLastEditDate = $album->setPageLastEditDate();
-			$album->save();
-			return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
-		} else {
-			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
-		}
+		return $this->writeAlbum($album_id, function (Album $album) use ($page_id) {
+			if ($album->deletePage($page_id)) {
+				$pageLastEditDate = $album->setPageLastEditDate();
+				$album->save();
+				return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
+			} else {
+				return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
+			}
+		});
 	}
 
 	/**
@@ -360,22 +435,51 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function postPage($album_id,$page_id) {
-		$album = $this->findAlbum($album_id);
-		if (is_null($album)) {
+		$pageArray = $this->request->params;
+		unset($pageArray["album_id"]);
+		unset($pageArray["page_id"]);
+		return $this->writeAlbum($album_id, function (Album $album) use ($page_id, $pageArray) {
+			$page = $album->getPage($page_id);
+			if (!is_null($page)) {
+				$page->setValues($pageArray);
+				$lastEditDate = $page->setLastEditDate();
+				$album->updatePage($page);
+				$album->save();
+				return new JSONResponse(array("lastEditDate" => $lastEditDate));
+			}
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		});
+	}
+
+	/**
+	 * apply several page operations (update, create, delete, move) in one
+	 * album write - see Album::applyPageOperations (issue #50)
+	 * @CORS
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function batchPages($album_id, $operations = array()) {
+		if (!is_array($operations) || count($operations) > BATCH_MAX_ITEMS) {
+			return new JSONResponse(array("message" => "operations: array of at most " . BATCH_MAX_ITEMS . " items expected"), Http::STATUS_BAD_REQUEST);
 		}
-		$page = $album->getPage($page_id);
-		if (!is_null($page)) {
-			$pageArray = $this->request->params;
-			unset($pageArray["album_id"]);
-			unset($pageArray["page_id"]);
-			$page->setValues($pageArray);
-			$lastEditDate = $page->setLastEditDate();
-			$album->updatePage($page);
+		return $this->writeAlbum($album_id, function (Album $album) use ($operations) {
+			if (count($operations) === 0) {
+				return new JSONResponse(array("results" => array()));
+			}
+			try {
+				$applied = $album->applyPageOperations($operations);
+			} catch (\OutOfBoundsException $e) {
+				return new JSONResponse(array("message" => $e->getMessage()), Http::STATUS_NOT_FOUND);
+			} catch (\InvalidArgumentException $e) {
+				return new JSONResponse(array("message" => $e->getMessage()), Http::STATUS_BAD_REQUEST);
+			}
 			$album->save();
-			return new JSONResponse(array("lastEditDate" => $lastEditDate));
-		}
-		return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+			$response = array("results" => $applied["results"]);
+			if (!is_null($applied["pageLastEditDate"])) {
+				$response["pageLastEditDate"] = $applied["pageLastEditDate"];
+			}
+			return new JSONResponse($response);
+		});
 	}
 
 	/**
@@ -385,21 +489,19 @@ class Api2Controller extends ApiController {
 	 * @NoCSRFRequired
 	 */
 	public function movePage($album_id,$page_id,$page_pos) {
-		$album = $this->findAlbum($album_id);
-		if (is_null($album)) {
-			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
-		}
-		$page = $album->getPage($page_id);
-		if (!is_null($page)) {
-			if ($album->movePage($page,$page_pos)) {
-				$pageLastEditDate = $album->setPageLastEditDate();
-				$album->save();
-				return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
-			} else {
-				return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		return $this->writeAlbum($album_id, function (Album $album) use ($page_id, $page_pos) {
+			$page = $album->getPage($page_id);
+			if (!is_null($page)) {
+				if ($album->movePage($page,$page_pos)) {
+					$pageLastEditDate = $album->setPageLastEditDate();
+					$album->save();
+					return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
+				} else {
+					return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+				}
 			}
-		}
-		return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
+		});
 	}
 		
 	/**

@@ -238,4 +238,33 @@ class CleanAssetsTest extends TestCase {
 
 		$this->assertFalse($album->searchAssetAndLink($this->fs->folder(self::USER_ROOT), 'data/new.jpg', 'beach.jpg', 5));
 	}
+
+	// --- link to a picked file (batch assetsearch) ------------------------------------------
+
+	public function testLinkAssetToSourceNeedsNoSearch(): void {
+		$this->fs->addFile(self::USER_ROOT . '/Photos/beach.jpg', 'beach');
+		$album = $this->album([]);
+		$this->fs->resetCalls();
+
+		$this->assertTrue($album->linkAssetToSource($this->fs->folder(self::USER_ROOT), 'data/new.jpg', '/Photos/beach.jpg', 5));
+
+		$this->assertSame(0, $this->fs->count('search'));
+		$this->assertSame(1, $this->fs->count('get'));
+		$link = json_decode($this->fs->content(self::ALBUM . '/data/new.jpg.lnk'), true);
+		$this->assertSame(self::USER_ROOT . '/Photos/beach.jpg', $link['assetPath']);
+	}
+
+	public function testLinkAssetToSourceRejectsWrongSizeMissingFilesAndAlbumFiles(): void {
+		$this->fs->addFile(self::USER_ROOT . '/Photos/beach.jpg', 'beach');
+		$this->fs->addFile(self::ALBUMS . '/other/data/x.jpg', 'xxxxx');
+		$this->fs->addFolder(self::USER_ROOT . '/Photos/folder');
+		$album = $this->album([]);
+		$userFolder = $this->fs->folder(self::USER_ROOT);
+
+		$this->assertFalse($album->linkAssetToSource($userFolder, 'data/n1.jpg', '/Photos/beach.jpg', 6));
+		$this->assertFalse($album->linkAssetToSource($userFolder, 'data/n2.jpg', '/Photos/none.jpg', 5));
+		$this->assertFalse($album->linkAssetToSource($userFolder, 'data/n3.jpg', '/Souvenirs/other/data/x.jpg', 5));
+		$this->assertFalse($album->linkAssetToSource($userFolder, 'data/n4.jpg', '/Photos/folder', null));
+		$this->assertFalse($this->fs->exists(self::ALBUM . '/data/n1.jpg.lnk'));
+	}
 }

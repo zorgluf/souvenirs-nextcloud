@@ -255,7 +255,8 @@ async function run(args) {
                 record('pick-media (batch)', await timeAction(client, async () => {
                     const elements = runMedia.map(m => imageElement(m.name, m.size))
                     await client.request('POST', client.app('apiv2/album/' + encodeURIComponent(albumId) + '/assetsearch'), {
-                        json: { assets: elements.map(el => ({ asset: el.image, asset_name: el.name, asset_size: el.size })) },
+                        // the web chooser knows where the picked files are: no search needed
+                        json: { assets: elements.map(el => ({ asset: el.image, asset_name: el.name, asset_size: el.size, source: '/' + mediaFolder + '/' + el.name })) },
                     })
                     await client.request('POST', client.app('apiv2/album/' + encodeURIComponent(albumId) + '/pages'), {
                         json: { operations: elements.map((el, i) => ({ op: 'create', pos: 1 + i, page: { id: randomUUID(), elements: [el] } })) },
