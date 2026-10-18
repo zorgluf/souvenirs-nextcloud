@@ -1,7 +1,10 @@
 <?php
 namespace OCA\Souvenirs\Model;
 
+use OCP\Files\File;
 use OCP\Files\Folder;
+use OCP\Files\Node;
+use OCP\Files\NotFoundException;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Model\AssetLink;
 use OCA\Souvenirs\Model\AlbumList;
@@ -14,6 +17,8 @@ class Album {
 
     private $albumNode;
     private $contentArray;
+    /** @var File|null album.json node, kept from load to save without a new lookup */
+    private $confFile = null;
 
     private function __construct() {
         $contentArray = array();
@@ -38,23 +43,45 @@ class Album {
         return $album;
     }
 
+    /**
+     * load the album stored in $albumNode, or null when the folder holds no
+     * album.json. One node lookup (issue #50), where isAlbum() followed by
+     * withFolder() costs two plus a duplicate existence check.
+     */
+    public static function tryLoad(Folder $albumNode) {
+        $instance = new self();
+        $instance->loadByFolder($albumNode);
+        return $instance->isLoaded() ? $instance : null;
+    }
+
     public static function isAlbum(Folder $node) {
         return $node->nodeExists(ALBUM_CONF_FILENAME);
     }
 
+    public function isLoaded() {
+        return !is_null($this->albumNode);
+    }
+
     protected function loadByFolder(Folder $albumNode) {
-        if ($albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
-            //get album conf
-            $jsonAlbum = Profiler::measure('load', fn () => $albumNode->get(ALBUM_CONF_FILENAME)->getContent());
+        Profiler::measure('load', function () use ($albumNode) {
+            try {
+                //get album conf (single lookup, no nodeExists() before)
+                $confFile = $albumNode->get(ALBUM_CONF_FILENAME);
+                $jsonAlbum = $confFile->getContent();
+            } catch (NotFoundException $e) {
+                //not an album folder
+                return;
+            }
             $this->contentArray = json_decode($jsonAlbum,true);
             $this->albumNode = $albumNode;
-        }
+            $this->confFile = ($confFile instanceof File) ? $confFile : null;
+        });
     }
 
     public function delete() {
         try {
             $this->albumNode->delete();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
         return true;
@@ -202,45 +229,102 @@ class Album {
     }
 
     /**
-	 * search if we have a nc link to asset
-	 */
-    public function hasAssetLink($assetPath) {
-        //check if link file exists
-        if ($this->albumNode->nodeExists($assetPath . ".lnk")) {
-            $link = $this->getAssetLink($assetPath);
-            if (!is_null($link)) {
-                //check if link points to an existing file
-                $root = $this->albumNode;
-                while (substr_count($root->getPath(),"/") > 2) {
-                    $root = $root->getParent();
-                }
-                return $root->nodeExists( $root->getRelativePath($link->getAssetPath()) );
-            }
-        }
-        return FALSE;
-    }
-    public function getAssetLink($assetPath) {
+     * node of an asset stored in the album data folder, or null
+     * (one lookup, where hasAsset() + get() cost two)
+     * @return Node|null
+     */
+    public function getAssetNode($assetPath) {
         try {
-            $assetLink = $this->albumNode->get($assetPath . ".lnk");
-            $link = AssetLink::createFromFile($assetLink);
+            return $this->albumNode->get($assetPath);
         } catch (NotFoundException $e) {
             return NULL;
         }
-        return $link;
     }
 
     /**
-     * get real file path of an asset
+	 * search if we have a nc link to asset, pointing to an existing file
+	 * @param Folder|null $userFolder the user files root, saves walking up the
+	 *                                album parents to find it
+	 */
+    public function hasAssetLink($assetPath, $userFolder = null) {
+        $link = $this->getAssetLink($assetPath);
+        return !is_null($link) && $this->linkTargetExists($link, $userFolder);
+    }
+
+    /**
+     * read the link file of an asset (one lookup and one read), or null when
+     * there is none or it is unreadable
+     * @return AssetLink|null
+     */
+    public function getAssetLink($assetPath) {
+        return Profiler::measure('link', function () use ($assetPath) {
+            try {
+                $assetLink = $this->albumNode->get($assetPath . ".lnk");
+                if (!($assetLink instanceof File)) {
+                    return NULL;
+                }
+                return AssetLink::createFromFile($assetLink);
+            } catch (NotFoundException $e) {
+                return NULL;
+            }
+        });
+    }
+
+    /**
+     * check that the file a link points to still exists
+     * @param Folder|null $userFolder the user files root, when the caller has it
+     */
+    public function linkTargetExists(AssetLink $link, $userFolder = null) {
+        $root = $userFolder;
+        if (is_null($root)) {
+            //walk up to the user root ("/<user>/files")
+            $root = $this->albumNode;
+            while (substr_count($root->getPath(),"/") > 2) {
+                $root = $root->getParent();
+            }
+        }
+        $relativePath = $root->getRelativePath($link->getAssetPath());
+        if (is_null($relativePath)) {
+            return FALSE;
+        }
+        return $root->nodeExists($relativePath);
+    }
+
+    /**
+     * get real file path of an asset: the data file itself, else the target of
+     * its link file (read once), else "unknown"
      */
     public function getAssetRealPath($assetPath) {
-        if ($this->hasAsset($assetPath)) {
-            return $this->albumNode->get($assetPath)->getPath();
-        }
-        if ($this->hasAssetLink($assetPath)) {
-            $link = $this->getAssetLink($assetPath);
-            return $link->getAssetPath();
-        }
-        return "unknown";
+        return self::resolveAssetPath($this->albumNode, $assetPath);
+    }
+
+    /**
+     * resolve the real path of an album asset without loading album.json
+     * (issue #50: the preview and asset endpoints used to parse the whole
+     * album for every tile). Callers must pass a plain asset file name under
+     * the data folder (see PreviewController).
+     * A missing link target is reported by the caller's own lookup of the
+     * returned path.
+     * @param Folder $albumNode the album folder node
+     * @param string $assetPath asset path relative to the album folder
+     * @return string the real path, or "unknown" when the asset has neither a
+     *                data file nor a link file
+     */
+    public static function resolveAssetPath(Folder $albumNode, $assetPath) {
+        return Profiler::measure('link', function () use ($albumNode, $assetPath) {
+            try {
+                return $albumNode->get($assetPath)->getPath();
+            } catch (NotFoundException $e) {
+                //no data file, try the link file
+            }
+            try {
+                $linkFile = $albumNode->get($assetPath . ".lnk");
+            } catch (NotFoundException $e) {
+                return "unknown";
+            }
+            $link = ($linkFile instanceof File) ? AssetLink::createFromFile($linkFile) : NULL;
+            return is_null($link) ? "unknown" : $link->getAssetPath();
+        });
     }
 
     public function buildFullAssetPath($assetPath) {
@@ -352,12 +436,17 @@ class Album {
 
     private function doSave() {
         $json = json_encode($this->contentArray);
-        if ($this->albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
-            $file = $this->albumNode->get(ALBUM_CONF_FILENAME);
-        } else {
-            $file = $this->albumNode->newFile(ALBUM_CONF_FILENAME);
+        //reuse the node read at load time (issue #50): no exists + get lookups
+        $file = $this->confFile;
+        if (is_null($file)) {
+            try {
+                $file = $this->albumNode->get(ALBUM_CONF_FILENAME);
+            } catch (NotFoundException $e) {
+                $file = $this->albumNode->newFile(ALBUM_CONF_FILENAME);
+            }
         }
         $file->putContent($json);
+        $this->confFile = ($file instanceof File) ? $file : null;
     }
 
     public function toArray() {

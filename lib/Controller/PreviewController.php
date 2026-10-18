@@ -44,11 +44,10 @@ class PreviewController extends Controller {
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
 		try {
-			$album = Album::withFolder($userFolder->get($apath));
-			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+			$realFilePath = $this->resolveUserAsset($userFolder, $apath, $file);
 			$node = $this->rootFolder->get($realFilePath);
 		} catch (\Exception $exception) {
-			//also covers getAssetRealPath returning "unknown" for a missing asset
+			//also covers resolveUserAsset returning "unknown" for a missing asset
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -78,9 +77,32 @@ class PreviewController extends Controller {
 	public function getPreview($apath, $file, $width=-1, $height=-1) {
 
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get($apath));
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
+		try {
+			$realFilePath = $this->resolveUserAsset($userFolder, $apath, $file);
+		} catch (\Exception $exception) {
+			$realFilePath = "unknown";
+		}
 		return $this->preview($realFilePath, $width, $height);
+	}
+
+	/**
+	 * Resolve an asset of one of the user's albums to its real path, without
+	 * loading album.json (issue #50): the data file, else its link target.
+	 * Only plain file names are accepted, so the lookup stays inside the
+	 * album data folder.
+	 *
+	 * @throws \Exception when the album folder or the asset cannot be resolved
+	 */
+	private function resolveUserAsset($userFolder, $apath, $file) {
+		if (!is_string($file) || $file === '' || $file === '.' || $file === '..'
+			|| str_contains($file, '/') || str_contains($file, '\\') || str_contains($file, "\0")) {
+			throw new \InvalidArgumentException('Invalid asset name');
+		}
+		$albumNode = $userFolder->get($apath);
+		if (!($albumNode instanceof \OCP\Files\Folder)) {
+			throw new \InvalidArgumentException('Not an album folder');
+		}
+		return Album::resolveAssetPath($albumNode, DATA_DIR . "/" . $file);
 	}
 	
 	/**

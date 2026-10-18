@@ -66,10 +66,11 @@ class Api2Controller extends ApiController {
 		} catch (NotFoundException $e) {
 			return null;
 		}
-		if (!($folder instanceof Folder) || !Album::isAlbum($folder)) {
+		if (!($folder instanceof Folder)) {
 			return null;
 		}
-		return Album::withFolder($folder);
+		//null when the folder holds no album.json (single lookup, issue #50)
+		return Album::tryLoad($folder);
 	}
 
 	/**
@@ -250,16 +251,16 @@ class Api2Controller extends ApiController {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		//search locally
-		if ($album->hasAsset($asset_path)) {
-			$asset_relative_path = $this->userFolder->getRelativePath($album->buildFullAssetPath($asset_path));
+		//search locally (one lookup gives both existence and size)
+		$asset_node = $album->getAssetNode($asset_path);
+		if (!is_null($asset_node)) {
 			return new JSONResponse(array("status" => "ok",
-										"path" => $asset_relative_path,
-									"size" => $this->userFolder->get($asset_relative_path)->getSize() ));
+										"path" => $this->userFolder->getRelativePath($asset_node->getPath()),
+									"size" => $asset_node->getSize() ));
 		}
-		//search local link
-		if ($album->hasAssetLink($asset_path)) {
-			$asset_link = $album->getAssetLink($asset_path);
+		//search local link (link file read once, target checked from the user root)
+		$asset_link = $album->getAssetLink($asset_path);
+		if (!is_null($asset_link) && $album->linkTargetExists($asset_link, $this->userFolder)) {
 			$asset_relative_path = $this->userFolder->getRelativePath($asset_link->getAssetPath());
 			return new JSONResponse(array("status" => "ok",
 										"path" => $asset_relative_path,
