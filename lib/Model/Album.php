@@ -8,12 +8,20 @@ use OCP\Files\NotFoundException;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Model\AssetLink;
 use OCA\Souvenirs\Model\AlbumList;
+use OCA\Souvenirs\Service\AssetFinder;
 use OCA\Souvenirs\Service\Profiler;
 
 define("ALBUM_CONF_FILENAME","album.json");
 define("DATA_DIR","data");
+//sidecar of the duplicate search done by cleanAssets (issue #50)
+define("ASSET_CHECKS_FILENAME",".souvenirs-assets-checked.json");
 
 class Album {
+
+    /** data files younger than this are never garbage-collected (in-flight uploads) */
+    const ORPHAN_GRACE_SECONDS = 600;
+    /** an asset is searched for duplicates again after this delay */
+    const DUPLICATE_CHECK_TTL_SECONDS = 7 * 86400;
 
     private $albumNode;
     private $contentArray;
@@ -331,43 +339,237 @@ class Album {
         return $this->albumNode->getFullPath($assetPath);
     }
 
-    public function cleanAssets($userFolder) {
-        //list data dir
-        $dataFiles = $this->albumNode->get(DATA_DIR)->search("%");
-        //loop on page/element to check if assets still in use
+    /**
+     * Garbage-collect the album data folder and replace assets with links to
+     * identical user files (issue #50). Returns true.
+     *
+     * - The data folder is listed once; orphan detection and link lookups
+     *   use that listing instead of one lookup per asset.
+     * - Files written less than ORPHAN_GRACE_SECONDS ago are never deleted:
+     *   an upload (or a link created by assetsearch) lands before the page
+     *   referencing it is saved, and a clean running in between must not
+     *   remove it. This is what makes a background clean safe.
+     * - Every asset processed by the duplicate search is remembered, whatever
+     *   the outcome, in ASSET_CHECKS_FILENAME; it is processed again only
+     *   when its size changes or after DUPLICATE_CHECK_TTL_SECONDS.
+     *
+     * @param Folder $userFolder the user files root
+     */
+    public function cleanAssets($userFolder, $finder = null) {
+        $listing = $this->listDataFolder();
+        if (is_null($listing)) {
+            //no data folder: nothing to clean nor to link
+            return true;
+        }
+        $listing = $this->cleanOrphanAssets($listing);
+        $this->linkDuplicatedAssets($userFolder, $listing, $finder ?? new AssetFinder());
+        return true;
+    }
+
+    /**
+     * @return array<string, Node>|null data folder entries by name, or null
+     *                                   when the album has no data folder
+     */
+    private function listDataFolder() {
+        try {
+            $dataFolder = $this->albumNode->get(DATA_DIR);
+        } catch (NotFoundException $e) {
+            return NULL;
+        }
+        if (!($dataFolder instanceof Folder)) {
+            return NULL;
+        }
+        $listing = array();
+        foreach ($dataFolder->getDirectoryListing() as $node) {
+            $listing[$node->getName()] = $node;
+        }
+        return $listing;
+    }
+
+    /**
+     * basenames of every asset referenced by the pages, plus the album image
+     * @return array<string, true>
+     */
+    private function referencedAssetNames() {
+        $names = array();
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
                 foreach ($element->getAssets() as $asset) {
-                    $dataFiles = array_filter($dataFiles,function ($v) use ($asset) {
-                        return !(str_starts_with($v->getName(),basename($asset)));
-                    });
+                    $names[basename($asset)] = true;
                 }
             }
         }
-        //check album image
-        if (!is_null($this->getAlbumImage())) {
-            $dataFiles = array_filter($dataFiles,function ($v) {
-                return !(str_starts_with($v->getName(),basename($this->getAlbumImage())));
-            });
+        if (!is_null($this->getAlbumImage()) && $this->getAlbumImage() !== "") {
+            $names[basename($this->getAlbumImage())] = true;
         }
-        //delete remainings assets
-        foreach ($dataFiles as $file) {
-            $file->delete();
+        return $names;
+    }
+
+    /**
+     * same rule as before issue #50: a data file is in use when its name
+     * starts with the name of a referenced asset (e.g. "x.jpg" and
+     * "x.jpg.lnk" for the asset "data/x.jpg")
+     */
+    private static function isReferenced($name, array $referenced) {
+        if (isset($referenced[$name])) {
+            return true;
         }
-        //search for duplicated files in user root FS and create assetLinks
+        if (str_ends_with($name, ".lnk") && isset($referenced[substr($name, 0, -4)])) {
+            return true;
+        }
+        foreach ($referenced as $assetName => $unused) {
+            if (str_starts_with($name, $assetName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static function isRecent(Node $node) {
+        $written = max((int)$node->getMTime(), (int)$node->getUploadTime());
+        return $written > (time() - self::ORPHAN_GRACE_SECONDS);
+    }
+
+    /**
+     * delete the data files no longer referenced by the album, except recent
+     * ones (see cleanAssets)
+     * @param array<string, Node> $listing
+     * @return array<string, Node> the listing without the deleted entries
+     */
+    private function cleanOrphanAssets(array $listing) {
+        $referenced = $this->referencedAssetNames();
+        foreach ($listing as $name => $node) {
+            if (!($node instanceof File) || self::isReferenced($name, $referenced) || self::isRecent($node)) {
+                continue;
+            }
+            $node->delete();
+            unset($listing[$name]);
+        }
+        return $listing;
+    }
+
+    /**
+     * replace assets with links to identical user files, at most once per
+     * asset per DUPLICATE_CHECK_TTL_SECONDS (see cleanAssets)
+     * @param array<string, Node> $listing data folder entries by name
+     */
+    private function linkDuplicatedAssets($userFolder, array $listing, AssetFinder $finder) {
+        $checks = $this->loadAssetChecks();
+        $now = time();
+        $changed = false;
+        $seen = array();
         foreach ($this->getPages() as $page) {
             foreach ($page->getElements() as $element) {
-                if ($element->isVideo()) {
-                    //search only for video asset, preview image is generated, so not present elsewhere
-                    $this->searchAssetAndLink($userFolder,$element->getContent("video"),$element->getContent("name"),$element->getContent("size"));
-                } else {
-                    foreach ($element->getAssets() as $asset) {
-                        $this->searchAssetAndLink($userFolder,$asset,$element->getContent("name"),$element->getContent("size"));
+                //videos: only the video file, the poster image is generated
+                $assets = $element->isVideo() ? array($element->getContent("video")) : $element->getAssets();
+                $name = $element->getContent("name");
+                $size = $element->getContent("size");
+                foreach ($assets as $asset) {
+                    if (is_null($asset) || $asset === "") {
+                        continue;
                     }
+                    $seen[$asset] = true;
+                    $check = $checks[$asset] ?? null;
+                    if (is_array($check) && ($check["size"] ?? null) === $size
+                        && (int)($check["at"] ?? 0) > ($now - self::DUPLICATE_CHECK_TTL_SECONDS)) {
+                        continue;
+                    }
+                    $this->checkAssetDuplicate($userFolder, $finder, $asset, $name, $size, $listing);
+                    $checks[$asset] = array("size" => $size, "at" => $now);
+                    $changed = true;
                 }
             }
         }
-        return true;
+        //forget assets no longer in the album
+        foreach (array_keys($checks) as $asset) {
+            if (!isset($seen[$asset])) {
+                unset($checks[$asset]);
+                $changed = true;
+            }
+        }
+        if ($changed) {
+            $this->saveAssetChecks($checks);
+        }
+    }
+
+    /**
+     * one asset of cleanAssets: keep a valid link, else link the asset to an
+     * identical user file when there is one
+     */
+    private function checkAssetDuplicate($userFolder, AssetFinder $finder, $asset, $name, $size, array $listing) {
+        $inData = (dirname($asset) === DATA_DIR);
+        $baseName = basename($asset);
+        $linkNode = $inData ? ($listing[$baseName . ".lnk"] ?? null) : null;
+        if ($linkNode instanceof File || !$inData) {
+            $link = $this->getAssetLink($asset);
+            if (!is_null($link) && $this->linkTargetExists($link, $userFolder)) {
+                return;
+            }
+        }
+        //sizes written as numeric strings by some clients count too
+        $size = is_numeric($size) ? (int)$size : 0;
+        if (is_null($name) || $name === "" || $size === 0) {
+            return;
+        }
+        $assetNode = $inData ? ($listing[$baseName] ?? null) : $this->getAssetNode($asset);
+        foreach ($finder->find($userFolder, $name, $size) as $candidate) {
+            if ($this->isLinkableSource($candidate)) {
+                $this->linkAsset($asset, $candidate, $linkNode, $assetNode);
+                return;
+            }
+        }
+    }
+
+    /**
+     * a user file can back an album asset unless it lives in the albums
+     * folder itself (it could be removed with its album)
+     */
+    private function isLinkableSource(Node $node) {
+        $albumsRoot = dirname($this->albumNode->getPath());
+        return ($node instanceof File) && !str_starts_with($node->getPath(), $albumsRoot . "/");
+    }
+
+    /**
+     * point $assetPath to $target with a link file, replacing a data file of
+     * the same asset (now redundant) if there is one
+     * @param Node|null $linkNode existing link file node, when already known
+     * @param Node|null $assetNode existing data file node, when already known
+     */
+    private function linkAsset($assetPath, Node $target, $linkNode = null, $assetNode = null) {
+        $linkPath = $assetPath . ".lnk";
+        if (!($linkNode instanceof File)) {
+            try {
+                $linkNode = $this->albumNode->get($linkPath);
+            } catch (NotFoundException $e) {
+                $linkNode = $this->albumNode->newFile($linkPath);
+            }
+        }
+        AssetLink::createLink($linkNode, $target);
+        if ($assetNode instanceof File) {
+            $assetNode->delete();
+        }
+    }
+
+    /**
+     * @return array<string, array{size: mixed, at: int}>
+     */
+    private function loadAssetChecks() {
+        try {
+            $checks = json_decode($this->albumNode->get(ASSET_CHECKS_FILENAME)->getContent(), true);
+        } catch (NotFoundException $e) {
+            return array();
+        }
+        return is_array($checks) ? $checks : array();
+    }
+
+    private function saveAssetChecks(array $checks) {
+        $json = json_encode((object)$checks);
+        try {
+            $file = $this->albumNode->get(ASSET_CHECKS_FILENAME);
+        } catch (NotFoundException $e) {
+            $file = $this->albumNode->newFile(ASSET_CHECKS_FILENAME);
+        }
+        $file->putContent($json);
     }
 
     public function getAssets() {
@@ -382,9 +584,14 @@ class Album {
         return $assets;    
     }
 
-    public function searchAssetAndLink($userFolder,$assetPath,$asset_name,$asset_size) {
-        //if link exists, skip the search
-        if ($this->hasAssetLink($assetPath)) {
+    /**
+     * link $assetPath to a user file with the same name and size (the
+     * assetsearch endpoint, used when picking existing media)
+     * @return bool true when the asset is (now) linked
+     */
+    public function searchAssetAndLink($userFolder,$assetPath,$asset_name,$asset_size,$finder = null) {
+        //if a valid link exists, skip the search
+        if ($this->hasAssetLink($assetPath, $userFolder)) {
             return TRUE;
         }
         if (is_null($asset_name) || $asset_name === "") {
@@ -393,31 +600,12 @@ class Album {
         if (is_null($asset_size) || $asset_size === 0) {
             return FALSE;
         }
-        //if name and size look for similar file
-        $nodesSameName = Profiler::measure('search', fn () => $userFolder->search($asset_name));
-        foreach ($nodesSameName as $node) {
-            //do not link if in an other album
-            if (str_starts_with($node->getPath(),$this->albumNode->getParent()->getPath())) {
-                continue;
-            }
-            if ($node->getSize() === $asset_size) {
-                //compute link name
-                $linkPath = $assetPath.".lnk";
-                if ($this->albumNode->nodeExists($linkPath)) {
-                    $linkFile = $this->albumNode->get($linkPath);
-                } else {
-                    $linkFile = $this->albumNode->newFile($linkPath);
-                }
-                //if asset exists, replace with link
-                if ($this->albumNode->nodeExists($assetPath)) {
-                    $assetNode = $this->albumNode->get($assetPath);
-                    $link = AssetLink::createLinkFromAsset($linkFile,$assetNode, $node);
-                    return TRUE;
-                } else {
-                    //just create link
-                    $link = AssetLink::createLink($linkFile, $node);
-                    return TRUE;
-                }
+        $finder = $finder ?? new AssetFinder();
+        foreach ($finder->find($userFolder, (string)$asset_name, (int)$asset_size) as $node) {
+            //do not link to a file of an album
+            if ($this->isLinkableSource($node)) {
+                $this->linkAsset($assetPath, $node, null, $this->getAssetNode($assetPath));
+                return TRUE;
             }
         }
         return FALSE;

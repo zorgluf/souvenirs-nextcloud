@@ -17,11 +17,12 @@ class AssetLink {
     public static function createFromFile(File $assetLinkFile) {
         $assetLinkJson = json_decode($assetLinkFile->getContent());
         $assetLink = new self();
-        if ($assetLinkJson->assetPath == NULL) {
+        //unreadable or incomplete link files are no link
+        if (!is_object($assetLinkJson) || !isset($assetLinkJson->assetPath) || $assetLinkJson->assetPath == NULL) {
             return NULL;
         }
         $assetLink->setAssetPath($assetLinkJson->assetPath);
-        if ($assetLinkJson->assetSize == NULL) {
+        if (!isset($assetLinkJson->assetSize) || $assetLinkJson->assetSize == NULL) {
             return NULL;
         }
         $assetLink->setAssetSize($assetLinkJson->assetSize);
