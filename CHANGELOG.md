@@ -1,3 +1,19 @@
+## Unreleased
+### Changed
+- Faster edit mode on slow storage or a remote database [#50](https://github.com/zorgluf/souvenirs-nextcloud/issues/50): text, resize, pan & zoom and layout edits are saved in the background (no more blocking overlay), adding media and moving an element to another page take one request instead of one per page, uploads no longer probe the server, and the asset cleanup runs in the background and no longer searches the whole user tree on every edit
+- Posters of videos picked from Nextcloud are captured while streaming the video (or taken from the server preview) instead of downloading the whole file
+
+### Added
+- API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints are unchanged
+- `Server-Timing` header on API and preview responses, and `tools/bench-apiv2.mjs` to measure the edit-mode API of an instance
+- Database index on the albums table (user, album id)
+
+### Fixed
+- Concurrent edits of the same album (two tabs, web and Android) could overwrite each other
+- Asset cleanup could delete a file uploaded moments before the page referencing it was saved
+- Linking existing media matched files whose name merely contained the searched one
+- Preview revalidations (304) regenerated the preview every time
+
 ## 2.5.0 - 2026-10-14
 ### Added
 - API endpoint `GET apiv2/albums` listing all albums with their details in one call, so the Android app no longer fetches albums one by one ([souvenirs-android#37](https://github.com/zorgluf/souvenirs-android/issues/37))

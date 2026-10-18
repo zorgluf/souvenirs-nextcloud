@@ -20,8 +20,11 @@ class Album {
 
     /** data files younger than this are never garbage-collected (in-flight uploads) */
     const ORPHAN_GRACE_SECONDS = 600;
-    /** an asset is searched for duplicates again after this delay */
-    const DUPLICATE_CHECK_TTL_SECONDS = 7 * 86400;
+    /**
+     * an asset is searched for duplicates again after this delay: a copy may
+     * show up later (e.g. the phone's auto-upload of the original photo)
+     */
+    const DUPLICATE_CHECK_TTL_SECONDS = 86400;
 
     private $albumNode;
     private $contentArray;
