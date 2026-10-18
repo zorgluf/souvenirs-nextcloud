@@ -2,6 +2,12 @@
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown="onKeydown"
     v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver">
         <div class="top-right">
+            <!-- Background saves in progress (issue #50): light edits no longer
+                 block the page, this is the only sign they are being sent. -->
+            <span v-if="editMode && pendingSaves > 0 && savingCount === 0" class="saving-indicator"
+                :title="sSaving" :aria-label="sSaving" role="status">
+                <NcLoadingIcon :size="20"></NcLoadingIcon>
+            </span>
             <NcActions default-icon="icon-menu" :force-menu="true" :primary="true" v-if="!fullscreenMode">
                 <NcActionButton v-if="canEdit" @click="toggleEdit" :close-after-click="true">
                     <template #icon>
@@ -97,12 +103,14 @@ import { NcLoadingIcon, NcActionInput, NcActionButton, NcActions, NcProgressBar,
 import Plus from 'vue-material-design-icons/Plus.vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildVideoElement, buildAudioElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements, getAudioElement, setPageAudioElement, removeAudioElements, hasVisibleElements } from '../utils/albumEdit.js'
+import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildVideoElement, buildAudioElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements, getAudioElement, removeAudioElements, hasVisibleElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { captureVideoPoster } from '../utils/videoPoster.js'
 import { getFileBlob, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
-import { updatePage, searchAsset, cleanAssets, createPage, deletePage, movePage, probeAsset, uploadAsset } from '../api/albumApi.js'
+import { updatePage, searchAssets, cleanAssets, createPage, deletePage, movePage, pageOperations, probeAsset, uploadAsset } from '../api/albumApi.js'
+import { SaveQueue } from '../utils/saveQueue.js'
+import { planMediaInsertion, applyPageOperationsLocally } from '../utils/mediaInsertion.js'
 import PaintDialog from './PaintDialog.vue'
 import ImageChooserDialog from './ImageChooserDialog.vue'
 import { showError } from '@nextcloud/dialogs'
@@ -152,6 +160,7 @@ export default {
             "sEdit": t("souvenirs","Edit (E)"),
             "sFinishEdit": t("souvenirs","Finish editing (E)"),
             "sAddPage": t("souvenirs","Add page"),
+            "sSaving": t("souvenirs","Saving changes…"),
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
             // Id of the page currently open in the paint dialog (null = closed),
@@ -172,14 +181,40 @@ export default {
             // Timestamp of the last page turn triggered by dragging an element
             // near the album edge (throttles the edge navigation).
             "dragNavLast": 0,
-            // Number of in-flight edit actions (issue #39): while > 0, a
-            // full-page overlay blocks any further modification. A counter,
-            // not a boolean, so overlapping actions compose.
+            // Number of in-flight blocking edit actions (issue #39): while > 0,
+            // a full-page overlay blocks any further modification. A counter,
+            // not a boolean, so overlapping actions compose. Since issue #50
+            // only structural actions block; text/geometry edits are saved in
+            // the background (see saveQueue).
             "savingCount": 0,
+            // Edit-mode writes not yet confirmed by the server (issue #50):
+            // drives the discreet "saving" indicator.
+            "pendingSaves": 0,
         }
     },
     created: function() {
         window.addEventListener("resize", this.resizeEventHandler);
+        // All album writes go through one serialized queue (issue #50): no two
+        // album.json rewrites in flight, background saves for light edits.
+        // Plain properties, not data(): no reactivity needed.
+        var that = this;
+        this.saveQueue = new SaveQueue({
+            onChange: function(pending) { that.pendingSaves = pending; },
+            onError: function(error) { that.onSaveError(error); },
+        });
+        this.cleanTimer = null;
+        this.lastSaveErrorAt = 0;
+        window.addEventListener("beforeunload", this.onBeforeUnload);
+    },
+    beforeUnmount: function() {
+        // Leaving the album (router navigation): send the debounced writes
+        // now instead of dropping them with the component.
+        window.removeEventListener("beforeunload", this.onBeforeUnload);
+        this.saveQueue.flush();
+        if (this.cleanTimer) {
+            clearTimeout(this.cleanTimer);
+            this.cleanTimer = null;
+        }
     },
     destroyed: function() {
         window.removeEventListener("resize", this.resizeEventHandler);
@@ -423,6 +458,10 @@ export default {
         },
         toggleEdit: function() {
             this.editMode = !this.editMode;
+            if (!this.editMode) {
+                // Finishing the edit session: persist what is still pending.
+                this.saveQueue.flush();
+            }
         },
         onKeydown: function(event) {
             // Navigation/slideshow shortcuts don't apply while typing in a
@@ -469,6 +508,66 @@ export default {
             this.savingCount++;
             return promise.finally(function() { that.savingCount--; });
         },
+        runSave: function(task) {
+            // Run an album write after every pending one (debounced page saves
+            // included), never concurrently with another (issue #50).
+            this.saveQueue.flush();
+            return this.saveQueue.run(task);
+        },
+        runBlocking: function(task) {
+            // Same, behind the saving overlay: for structural actions whose
+            // local result is only applied once the server accepted them.
+            return this.blockWhile(this.runSave(task));
+        },
+        queuePageSave: function(pageId) {
+            // Background, debounced save of one page (issue #50): a burst of
+            // edits (typing, resizing, zooming) becomes one request, which
+            // sends the page as it is when the request starts.
+            var that = this;
+            this.saveQueue.schedule("page:" + pageId, function() {
+                var page = that.pages.find(p => p.id === pageId);
+                return (page == null) ? Promise.resolve() : updatePage(that.albumId, page);
+            });
+        },
+        onSaveError: function(error) {
+            // A background save failed for good (retries exhausted): the
+            // edit stays on screen but may not be on the server. One toast
+            // per burst of failures.
+            console.log("Error saving album edit.", error);
+            var now = Date.now();
+            if (now - this.lastSaveErrorAt > 5000) {
+                this.lastSaveErrorAt = now;
+                showError(t("souvenirs","Could not save your last changes. Reload the album to check what was saved."));
+            }
+        },
+        onBeforeUnload: function(event) {
+            // Closing or reloading the tab with writes still pending: send
+            // them and ask the browser to confirm leaving.
+            if (this.saveQueue == null || this.saveQueue.pending === 0) {
+                return;
+            }
+            this.saveQueue.flush();
+            event.preventDefault();
+            event.returnValue = "";
+        },
+        scheduleClean: function() {
+            // Background, debounced GC of unreferenced assets (issue #50): one
+            // cleanAssets call after a series of removals, outside the
+            // blocking chains, and never while media are being added (the
+            // server also keeps recent files, see Album::cleanAssets).
+            var that = this;
+            if (this.cleanTimer) {
+                clearTimeout(this.cleanTimer);
+            }
+            this.cleanTimer = setTimeout(function() {
+                that.cleanTimer = null;
+                if (that.imageChooserSaving || that.paintSaving) {
+                    that.scheduleClean();
+                    return;
+                }
+                that.runSave(function() { return cleanAssets(that.albumId); }).catch(() => {});
+            }, 5000);
+        },
         onEditText: function(pageId, elementId, newText) {
             // Locate the page, patch only the changed caption (preserving every
             // other album/page/element field), then persist that page.
@@ -478,9 +577,7 @@ export default {
             }
             var updatedPage = setElementText(this.pages[index], elementId, newText);
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                console.log("Error saving album page edit.");
-            }));
+            this.queuePageSave(pageId);
         },
         onRemoveElement: function(pageId, elementId) {
             // Drop the element, re-grid the page so nothing overlaps, persist,
@@ -496,27 +593,30 @@ export default {
             // unless it is the only page left, which we keep so the album is not
             // left with no pages and no way to add one.
             if (!hasVisibleElements(updatedPage) && this.pages.length > 1) {
-                this.blockWhile(deletePage(this.albumId, pageId)
+                this.saveQueue.cancel("page:" + pageId);
+                return this.runBlocking(() => deletePage(this.albumId, pageId))
                     .then(() => {
-                        that.pages.splice(index, 1);
+                        var i = that.pages.findIndex(p => p.id === pageId);
+                        if (i >= 0) {
+                            that.pages.splice(i, 1);
+                        }
                         if (that.displayedPage >= that.pages.length) {
                             that.displayedPage = that.pages.length - 1;
                         }
-                        return cleanAssets(that.albumId).catch(() => {});
+                        that.scheduleClean();
                     })
                     .catch(error => {
                         showError(t("souvenirs","Could not delete the page."));
-                    }));
-                return;
+                    });
             }
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage)
+            return this.runBlocking(() => updatePage(this.albumId, updatedPage))
                 .then(() => {
-                    return cleanAssets(this.albumId).catch(() => {});
+                    that.scheduleClean();
                 })
                 .catch(error => {
                     showError(t("souvenirs","Could not remove the image."));
-                }));
+                });
         },
         onResizeElement: function(pageId, elementId, geometry) {
             // Patch only the resized element's geometry (preserving every other
@@ -527,9 +627,7 @@ export default {
             }
             var updatedPage = setElementGeometry(this.pages[index], elementId, geometry);
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                showError(t("souvenirs","Could not resize the element."));
-            }));
+            this.queuePageSave(pageId);
         },
         onPanZoomElement: function(pageId, elementId, panZoom) {
             // Patch only the panned/zoomed element's values (preserving every
@@ -540,9 +638,7 @@ export default {
             }
             var updatedPage = setElementPanZoom(this.pages[index], elementId, panZoom);
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                showError(t("souvenirs","Could not adjust the image."));
-            }));
+            this.queuePageSave(pageId);
         },
         onCycleLayout: function(pageId) {
             // Switch the page to the next layout available for its element count.
@@ -553,9 +649,7 @@ export default {
             var page = this.pages[index];
             var updatedPage = { ...page, elements: cycleLayout(page.elements) };
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                showError(t("souvenirs","Could not change the layout."));
-            }));
+            this.queuePageSave(pageId);
         },
         onMovePage: function(index, dir) {
             // Reorder a page one step left (dir -1) or right (dir +1), keeping the
@@ -572,13 +666,13 @@ export default {
             this.pages.splice(index, 1);
             this.pages.splice(newIndex, 0, page);
             this.$nextTick(() => { that.showN(newIndex); });
-            this.blockWhile(movePage(this.albumId, page.id, pos).catch(error => {
+            return this.runBlocking(() => movePage(this.albumId, page.id, pos)).catch(error => {
                 // Revert the optimistic move.
                 that.pages.splice(newIndex, 1);
                 that.pages.splice(index, 0, page);
                 that.$nextTick(() => { that.showN(index); });
                 showError(t("souvenirs","Could not move the page."));
-            }));
+            });
         },
         onElementDrop: function(srcPageId, srcElementId, destPageId, destElementId) {
             if (srcPageId === destPageId) {
@@ -593,9 +687,7 @@ export default {
                 }
                 var updatedPage = swapElements(this.pages[index], srcElementId, destElementId);
                 this.pages.splice(index, 1, updatedPage);
-                this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                    showError(t("souvenirs","Could not move the element."));
-                }));
+                this.queuePageSave(destPageId);
                 return;
             }
             // Other page: move the element there, with the same re-layout logic
@@ -612,37 +704,41 @@ export default {
             var that = this;
             var updatedDest = addElement(this.pages[destIndex], element);
             var updatedSrc = removeElement(this.pages[srcIndex], srcElementId);
-            this.pages.splice(destIndex, 1, updatedDest);
-            // Persist the destination first: if the source update then fails,
-            // the element at worst exists on both pages instead of being lost.
-            this.blockWhile(updatePage(this.albumId, updatedDest)
+            // Moving the last visible element away deletes the emptied page
+            // (same rule as onRemoveElement), unless it is the only page left.
+            var deleteSrc = !hasVisibleElements(updatedSrc) && this.pages.length > 1;
+            // One atomic request for both pages (issue #50): the element can
+            // no longer end up on both pages, nor on none.
+            var operations = [
+                { op: "update", page: updatedDest },
+                deleteSrc ? { op: "delete", id: srcPageId } : { op: "update", page: updatedSrc },
+            ];
+            if (deleteSrc) {
+                this.saveQueue.cancel("page:" + srcPageId);
+            }
+            return this.runBlocking(() => pageOperations(this.albumId, operations))
                 .then(() => {
-                    // Moving the last visible element away deletes the emptied
-                    // page (same rule as onRemoveElement), unless it is the
-                    // only page left.
-                    if (!hasVisibleElements(updatedSrc) && that.pages.length > 1) {
-                        return deletePage(that.albumId, srcPageId).then(() => {
-                            var i = that.pages.findIndex(p => p.id === srcPageId);
-                            if (i >= 0) {
-                                that.pages.splice(i, 1);
-                            }
-                            if (that.displayedPage >= that.pages.length) {
-                                that.displayedPage = that.pages.length - 1;
-                            }
-                            // Best-effort GC of the deleted page's assets
-                            // (e.g. its audio track).
-                            return cleanAssets(that.albumId).catch(() => {});
-                        });
+                    var d = that.pages.findIndex(p => p.id === destPageId);
+                    if (d >= 0) {
+                        that.pages.splice(d, 1, updatedDest);
                     }
                     var i = that.pages.findIndex(p => p.id === srcPageId);
-                    if (i >= 0) {
+                    if (deleteSrc) {
+                        if (i >= 0) {
+                            that.pages.splice(i, 1);
+                        }
+                        if (that.displayedPage >= that.pages.length) {
+                            that.displayedPage = that.pages.length - 1;
+                        }
+                        // The deleted page's assets (e.g. its audio track).
+                        that.scheduleClean();
+                    } else if (i >= 0) {
                         that.pages.splice(i, 1, updatedSrc);
                     }
-                    return updatePage(that.albumId, updatedSrc);
                 })
                 .catch(error => {
                     showError(t("souvenirs","Could not move the element."));
-                }));
+                });
         },
         onAlbumDragOver: function(event) {
             // Dragging an element near the album edge turns the page, so the
@@ -675,12 +771,12 @@ export default {
             // Create a new empty page at `pos`, insert it locally, and navigate to it.
             var that = this;
             var page = buildPage();
-            this.blockWhile(createPage(this.albumId, pos, page).then(() => {
+            return this.runBlocking(() => createPage(this.albumId, pos, page)).then(() => {
                 that.pages.splice(pos, 0, page);
                 that.$nextTick(() => { that.showN(pos); });
             }).catch(error => {
                 showError(t("souvenirs","Could not create the page."));
-            }));
+            });
         },
         onAddText: function(pageId) {
             // Add a new empty text element and re-lay-out the page, then persist.
@@ -690,9 +786,7 @@ export default {
             }
             var updatedPage = addElement(this.pages[index], buildTextElement());
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage).catch(error => {
-                showError(t("souvenirs","Could not add the text."));
-            }));
+            this.queuePageSave(pageId);
         },
         onPaint: function(pageId) {
             this.paintSaving = false;
@@ -720,7 +814,7 @@ export default {
                 var cleared = removePaintElements(page);
                 this.paintSaving = true;
                 try {
-                    await updatePage(this.albumId, cleared);
+                    await this.runSave(() => updatePage(this.albumId, cleared));
                 } catch (error) {
                     this.paintSaving = false;
                     showError(t("souvenirs","Could not save the drawing."));
@@ -730,7 +824,7 @@ export default {
                 this.paintSaving = false;
                 this.paintPageId = null;
                 // Best-effort GC of the removed drawing's PNG.
-                cleanAssets(this.albumId).catch(() => {});
+                this.scheduleClean();
                 return;
             }
             // A page holds 0 or 1 paint element (as in the Android app): an
@@ -756,7 +850,7 @@ export default {
                 if (check == null || check.status !== "ok") {
                     throw new Error("uploaded asset not found in the album");
                 }
-                await updatePage(this.albumId, updatedPage);
+                await this.runSave(() => updatePage(this.albumId, updatedPage));
             } catch (error) {
                 // Keep the dialog open so the drawing is not lost.
                 this.paintSaving = false;
@@ -767,7 +861,7 @@ export default {
             this.paintSaving = false;
             this.paintPageId = null;
             // Best-effort GC of assets orphaned by dropped paint elements.
-            cleanAssets(this.albumId).catch(() => {});
+            this.scheduleClean();
         },
         onAddImage: function(pageId) {
             this.imageChooserSaving = false;
@@ -797,17 +891,17 @@ export default {
             // elements' geometry must survive the removal.
             var updatedPage = removeAudioElements(this.pages[index]);
             this.pages.splice(index, 1, updatedPage);
-            this.blockWhile(updatePage(this.albumId, updatedPage)
+            return this.runBlocking(() => updatePage(this.albumId, updatedPage))
                 .then(() => {
                     // The player deliberately keeps playing when its URL goes
                     // away; a removed track must actually stop.
                     that.audioForceStop = true;
                     // Best-effort GC of the now-unreferenced audio asset.
-                    return cleanAssets(that.albumId).catch(() => {});
+                    that.scheduleClean();
                 })
                 .catch(error => {
                     showError(t("souvenirs","Could not remove the audio."));
-                }));
+                });
         },
         closeImageChooser: function() {
             // Ignore the dialog's close while a chosen image is being saved.
@@ -818,57 +912,150 @@ export default {
         onImagePick: function(entries) {
             // The chooser emits the picked media as an array, in selection
             // order (issue #36).
-            return this.addMediaItems(entries, this.prepareEntryElement);
+            return this.addPickedMedia(entries);
         },
         onImageUpload: function(files) {
-            return this.addMediaItems(files, this.prepareFileElement);
+            return this.addUploadedMedia(files);
         },
-        prepareEntryElement: async function(entry) {
-            // Link a picked Nextcloud file into the album (no copy/upload) and
-            // return the element referencing it, or null after showing an
-            // error toast (the caller then keeps the chooser open). Videos get
-            // their poster captured too (issue #32), best-effort.
-            const file = { name: entry.basename, size: entry.size, mime: entry.mime };
-            if (!file.size) {
-                showError(t("souvenirs","Could not read the selected file."));
-                return null;
+        chooserTargetIndex: function(items) {
+            // Index of the page the chooser was opened from, or -1 when there
+            // is nothing to do (no page, already saving, empty selection).
+            var targetIndex = this.pages.findIndex(p => p.id === this.imageChooserPageId);
+            if (targetIndex < 0 || this.imageChooserSaving || items.length === 0) {
+                return -1;
             }
-            const isVideo = VIDEO_MIMES.includes(entry.mime);
-            const isAudio = AUDIO_MIMES.includes(entry.mime);
-            // Build the element first so we know the in-album asset path to link,
-            // then ask the backend to link the picked file to it.
-            var element = isVideo ? buildVideoElement(file)
-                : isAudio ? buildAudioElement(file)
-                : buildImageElement(file);
-            try {
-                var res = await searchAsset(this.albumId, isVideo ? element.video : (isAudio ? element.audio : element.image), file.name, file.size);
-                if (res == null || res.status !== "found") {
-                    showError(isVideo
-                        ? t("souvenirs","Could not link the selected video. It must be located outside the Souvenirs albums folder.")
-                        : isAudio
-                            ? t("souvenirs","Could not link the selected audio. It must be located outside the Souvenirs albums folder.")
-                            : t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder."));
-                    return null;
+            return targetIndex;
+        },
+        linkErrorString: function(isVideo, isAudio) {
+            return isVideo
+                ? t("souvenirs","Could not link the selected video. It must be located outside the Souvenirs albums folder.")
+                : isAudio
+                    ? t("souvenirs","Could not link the selected audio. It must be located outside the Souvenirs albums folder.")
+                    : t("souvenirs","Could not link the selected image. It must be located outside the Souvenirs albums folder.");
+        },
+        addPickedMedia: async function(entries) {
+            // Link picked Nextcloud files into the album (no copy/upload), then
+            // put them on pages. Issue #50: every file is linked in ONE request
+            // (the server is told where each file is, so it does not search the
+            // user's files), and every page change is saved in ONE more,
+            // instead of two requests per medium. As before, the first failure
+            // stops the batch with an error toast and keeps the chooser open;
+            // the media before it are added.
+            var targetIndex = this.chooserTargetIndex(entries);
+            if (targetIndex < 0) {
+                return;
+            }
+            this.imageChooserSaving = true;
+            var picked = [];
+            var failed = false;
+            for (const entry of entries) {
+                if (!entry.size) {
+                    showError(t("souvenirs","Could not read the selected file."));
+                    failed = true;
+                    break;
                 }
-                if (isVideo) {
-                    // The poster capture pulls the video bytes once over WebDAV;
-                    // no bytes just means no poster, the element stays usable.
-                    var blob = null;
-                    try {
-                        blob = await getFileBlob(entry.path);
-                    } catch (fetchError) {
+                const file = { name: entry.basename, size: entry.size, mime: entry.mime };
+                const isVideo = VIDEO_MIMES.includes(entry.mime);
+                const isAudio = AUDIO_MIMES.includes(entry.mime);
+                // Build the element first so we know the in-album asset path to link.
+                const element = isVideo ? buildVideoElement(file)
+                    : isAudio ? buildAudioElement(file)
+                    : buildImageElement(file);
+                const asset = isVideo ? element.video : (isAudio ? element.audio : element.image);
+                picked.push({ entry, element, isVideo, isAudio, asset });
+            }
+            var elements = [];
+            if (picked.length > 0) {
+                var statuses;
+                try {
+                    statuses = await searchAssets(this.albumId, picked.map(p => ({
+                        asset: p.asset, name: p.entry.basename, size: p.entry.size, source: p.entry.path,
+                    })));
+                } catch (error) {
+                    this.imageChooserSaving = false;
+                    showError(this.mediaErrorString(picked[0].element));
+                    return;
+                }
+                for (let i = 0; i < picked.length; i++) {
+                    if (statuses[i] !== "found") {
+                        showError(this.linkErrorString(picked[i].isVideo, picked[i].isAudio));
+                        failed = true;
+                        break;
                     }
-                    element = (blob != null)
-                        ? await this.attachVideoPoster(element, blob)
-                        : { ...element, image: '' };
+                    var element = picked[i].element;
+                    if (picked[i].isVideo) {
+                        element = await this.pickedVideoPoster(element, picked[i].entry);
+                    }
+                    elements.push(element);
                 }
-                return element;
-            } catch (error) {
-                showError(this.mediaErrorString(element));
-                // GC the link/poster of the never-persisted element.
-                cleanAssets(this.albumId).catch(() => {});
-                return null;
             }
+            await this.insertMediaElements(targetIndex, elements, !failed);
+        },
+        addUploadedMedia: async function(files) {
+            // Upload local files as new album assets, then put them on pages
+            // with ONE save (issue #50). Stops at the first failed upload
+            // (error toast, chooser kept open); the media before it are added.
+            var targetIndex = this.chooserTargetIndex(files);
+            if (targetIndex < 0) {
+                return;
+            }
+            this.imageChooserSaving = true;
+            var elements = [];
+            for (const file of files) {
+                var element = await this.prepareFileElement(file);
+                if (element == null) {
+                    break;
+                }
+                elements.push(element);
+            }
+            await this.insertMediaElements(targetIndex, elements, elements.length === files.length);
+        },
+        insertMediaElements: async function(targetIndex, elements, complete) {
+            // Place the prepared elements (see planMediaInsertion) and save
+            // every touched page in one request. `complete`: the whole
+            // selection made it, so the chooser can close.
+            var that = this;
+            if (elements.length > 0) {
+                var plan = planMediaInsertion(this.pages, targetIndex, elements);
+                try {
+                    await this.runSave(() => pageOperations(this.albumId, plan.operations));
+                } catch (error) {
+                    this.imageChooserSaving = false;
+                    showError(this.mediaErrorString(elements[0]));
+                    // GC the links/uploads of the never-persisted elements.
+                    this.scheduleClean();
+                    return;
+                }
+                applyPageOperationsLocally(this.pages, plan.operations);
+                if (plan.audioReplaced) {
+                    // Replaced tracks leave their old audio asset orphaned.
+                    this.scheduleClean();
+                }
+            }
+            this.imageChooserSaving = false;
+            if (!complete) {
+                // Keep the dialog open so the user can retry or pick something
+                // else; GC whatever landed for the failed medium.
+                this.scheduleClean();
+                return;
+            }
+            this.imageChooserPageId = null;
+            if (elements.length > 0 && plan.visualCount > 1) {
+                // Land on the last created page so the whole batch is visible.
+                this.$nextTick(() => { that.showN(targetIndex + plan.visualCount - 1); });
+            }
+        },
+        pickedVideoPoster: async function(element, entry) {
+            // The poster capture pulls the video bytes once over WebDAV;
+            // no bytes just means no poster, the element stays usable.
+            var blob = null;
+            try {
+                blob = await getFileBlob(entry.path);
+            } catch (fetchError) {
+            }
+            return (blob != null)
+                ? await this.attachVideoPoster(element, blob)
+                : { ...element, image: '' };
         },
         prepareFileElement: async function(file) {
             // Upload a local file as a new album asset and return the element
@@ -906,7 +1093,7 @@ export default {
                     : isAudio
                         ? t("souvenirs","Could not upload the audio.")
                         : t("souvenirs","Could not upload the image."));
-                cleanAssets(this.albumId).catch(() => {});
+                this.scheduleClean();
                 return null;
             }
         },
@@ -916,71 +1103,6 @@ export default {
                 : element.class === "AudioElement"
                     ? t("souvenirs","Could not add the audio.")
                     : t("souvenirs","Could not add the image.");
-        },
-        addMediaItems: async function(items, prepare) {
-            // Insert the chosen media in order (issue #36): the first visual
-            // medium joins the page the chooser was opened from (as a single
-            // pick always did), each further one gets its own new page right
-            // after — one medium per page. Audio (issue #33) is not a tile: it
-            // becomes the audio track of the page the batch is currently on,
-            // replacing any existing track (last one wins).
-            var that = this;
-            var targetIndex = this.pages.findIndex(p => p.id === this.imageChooserPageId);
-            if (targetIndex < 0 || this.imageChooserSaving || items.length === 0) {
-                return;
-            }
-            this.imageChooserSaving = true;
-            var visualCount = 0;
-            var audioReplaced = false;
-            for (const item of items) {
-                var element = await prepare(item);
-                if (element == null) {
-                    // Error already shown; keep the dialog open (media inserted
-                    // so far stay) so the user can retry or pick something else.
-                    this.imageChooserSaving = false;
-                    return;
-                }
-                try {
-                    if (element.class === "AudioElement") {
-                        // The page the batch is currently on: the target page
-                        // until a visual medium has created a new one. Read the
-                        // page at application time — earlier iterations may
-                        // have replaced the object in `pages`.
-                        var currentIndex = targetIndex + Math.max(0, visualCount - 1);
-                        var current = this.pages[currentIndex];
-                        audioReplaced = audioReplaced || (getAudioElement(current) != null);
-                        var withAudio = setPageAudioElement(current, element);
-                        await updatePage(this.albumId, withAudio);
-                        this.pages.splice(currentIndex, 1, withAudio);
-                    } else if (visualCount === 0) {
-                        var updatedPage = addElement(this.pages[targetIndex], element);
-                        await updatePage(this.albumId, updatedPage);
-                        this.pages.splice(targetIndex, 1, updatedPage);
-                        visualCount++;
-                    } else {
-                        var pos = targetIndex + visualCount;
-                        var page = addElement(buildPage(), element);
-                        await createPage(this.albumId, pos, page);
-                        this.pages.splice(pos, 0, page);
-                        visualCount++;
-                    }
-                } catch (error) {
-                    this.imageChooserSaving = false;
-                    showError(this.mediaErrorString(element));
-                    cleanAssets(this.albumId).catch(() => {});
-                    return;
-                }
-            }
-            if (audioReplaced) {
-                // Replaced tracks leave their old audio asset orphaned.
-                cleanAssets(this.albumId).catch(() => {});
-            }
-            this.imageChooserSaving = false;
-            this.imageChooserPageId = null;
-            if (visualCount > 1) {
-                // Land on the last created page so the whole batch is visible.
-                this.$nextTick(() => { that.showN(targetIndex + visualCount - 1); });
-            }
         },
         attachVideoPoster: async function(element, videoBlob) {
             // Capture a poster frame of the video and upload it as the
@@ -1255,6 +1377,12 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     /* Above every in-page control (element delete/drag handles are 8, page
        insert/move and progress are 9), so the menu stays reachable in edit mode. */
     z-index: 10;
+}
+
+.saving-indicator {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-right: 6px;
 }
 
 .s-album.editing {
