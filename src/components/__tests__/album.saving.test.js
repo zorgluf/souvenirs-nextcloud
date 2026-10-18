@@ -203,4 +203,30 @@ describe('album edit-mode saving', () => {
         ctx.onBeforeUnload(event)
         expect(event.preventDefault).not.toHaveBeenCalled()
     })
+
+    it('uploads new files straight to the album folder: no assetprobe, one page save', async () => {
+        const ctx = makeAlbum()
+        ctx.imageChooserPageId = 'p2'
+        ctx.albumDavPath = '/Souvenirs/2026'
+        const files = [new File(['a'], 'a.jpg', { type: 'image/jpeg' }), new File(['bb'], 'b.png', { type: 'image/png' })]
+
+        await ctx.onImageUpload(files)
+
+        expect(api.probeAsset).not.toHaveBeenCalled()
+        expect(api.uploadAsset).toHaveBeenCalledTimes(2)
+        expect(api.uploadAsset.mock.calls[0][0]).toMatch(/^\/Souvenirs\/2026\/data\/.+\.jpg$/)
+        expect(api.pageOperations).toHaveBeenCalledTimes(1)
+        expect(ctx.pages).toHaveLength(4)
+    })
+
+    it('falls back to assetprobe when the album folder is unknown', async () => {
+        const ctx = makeAlbum()
+        ctx.imageChooserPageId = 'p2'
+        ctx.albumDavPath = ''
+
+        await ctx.onImageUpload([new File(['a'], 'a.jpg', { type: 'image/jpeg' })])
+
+        expect(api.probeAsset).toHaveBeenCalledTimes(1)
+        expect(api.uploadAsset).toHaveBeenCalledWith('/Souvenirs/a/data/x', expect.anything())
+    })
 })

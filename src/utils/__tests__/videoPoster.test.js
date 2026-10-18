@@ -43,4 +43,15 @@ describe('captureVideoPoster', () => {
         createdVideo.dispatchEvent(new Event('loadeddata'))
         await expect(promise).resolves.toBeNull()
     })
+
+    it('streams a remote video from its URL, with no object URL to create or revoke', async () => {
+        const promise = captureVideoPoster('/remote.php/webdav/clip.mp4')
+        expect(createdVideo.getAttribute('src')).toBe('/remote.php/webdav/clip.mp4')
+        // only the metadata and the target frame are needed
+        expect(createdVideo.preload).toBe('metadata')
+        createdVideo.dispatchEvent(new Event('error'))
+        await expect(promise).resolves.toBeNull()
+        expect(URL.createObjectURL).not.toHaveBeenCalled()
+        expect(URL.revokeObjectURL).not.toHaveBeenCalled()
+    })
 })

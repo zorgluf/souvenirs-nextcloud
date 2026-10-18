@@ -153,9 +153,20 @@ export function listFolder(path) {
 }
 
 /**
- * Download a user file over WebDAV (plain GET, same auth as listFolder). Used
- * to capture a poster frame from a video already on the server: a `<video>`
- * src cannot carry the CSRF token header, so the bytes are fetched first.
+ * URL of a user file over WebDAV. A plain GET on it is authenticated by the
+ * web session alone (Nextcloud does not require the CSRF token for GET), so
+ * it can be a `<video>` src: the browser then streams the file with range
+ * requests (issue #50, poster capture of picked videos).
+ *
+ * @param {string} path - file path relative to the user's files root
+ * @returns {string}
+ */
+export function getFileUrl(path) {
+    return generateRemoteUrl('webdav') + '/' + encodePath(path)
+}
+
+/**
+ * Download a user file over WebDAV (plain GET, same auth as listFolder).
  *
  * @param {string} path - file path relative to the user's files root
  * @returns {Promise<Blob>}
@@ -242,4 +253,27 @@ export function getPreviewUrl(fileid, size = 256) {
     return generateUrl('/core/preview')
         + '?fileId=' + encodeURIComponent(fileid)
         + '&x=' + size + '&y=' + size + '&a=1'
+}
+
+/**
+ * Fetch a preview of an arbitrary user file as a Blob (core preview
+ * endpoint, like getPreviewUrl). For a picked video this is the cheapest
+ * poster there is - one small image - when the server has a video preview
+ * provider enabled (issue #50); it rejects otherwise and the caller falls
+ * back to capturing a frame itself.
+ *
+ * @param {string} fileid - the file's oc:fileid as returned by listFolder
+ * @param {number} size - requested bounding box in pixels
+ * @returns {Promise<Blob>}
+ */
+export function getFilePreviewBlob(fileid, size = 1024) {
+    return fetch(getPreviewUrl(fileid, size), {
+        headers: { 'requesttoken': OC.requestToken },
+    }).then(response => {
+        const type = response.headers.get('Content-Type') || ''
+        if (!response.ok || !type.startsWith('image/')) {
+            throw new Error('Preview GET failed with status ' + response.status)
+        }
+        return response.blob()
+    })
 }

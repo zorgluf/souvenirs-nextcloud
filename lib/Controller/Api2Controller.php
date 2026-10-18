@@ -220,6 +220,11 @@ class Api2Controller extends ApiController {
 				$albumArray["isShared"] = true;
 				$albumArray["shareToken"] = $share->getToken();
 			}
+		} else {
+			//web editor only (it is the only client passing apath): where the
+			//album lives under the user's files root, so new assets can be
+			//uploaded over WebDAV without an assetprobe call first (issue #50)
+			$albumArray["path"] = $this->userFolder->getRelativePath($album->getPath());
 		}
 		return new JSONResponse($albumArray);
 	}

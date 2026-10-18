@@ -106,7 +106,7 @@ import { saveAs } from 'file-saver'
 import { setElementText, setElementGeometry, setElementPanZoom, removeElement, buildImageElement, buildVideoElement, buildAudioElement, buildTextElement, buildPage, addElement, swapElements, getPaintElement, setPagePaintElement, removePaintElements, getAudioElement, removeAudioElements, hasVisibleElements } from '../utils/albumEdit.js'
 import { isElementDrag } from '../utils/elementDrag.js'
 import { captureVideoPoster } from '../utils/videoPoster.js'
-import { getFileBlob, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
+import { getFileUrl, getFilePreviewBlob, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
 import { cycleLayout } from '../utils/tilePageLayout.js'
 import { updatePage, searchAssets, cleanAssets, createPage, deletePage, movePage, pageOperations, probeAsset, uploadAsset } from '../api/albumApi.js'
 import { SaveQueue } from '../utils/saveQueue.js'
@@ -139,6 +139,10 @@ export default {
             "videoFullUrl": "",
             "sName": "",
             "albumId": "",
+            // The album folder relative to the user's files root, as returned
+            // by the album load (issue #50): new assets are uploaded there
+            // directly, without asking the server first (assetprobe).
+            "albumDavPath": "",
             "editMode": false,
             "pages": [],
             "loading": true,
@@ -446,6 +450,7 @@ export default {
                         that.albumJson = JSON.stringify(data);
                         that.sName = data.name;
                         that.albumId = data.id;
+                        that.albumDavPath = data.path || "";
                         that.pages = data.pages || [];
                         that.elementMargin = data.elementMargin ??= 0;
                         that.loading = false;
@@ -835,21 +840,9 @@ export default {
             var element = getPaintElement(updatedPage);
             this.paintSaving = true;
             try {
-                // The probe returns where the asset lives under the user's files
-                // root; the bytes then go up over native WebDAV (same flow as the
-                // Android app). Upload before persisting the page, so a failed
-                // upload never leaves an element pointing at a missing asset.
-                var probe = await probeAsset(this.albumId, element.image);
-                if (probe == null || !probe.path) {
-                    throw new Error("assetprobe returned no upload path");
-                }
-                await uploadAsset(probe.path, blob);
-                // The server must confirm the PNG actually landed in the album
-                // before the page starts referencing it.
-                var check = await probeAsset(this.albumId, element.image);
-                if (check == null || check.status !== "ok") {
-                    throw new Error("uploaded asset not found in the album");
-                }
+                // Upload before persisting the page, so a failed upload never
+                // leaves an element pointing at a missing asset.
+                await this.uploadNewAsset(element.image, blob);
                 await this.runSave(() => updatePage(this.albumId, updatedPage));
             } catch (error) {
                 // Keep the dialog open so the drawing is not lost.
@@ -1046,24 +1039,42 @@ export default {
             }
         },
         pickedVideoPoster: async function(element, entry) {
-            // The poster capture pulls the video bytes once over WebDAV;
-            // no bytes just means no poster, the element stays usable.
-            var blob = null;
+            // Poster of a video already on the server (issue #50), cheapest
+            // first: the server's own preview of it when a video preview
+            // provider is enabled, else a frame captured while streaming the
+            // video (range requests: never the whole file). Best-effort: no
+            // poster just means none, the element stays usable.
+            var preview = null;
             try {
-                blob = await getFileBlob(entry.path);
-            } catch (fetchError) {
+                preview = await getFilePreviewBlob(entry.fileid);
+            } catch (previewError) {
             }
-            return (blob != null)
-                ? await this.attachVideoPoster(element, blob)
-                : { ...element, image: '' };
+            if (preview != null) {
+                return this.uploadVideoPoster(element, preview);
+            }
+            return this.attachVideoPoster(element, getFileUrl(entry.path));
+        },
+        uploadNewAsset: async function(asset, blob) {
+            // Upload the bytes of a new album asset over native WebDAV (same
+            // flow as the Android app). The album folder is known since the
+            // album was loaded (issue #50), so no assetprobe round trip: one
+            // PUT, whose success means the file landed. The probe remains the
+            // fallback should the path be unknown.
+            var davPath = this.albumDavPath ? (this.albumDavPath + "/" + asset) : null;
+            if (davPath == null) {
+                var probe = await probeAsset(this.albumId, asset);
+                if (probe == null || !probe.path) {
+                    throw new Error("assetprobe returned no upload path");
+                }
+                davPath = probe.path;
+            }
+            await uploadAsset(davPath, blob);
         },
         prepareFileElement: async function(file) {
             // Upload a local file as a new album asset and return the element
             // referencing it, or null after showing an error toast. Same flow
-            // as the paint dialog (and the Android app): the probe returns
-            // where the asset lives under the user's files root, the bytes go
-            // up over native WebDAV, and the server must confirm the file
-            // landed before any page starts referencing it.
+            // as the paint dialog (and the Android app): the bytes go up over
+            // native WebDAV before any page starts referencing them.
             const isVideo = VIDEO_MIMES.includes(file.type);
             const isAudio = AUDIO_MIMES.includes(file.type);
             const picked = { name: file.name, size: file.size, mime: file.type };
@@ -1072,16 +1083,9 @@ export default {
                 : buildImageElement(picked);
             const asset = isVideo ? element.video : (isAudio ? element.audio : element.image);
             try {
-                var probe = await probeAsset(this.albumId, asset);
-                if (probe == null || !probe.path) {
-                    throw new Error("assetprobe returned no upload path");
-                }
-                await uploadAsset(probe.path, file);
-                var check = await probeAsset(this.albumId, asset);
-                if (check == null || check.status !== "ok") {
-                    throw new Error("uploaded asset not found in the album");
-                }
+                await this.uploadNewAsset(asset, file);
                 if (isVideo) {
+                    // the poster is captured from the local file: no download
                     element = await this.attachVideoPoster(element, file);
                 }
                 return element;
@@ -1104,26 +1108,24 @@ export default {
                     ? t("souvenirs","Could not add the audio.")
                     : t("souvenirs","Could not add the image.");
         },
-        attachVideoPoster: async function(element, videoBlob) {
-            // Capture a poster frame of the video and upload it as the
-            // element's `image` asset (the Android app stores a generated
-            // thumbnail there too). Best-effort: any failure — undecodable
-            // codec, upload error — returns the element without a poster,
-            // which every consumer (web and Android) tolerates.
+        attachVideoPoster: async function(element, videoSource) {
+            // Capture a poster frame of the video (local bytes or the URL of a
+            // video on the server) and upload it as the element's `image`
+            // asset (the Android app stores a generated thumbnail there too).
+            // Best-effort: any failure - undecodable codec, upload error -
+            // returns the element without a poster, which every consumer
+            // (web and Android) tolerates.
+            var poster = await captureVideoPoster(videoSource);
+            if (poster == null) {
+                return { ...element, image: '' };
+            }
+            return this.uploadVideoPoster(element, poster);
+        },
+        uploadVideoPoster: async function(element, poster) {
+            // Upload a poster image as the element's `image` asset; on failure
+            // the element simply has no poster.
             try {
-                var poster = await captureVideoPoster(videoBlob);
-                if (poster == null) {
-                    throw new Error("poster capture failed");
-                }
-                var probe = await probeAsset(this.albumId, element.image);
-                if (probe == null || !probe.path) {
-                    throw new Error("assetprobe returned no upload path");
-                }
-                await uploadAsset(probe.path, poster);
-                var check = await probeAsset(this.albumId, element.image);
-                if (check == null || check.status !== "ok") {
-                    throw new Error("uploaded poster not found in the album");
-                }
+                await this.uploadNewAsset(element.image, poster);
                 return element;
             } catch (error) {
                 return { ...element, image: '' };

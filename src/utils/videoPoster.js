@@ -16,17 +16,24 @@ const POSTER_JPEG_QUALITY = 0.9
 /**
  * Capture a poster frame of a video as a JPEG blob.
  *
- * @param {Blob} blob - the video bytes
+ * The source is either the video bytes (a local file being uploaded) or the
+ * same-origin URL of a video already on the server (issue #50): the browser
+ * then streams it with HTTP range requests and only fetches what it needs
+ * to show the target frame, instead of the whole file being downloaded
+ * first. Same origin keeps the canvas readable.
+ *
+ * @param {Blob|string} source - the video bytes, or its same-origin URL
  * @param {number} timeoutMs - give up (resolve null) after this long
  * @returns {Promise<Blob|null>} the JPEG poster, or null when capture failed
  */
-export function captureVideoPoster(blob, timeoutMs = 30000) {
+export function captureVideoPoster(source, timeoutMs = 30000) {
     return new Promise(resolve => {
-        if (typeof URL.createObjectURL !== 'function') {
+        const isUrl = (typeof source === 'string')
+        if (!isUrl && typeof URL.createObjectURL !== 'function') {
             resolve(null)
             return
         }
-        const url = URL.createObjectURL(blob)
+        const url = isUrl ? source : URL.createObjectURL(source)
         const video = document.createElement('video')
         let done = false
         const finish = poster => {
@@ -41,7 +48,9 @@ export function captureVideoPoster(blob, timeoutMs = 30000) {
             try {
                 video.load()
             } catch (error) { /* already torn down */ }
-            URL.revokeObjectURL(url)
+            if (!isUrl) {
+                URL.revokeObjectURL(url)
+            }
             resolve(poster)
         }
         const timer = setTimeout(() => finish(null), timeoutMs)
@@ -66,9 +75,10 @@ export function captureVideoPoster(blob, timeoutMs = 30000) {
         }
         video.muted = true
         video.playsInline = true
-        video.preload = 'auto'
+        // A remote video only needs its metadata and the target frame.
+        video.preload = isUrl ? 'metadata' : 'auto'
         video.addEventListener('error', () => finish(null))
-        video.addEventListener('loadeddata', () => {
+        const onReady = () => {
             const target = Number.isFinite(video.duration)
                 ? Math.min(POSTER_TIME_S, video.duration / 2) : 0
             if (target > video.currentTime) {
@@ -78,10 +88,16 @@ export function captureVideoPoster(blob, timeoutMs = 30000) {
                 } catch (error) {
                     draw()
                 }
-            } else {
+            } else if (!isUrl || video.readyState >= 2) {
+                // loadeddata (local bytes): the current frame is there
                 draw()
+            } else {
+                video.addEventListener('loadeddata', draw, { once: true })
             }
-        }, { once: true })
+        }
+        // A remote video is seeked as soon as its metadata is known, so only
+        // the target frame is fetched; local bytes are all there anyway.
+        video.addEventListener(isUrl ? 'loadedmetadata' : 'loadeddata', onReady, { once: true })
         video.src = url
     })
 }

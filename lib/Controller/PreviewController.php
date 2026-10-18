@@ -211,9 +211,18 @@ class PreviewController extends Controller {
 			);
         }
 
-		if ($this->request->getHeader('If-None-Match') === $fileObj->getEtag()) {
-			return new DataResponse([], Http::STATUS_NOT_MODIFIED);
-        }
+		//The preview of a given source version at a given size never changes:
+		//answer revalidations before looking up or generating the preview
+		//(issue #50). The previous check compared the client's ETag with the
+		//source file's, while the response carried the preview's, so it never
+		//matched and every revalidation regenerated the preview.
+		$etag = md5($fileObj->getEtag() . ':' . $width . 'x' . $height);
+		$ifNoneMatch = trim((string)$this->request->getHeader('If-None-Match'));
+		if ($ifNoneMatch !== '' && trim(preg_replace('#^W/#', '', $ifNoneMatch), '"') === $etag) {
+			$notModified = new DataResponse([], Http::STATUS_NOT_MODIFIED);
+			$notModified->setETag($etag);
+			return $notModified;
+		}
 
 		try {
 			$mimeType = $fileObj->getMimeType();
@@ -253,7 +262,7 @@ class PreviewController extends Controller {
 		$preview['preview'] = $previewImg;
 		$preview['mimetype'] = $mimeType;
 		$response = new ImageResponse($preview);
-		$response->setETag($previewFile->getEtag());
+		$response->setETag($etag);
 		$lastModified = new \DateTime();
 		$lastModified->setTimestamp($previewFile->getMTime());
 		$response->setLastModified($lastModified);
