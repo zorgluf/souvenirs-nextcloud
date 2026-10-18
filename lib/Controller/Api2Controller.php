@@ -17,6 +17,7 @@ use OCA\Souvenirs\Model\AlbumList;
 use OCA\Souvenirs\Model\Album;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Controller\Utils;
+use OCA\Souvenirs\Service\Profiler;
 
 define("ALBUM_LIST_PAGE_SIZE",10);
 
@@ -48,6 +49,10 @@ class Api2Controller extends ApiController {
 	 * resolved: missing index row, stale/deleted path, folder without album.json, ...
 	 */
 	private function findAlbum($id, $apath = null) {
+		return Profiler::measure('resolve', fn () => $this->doFindAlbum($id, $apath));
+	}
+
+	private function doFindAlbum($id, $apath) {
 		try {
 			if ($apath !== null) {
 				$folder = $this->userFolder->get($apath);
@@ -294,7 +299,7 @@ class Api2Controller extends ApiController {
 		if (is_null($album)) {
 			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		}
-		if ($album->cleanAssets($this->userFolder)) {
+		if (Profiler::measure('clean', fn () => $album->cleanAssets($this->userFolder))) {
 			return new JSONResponse("OK");
 		} else {
 			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);

@@ -5,6 +5,7 @@ use OCP\Files\Folder;
 use OCA\Souvenirs\Model\Page;
 use OCA\Souvenirs\Model\AssetLink;
 use OCA\Souvenirs\Model\AlbumList;
+use OCA\Souvenirs\Service\Profiler;
 
 define("ALBUM_CONF_FILENAME","album.json");
 define("DATA_DIR","data");
@@ -44,7 +45,7 @@ class Album {
     protected function loadByFolder(Folder $albumNode) {
         if ($albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
             //get album conf
-            $jsonAlbum = $albumNode->get(ALBUM_CONF_FILENAME)->getContent();
+            $jsonAlbum = Profiler::measure('load', fn () => $albumNode->get(ALBUM_CONF_FILENAME)->getContent());
             $this->contentArray = json_decode($jsonAlbum,true);
             $this->albumNode = $albumNode;
         }
@@ -309,7 +310,7 @@ class Album {
             return FALSE;
         }
         //if name and size look for similar file
-        $nodesSameName = $userFolder->search($asset_name);
+        $nodesSameName = Profiler::measure('search', fn () => $userFolder->search($asset_name));
         foreach ($nodesSameName as $node) {
             //do not link if in an other album
             if (str_starts_with($node->getPath(),$this->albumNode->getParent()->getPath())) {
@@ -346,6 +347,10 @@ class Album {
      * save album conf file to disk
      */
     public function save() {
+        Profiler::measure('save', fn () => $this->doSave());
+    }
+
+    private function doSave() {
         $json = json_encode($this->contentArray);
         if ($this->albumNode->nodeExists(ALBUM_CONF_FILENAME)) {
             $file = $this->albumNode->get(ALBUM_CONF_FILENAME);
