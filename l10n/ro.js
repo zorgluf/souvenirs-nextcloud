@@ -7,6 +7,7 @@ OC.L10N.register(
     "Choose" : "Alege",
     "Pen" : "Peniță",
     "Confirm" : "Confirmă",
+    "New album" : "Album nou",
     "Date" : "Dată",
     "Create" : "Crează",
     "Save" : "Save",
