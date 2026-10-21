@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
     "Remove" : "Elimină",
+    "Add media" : "Adaugă fișiere media",
     "Remove image" : "Înlătură imagine"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");
