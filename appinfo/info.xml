@@ -20,7 +20,6 @@ Relive your memories the way you used to with paper albums: page after page, sto
 - ♻️ **Save space** — media already on your server is reused, not duplicated
 
 ### 🔒 Your souvenirs, your server
-
 Albums are stored as plain folders and files on your own Nextcloud. No third-party service, no lock-in: your souvenirs stay yours.]]></description>
     <version>2.5.0</version>
     <licence>agpl</licence>
@@ -37,7 +36,7 @@ Albums are stored as plain folders and files on your own Nextcloud. No third-par
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/5-paint.png</screenshot>
     <screenshot>https://raw.githubusercontent.com/zorgluf/souvenirs-nextcloud/main/metadata/en-US/images/6-photosphere.png</screenshot>
     <dependencies>
-        <nextcloud min-version="31" max-version="34"/>
+        <nextcloud min-version="31" max-version="35"/>
     </dependencies>
     <navigations>
         <navigation>
