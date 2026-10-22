@@ -1,3 +1,11 @@
+## Unreleased
+### Added
+- Support of Nextcloud 35 [#53](https://github.com/zorgluf/souvenirs-nextcloud/issues/53)
+
+### Fixed
+- Admin settings page no longer relies on the global jQuery library removed by the server
+- Register the "Open Album" file action with the modern @nextcloud/files API: the legacy OCA.Files.fileActions API was removed by the server
+
 ## 2.5.0 - 2026-10-14
 ### Added
 - API endpoint `GET apiv2/albums` listing all albums with their details in one call, so the Android app no longer fetches albums one by one ([souvenirs-android#37](https://github.com/zorgluf/souvenirs-android/issues/37))

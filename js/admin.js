@@ -1,49 +1,49 @@
 /**
  * Used to update the admin settings
+ * Rewritten without jQuery: the server no longer provides the global
+ * jQuery library (deprecated since NC 19 and removed since NC 34).
  */
- (function (window, document, $) {
-    'use strict';
+document.addEventListener('DOMContentLoaded', () => {
+	'use strict'
 
-    $(document).ready(function () {
-        var souvenirsPathInput = $('#souvenirs input[name="souvenirs-path"]');
-        var savedMessage = $('#souvenirs-saved-message');
+	const souvenirsPathInput = document.querySelector('#souvenirs input[name="souvenirs-path"]')
+	const savedMessage = document.getElementById('souvenirs-saved-message')
 
-        var saved = function () {
-            if (savedMessage.is(':visible')) {
-                savedMessage.hide();
-            }
+	let fadeTimer
 
-            savedMessage.fadeIn(function () {
-                setTimeout(function () {
-                    savedMessage.fadeOut();
-                }, 5000);
-            });
-        };
+	const saved = () => {
+		savedMessage.style.display = 'block'
+		clearTimeout(fadeTimer)
+		fadeTimer = setTimeout(() => {
+			savedMessage.style.display = 'none'
+		}, 5000)
+	}
 
-        var submit = function () {
-            var souvenirsPath = souvenirsPathInput.val();
+	const submit = () => {
+		fetch(OC.generateUrl('/apps/souvenirs/admin'), {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				requesttoken: OC.requestToken,
+			},
+			body: JSON.stringify({
+				souvenirsPath: souvenirsPathInput.value,
+			}),
+		})
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error('HTTP status ' + response.status)
+				}
+				return response.json()
+			})
+			.then((data) => {
+				saved()
+				souvenirsPathInput.value = data.souvenirsPath
+			})
+			.catch((error) => {
+				console.error('Failed to save Souvenirs settings', error)
+			})
+	}
 
-            var data = {
-                souvenirsPath: souvenirsPath,
-            };
-
-            var url = OC.generateUrl('/apps/souvenirs/admin');
-
-            $.ajax({
-                type: 'PUT',
-                contentType: 'application/json; charset=utf-8',
-                url: url,
-                data: JSON.stringify(data),
-                dataType: 'json'
-            }).then(function (data) {
-                saved();
-                souvenirsPathInput.val(data.souvenirsPath);
-            });
-
-        };
-
-        $('#souvenirs input[type="text"]').blur(submit);
-    });
-
-
-}(window, document, jQuery));
+	souvenirsPathInput.addEventListener('blur', submit)
+})

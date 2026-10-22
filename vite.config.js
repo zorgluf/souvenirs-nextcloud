@@ -20,6 +20,7 @@ const myOverrides = defineConfig({
 
 export default createAppConfig({
     index: 'src/index.js',
+    filesPlugin: 'src/filesPlugin.js',
 }, {
     config: myOverrides,
     emptyOutputDirectory: false,
