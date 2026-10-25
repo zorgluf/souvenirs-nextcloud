@@ -25,6 +25,19 @@ const routes = [
   }
 ]
 
+// Legacy hash links (e.g. the Files app "Open Album" action) look like
+// apps/souvenirs/#/show?apath=<path>. The server only serves the app root, so
+// rewrite them into a history route before the router reads the location.
+// The album view expects apath to stay percent-encoded once the router has
+// decoded the query (same as the router-link in album-item.vue).
+if (window.location.hash.startsWith('#/show?')) {
+  const apath = new URLSearchParams(window.location.hash.slice('#/show?'.length)).get('apath')
+  if (apath) {
+    window.history.replaceState(null, '', generateUrl('apps/souvenirs')
+      + '/show?apath=' + encodeURIComponent(encodeURIComponent(apath)))
+  }
+}
+
 const router = createRouter({
   routes: routes,
   history: createWebHistory(generateUrl('apps/souvenirs')),
