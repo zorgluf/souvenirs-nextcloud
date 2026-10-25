@@ -19,7 +19,9 @@
 		return
 	}
 
-	fetch(OC.linkTo('souvenirs', 'js/vite/.vite/manifest.json'))
+	// no-cache: revalidate the manifest, a stale cached copy would point to
+	// an outdated (or missing) build of the plugin.
+	fetch(OC.linkTo('souvenirs', 'js/vite/.vite/manifest.json'), { cache: 'no-cache' })
 		.then((response) => {
 			if (!response.ok) {
 				throw new Error('HTTP status ' + response.status)

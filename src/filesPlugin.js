@@ -11,7 +11,7 @@
 import { registerFileAction } from '@nextcloud/files'
 import { generateUrl } from '@nextcloud/router'
 
-const ALBUM_FILE_MIME = 'application/json'
+const ALBUM_FILE_NAME = 'album.json'
 
 // The core "t" global is available on Files pages, fall back to the
 // raw english string if it is not.
@@ -27,9 +27,9 @@ registerFileAction({
 		+ '<path fill="currentColor" d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13Zm.5 10V5.914L4.586 7.5 6.5 5.586 8.414 7.5 9.5 6.414 12 8.914V12H2Zm12-4.586L11.5 5.5l-2 2L8.414 6.414 6.5 8.326 4.586 6.5 2 9.086V3.5a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 .5.5v3.914ZM4.5 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>'
 		+ '</svg>',
 
-	enabled: ({ nodes }) => nodes.length > 0 && nodes.every((node) => node.mime === ALBUM_FILE_MIME),
+	enabled: ({ nodes }) => nodes.length === 1 && nodes[0].basename === ALBUM_FILE_NAME,
 
-	async exec({ node }) {
+	async exec({ nodes: [node] }) {
 		// The album is the folder containing the album.json file
 		window.location.href = generateUrl('apps/souvenirs') + '/#/show?apath=' + encodeURIComponent(node.dirname)
 		return null
