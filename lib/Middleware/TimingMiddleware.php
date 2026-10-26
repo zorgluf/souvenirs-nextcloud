@@ -13,8 +13,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Adds a `Server-Timing` header to the apiv2 and preview responses (issue #50),
- * so the cost of each edit-mode call can be measured from the browser or from
- * tools/bench-apiv2.mjs without touching the server logs. The same breakdown
+ * so the cost of each edit-mode call can be measured from the browser without
+ * touching the server logs. The same breakdown
  * is logged at debug level for server-side analysis.
  *
  * The header only exposes durations of the app's own steps (no paths, no

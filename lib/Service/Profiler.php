@@ -11,8 +11,7 @@ namespace OCA\Souvenirs\Service;
  * database, and the costs are spread over several layers (album resolution,
  * album.json read/write, user-tree searches, link files). Each layer wraps its
  * work in Profiler::measure(), and TimingMiddleware turns the accumulated spans
- * into a `Server-Timing` response header, readable in the browser dev tools
- * and by tools/bench-apiv2.mjs.
+ * into a `Server-Timing` response header, readable in the browser dev tools.
  *
  * Static on purpose: one PHP request = one profile, and the model classes
  * (Album, AssetLink) are not built through the DI container.

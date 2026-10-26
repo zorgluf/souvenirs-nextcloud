@@ -5,7 +5,7 @@
 
 ### Added
 - API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints keep their contract (the album load of the web editor, with `apath`, also returns the album path)
-- `Server-Timing` header on API and preview responses, and `tools/bench-apiv2.mjs` to measure the edit-mode API of an instance
+- `Server-Timing` header on API and preview responses, to measure the edit-mode API of an instance
 - Database index on the albums table (user, album id)
 - Support of Nextcloud 35 [#53](https://github.com/zorgluf/souvenirs-nextcloud/issues/53)
 

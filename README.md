@@ -52,13 +52,7 @@ settings remove the biggest costs that are outside the app:
 
 To see where the time goes, every `apiv2` and preview response carries a
 `Server-Timing` header (album resolution, `album.json` load/save, searches,
-lock wait), visible in the browser's developer tools. `tools/bench-apiv2.mjs`
-replays the editor's requests against an instance and compares two runs:
-
-    node tools/bench-apiv2.mjs --url https://cloud.example.org --user alice \
-         --password <app password> --json before.json
-    # upgrade, then the same with --json after.json
-    node tools/bench-apiv2.mjs --compare before.json after.json
+lock wait), visible in the browser's developer tools.
 
 ## Found it useful ?
 
