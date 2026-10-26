@@ -290,9 +290,11 @@ function isFullyVisible(el) {
   position: relative;
 }
 
+/* Clear of the album's progress dots (album.vue .progress: bottom 20px,
+   height 20px, z-index 9), which would otherwise swallow clicks on it. */
 .page-edit-toolbar {
   position: absolute;
-  bottom: 16px;
+  bottom: 48px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 8;

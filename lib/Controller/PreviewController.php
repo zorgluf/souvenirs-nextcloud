@@ -44,11 +44,12 @@ class PreviewController extends Controller {
 	public function getAsset($apath, $file) {
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
 		try {
-			$album = Album::withFolder($userFolder->get($apath));
-			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-			$node = $this->rootFolder->get($realFilePath);
+			$node = Album::openInUserFolder($userFolder, $this->resolveUserAsset($userFolder, $apath, $file));
+			if (is_null($node)) {
+				throw new \OCP\Files\NotFoundException($file);
+			}
 		} catch (\Exception $exception) {
-			//also covers getAssetRealPath returning "unknown" for a missing asset
+			//also covers a missing asset or a link pointing outside the user's files
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -78,9 +79,31 @@ class PreviewController extends Controller {
 	public function getPreview($apath, $file, $width=-1, $height=-1) {
 
 		$userFolder = $this->rootFolder->getUserFolder($this->userId);
-		$album = Album::withFolder($userFolder->get($apath));
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-		return $this->preview($realFilePath, $width, $height);
+		try {
+			$realFilePath = $this->resolveUserAsset($userFolder, $apath, $file);
+		} catch (\Exception $exception) {
+			$realFilePath = "unknown";
+		}
+		return $this->preview($userFolder, $realFilePath, $width, $height);
+	}
+
+	/**
+	 * Resolve an asset of one of the user's albums to its real path, without
+	 * loading album.json (issue #50): the data file, else its link target.
+	 * Only plain file names are accepted, so the lookup stays inside the
+	 * album data folder.
+	 *
+	 * @throws \Exception when the album folder or the asset cannot be resolved
+	 */
+	private function resolveUserAsset($userFolder, $apath, $file) {
+		if (!Album::isPlainAssetName($file)) {
+			throw new \InvalidArgumentException('Invalid asset name');
+		}
+		$albumNode = $userFolder->get($apath);
+		if (!($albumNode instanceof \OCP\Files\Folder)) {
+			throw new \InvalidArgumentException('Not an album folder');
+		}
+		return Album::resolveAssetPath($albumNode, DATA_DIR . "/" . $file);
 	}
 	
 	/**
@@ -118,8 +141,8 @@ class PreviewController extends Controller {
 		if (is_null($album)) {
 			return new PublicTemplateResponse($this->appName, 'publicerr', array('msg' => 'Cannot read file'));
 		}
-		$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-		return $this->preview($realFilePath, $width, $height);
+		$realFilePath = Album::isPlainAssetName($file) ? $album->getAssetRealPath(DATA_DIR . "/" . $file) : "unknown";
+		return $this->preview($userFolder, $realFilePath, $width, $height);
 	}
 
 	/**
@@ -147,10 +170,15 @@ class PreviewController extends Controller {
 			$albumsFolder = Utils::getAlbumsNode($this->config, $share->getUser(), $this->appName, $userFolder);
 			$albumList = AlbumList::getInstance($albumsFolder);
 			$album = $albumList->getAlbum($share->getAlbumId());
-			$realFilePath = $album->getAssetRealPath(DATA_DIR . "/" . $file);
-			$node = $this->rootFolder->get($realFilePath);
+			if (!Album::isPlainAssetName($file)) {
+				throw new \InvalidArgumentException('Invalid asset name');
+			}
+			$node = Album::openInUserFolder($userFolder, $album->getAssetRealPath(DATA_DIR . "/" . $file));
+			if (is_null($node)) {
+				throw new \OCP\Files\NotFoundException($file);
+			}
 		} catch (\Exception $exception) {
-			//also covers getAssetRealPath returning "unknown" for a missing asset
+			//also covers a missing asset or a link pointing outside the owner's files
 			return new JSONResponse(
 				[
 					'message' => "File do not exists.",
@@ -168,9 +196,13 @@ class PreviewController extends Controller {
 	/*
 	* internal get preview image function
 	*/
-	private function preview($filePath, $width=-1, $height=-1) {
+	private function preview($userFolder, $filePath, $width=-1, $height=-1) {
 		try {
-			$fileObj = $this->rootFolder->get($filePath);
+			//only files of the album owner (see Album::openInUserFolder)
+			$fileObj = Album::openInUserFolder($userFolder, $filePath);
+			if (is_null($fileObj)) {
+				throw new \OCP\Files\NotFoundException((string)$filePath);
+			}
 		} catch (\Exception $exception) {
 			return new JSONResponse(
 				[
@@ -189,9 +221,18 @@ class PreviewController extends Controller {
 			);
         }
 
-		if ($this->request->getHeader('If-None-Match') === $fileObj->getEtag()) {
-			return new DataResponse([], Http::STATUS_NOT_MODIFIED);
-        }
+		//The preview of a given source version at a given size never changes:
+		//answer revalidations before looking up or generating the preview
+		//(issue #50). The previous check compared the client's ETag with the
+		//source file's, while the response carried the preview's, so it never
+		//matched and every revalidation regenerated the preview.
+		$etag = md5($fileObj->getEtag() . ':' . $width . 'x' . $height);
+		$ifNoneMatch = trim((string)$this->request->getHeader('If-None-Match'));
+		if ($ifNoneMatch !== '' && trim(preg_replace('#^W/#', '', $ifNoneMatch), '"') === $etag) {
+			$notModified = new DataResponse([], Http::STATUS_NOT_MODIFIED);
+			$notModified->setETag($etag);
+			return $notModified;
+		}
 
 		try {
 			$mimeType = $fileObj->getMimeType();
@@ -231,7 +272,7 @@ class PreviewController extends Controller {
 		$preview['preview'] = $previewImg;
 		$preview['mimetype'] = $mimeType;
 		$response = new ImageResponse($preview);
-		$response->setETag($previewFile->getEtag());
+		$response->setETag($etag);
 		$lastModified = new \DateTime();
 		$lastModified->setTimestamp($previewFile->getMTime());
 		$response->setLastModified($lastModified);

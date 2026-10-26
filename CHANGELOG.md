@@ -1,8 +1,20 @@
 ## Unreleased
+### Changed
+- Faster edit mode on slow storage or a remote database [#50](https://github.com/zorgluf/souvenirs-nextcloud/issues/50): text, resize, pan & zoom and layout edits are saved in the background (no more blocking overlay), adding media and moving an element to another page take one request instead of one per page, uploads no longer probe the server, and the asset cleanup runs in the background and no longer searches the whole user tree on every edit
+- Posters of videos picked from Nextcloud are captured while streaming the video (or taken from the server preview) instead of downloading the whole file
+
 ### Added
+- API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints keep their contract (the album load of the web editor, with `apath`, also returns the album path)
+- `Server-Timing` header on API and preview responses, to measure the edit-mode API of an instance
+- Database index on the albums table (user, album id)
 - Support of Nextcloud 35 [#53](https://github.com/zorgluf/souvenirs-nextcloud/issues/53)
 
 ### Fixed
+- Concurrent edits of the same album (two tabs, web and Android) could overwrite each other
+- Asset cleanup could delete a file uploaded moments before the page referencing it was saved
+- Linking existing media matched files whose name merely contained the searched one
+- Preview revalidations (304) regenerated the preview every time
+- Asset and preview endpoints only serve files of the album owner, whatever a link file points to
 - Admin settings page no longer relies on the global jQuery library removed by the server
 - Register the "Open Album" file action with the modern @nextcloud/files API: the legacy OCA.Files.fileActions API was removed by the server
 

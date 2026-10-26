@@ -30,12 +30,16 @@ return [
 
     ['name' => 'api2#asset_exists_in_album', 'url' => '/apiv2/album/{id}/assetprobe/{asset_path}', 'verb' => 'GET', 'requirements' => array('asset_path' => '.+')],
     ['name' => 'api2#asset_search', 'url' => '/apiv2/album/{id}/assetsearch', 'verb' => 'GET' ],
+    // batch link of picked files (issue #50)
+    ['name' => 'api2#asset_search_batch', 'url' => '/apiv2/album/{id}/assetsearch', 'verb' => 'POST' ],
     ['name' => 'api2#clean_assets', 'url' => '/apiv2/album/{id}/clean', 'verb' => 'GET' ],
 
     ['name' => 'api2#create_page', 'url' => '/apiv2/album/{album_id}/page/{page_pos}', 'verb' => 'PUT' ],
     ['name' => 'api2#post_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}', 'verb' => 'POST' ],
     ['name' => 'api2#delete_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}', 'verb' => 'DELETE' ],
     ['name' => 'api2#move_page', 'url' => '/apiv2/album/{album_id}/page/{page_id}/pos/{page_pos}', 'verb' => 'POST' ],
+    // several page operations in one album write (issue #50)
+    ['name' => 'api2#batch_pages', 'url' => '/apiv2/album/{album_id}/pages', 'verb' => 'POST' ],
     
     ['name' => 'api2#create_share', 'url' => '/apiv2/share', 'verb' => 'POST','requirements' => array('albumId' => '.+')],
     ['name' => 'api2#delete_share', 'url' => '/apiv2/share/{token}', 'verb' => 'DELETE'],

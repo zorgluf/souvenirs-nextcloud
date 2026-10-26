@@ -7,7 +7,8 @@ use OCA\Souvenirs\Db\Album as AlbumEntity;
 use OCA\Souvenirs\Db\AlbumMapper;
 use OCA\Souvenirs\Db\Share;
 use OCA\Souvenirs\Db\ShareMapper;
-use OCA\Souvenirs\Tests\Unit\Support\FakeFilesystem;
+use OCA\Souvenirs\Service\AlbumLock;
+use OCA\Souvenirs\Tests\Unit\Support\FakeFs;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
@@ -15,6 +16,7 @@ use OCP\IConfig;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IURLGenerator;
+use OCP\Lock\ILockingProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -30,17 +32,16 @@ abstract class RequestWithParams implements IRequest {
  * Pins the /apiv2 contract shared by the web SPA and the Android client.
  *
  * The controller runs against the real model classes on top of an in-memory
- * filesystem (FakeFilesystem); only the DB mappers, config and URL generator
+ * filesystem (FakeFs); only the DB mappers, config and URL generator
  * are mocked. The DB index is $albumIndex (album id => folder path) and the
  * shares table is $shareTokens (album id => token).
  */
 class Api2ControllerTest extends TestCase {
-    use FakeFilesystem;
-
     private const USER = 'alice';
     private const USER_ROOT = '/alice/files';
     private const ALBUMS = '/alice/files/Souvenirs';
 
+    private FakeFs $fs;
     /** @var array<string,string> album id => absolute folder path */
     private array $albumIndex = [];
     /** @var array<string,string> album id => share token */
@@ -54,7 +55,8 @@ class Api2ControllerTest extends TestCase {
     private $urlGen;
 
     protected function setUp(): void {
-        $this->addFolder(self::ALBUMS);
+        $this->fs = new FakeFs($this);
+        $this->fs->addFolder(self::ALBUMS);
 
         $this->albumMapper = $this->createMock(AlbumMapper::class);
         $this->albumMapper->method('findByAlbumId')->willReturnCallback(
@@ -93,14 +95,15 @@ class Api2ControllerTest extends TestCase {
         $request->params = $params;
 
         $rootFolder = $this->createMock(IRootFolder::class);
-        $rootFolder->method('getUserFolder')->willReturnCallback(fn () => $this->folderNode(self::USER_ROOT));
-        $rootFolder->method('get')->willReturnCallback(fn ($path) => $this->node($path));
+        $rootFolder->method('getUserFolder')->willReturnCallback(fn () => $this->fs->folder(self::USER_ROOT));
+        $rootFolder->method('get')->willReturnCallback(fn ($path) => $this->fs->node($path));
 
         $config = $this->createMock(IConfig::class);
         $config->method('getUserValue')->willReturnCallback(fn ($u, $app, $key, $default) => $default);
 
         return new Api2Controller('souvenirs', $request, self::USER, $rootFolder,
-            $this->createMock(IL10N::class), $this->shareMapper, $this->urlGen, $config, $this->albumMapper);
+            $this->createMock(IL10N::class), $this->shareMapper, $this->urlGen, $config, $this->albumMapper,
+            new AlbumLock($this->createMock(ILockingProvider::class)));
     }
 
     /**
@@ -109,8 +112,8 @@ class Api2ControllerTest extends TestCase {
      */
     private function addAlbum(string $id, array $content = [], bool $indexed = true): string {
         $dir = self::ALBUMS . '/A-' . $id;
-        $this->addFile($dir . '/album.json', json_encode(['id' => $id] + $content));
-        $this->addFolder($dir . '/data');
+        $this->fs->addFile($dir . '/album.json', json_encode(['id' => $id] + $content));
+        $this->fs->addFolder($dir . '/data');
         if ($indexed) {
             $this->albumIndex[$id] = $dir;
         }
@@ -118,7 +121,7 @@ class Api2ControllerTest extends TestCase {
     }
 
     private function savedAlbum(string $dir): array {
-        return json_decode($this->files[$dir . '/album.json'], true);
+        return json_decode($this->fs->content($dir . '/album.json'), true);
     }
 
     private function pageIds(string $dir): array {
@@ -211,7 +214,7 @@ class Api2ControllerTest extends TestCase {
     }
 
     public function testGetAlbumNotFoundWhenFolderHasNoAlbumJson(): void {
-        $this->addFolder(self::ALBUMS . '/plain');
+        $this->fs->addFolder(self::ALBUMS . '/plain');
         $this->albumIndex['a1'] = self::ALBUMS . '/plain';
 
         $controller = $this->controller();
@@ -220,7 +223,7 @@ class Api2ControllerTest extends TestCase {
     }
 
     public function testGetAlbumNotFoundWhenPathIsAFile(): void {
-        $this->addFile(self::ALBUMS . '/notes.txt', 'x');
+        $this->fs->addFile(self::ALBUMS . '/notes.txt', 'x');
 
         $this->assertStatus(Http::STATUS_NOT_FOUND, $this->controller()->getAlbum('a1', '/Souvenirs/notes.txt'));
     }
@@ -284,7 +287,7 @@ class Api2ControllerTest extends TestCase {
 
         $this->assertStatus(Http::STATUS_OK, $response);
         $this->assertSame('new-id', $response->getData()['id']);
-        $configs = array_values(array_filter(array_keys($this->files),
+        $configs = array_values(array_filter($this->fs->filePaths(),
             fn ($p) => str_ends_with($p, '/album.json')));
         $this->assertCount(1, $configs);
         $dir = dirname($configs[0]);
@@ -292,11 +295,11 @@ class Api2ControllerTest extends TestCase {
         $this->assertSame('new-id', $saved['id']);
         $this->assertMatchesRegularExpression('/^\d{14}$/', $saved['lastEditDate']);
         $this->assertMatchesRegularExpression('/^\d{14}$/', $saved['pageLastEditDate']);
-        $this->assertTrue($this->pathExists($dir . '/data'));
+        $this->assertTrue($this->fs->exists($dir . '/data'));
     }
 
     public function testCreateAlbumIgnoresNonAlbumFolders(): void {
-        $this->addFolder(self::ALBUMS . '/holiday-photos');
+        $this->fs->addFolder(self::ALBUMS . '/holiday-photos');
 
         $this->assertStatus(Http::STATUS_OK, $this->controller()->createAlbum('new-id'));
     }
@@ -338,14 +341,14 @@ class Api2ControllerTest extends TestCase {
 
     public function testDeleteAlbumRemovesFolderAndIndexRow(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile($dir . '/data/a.jpg', 'img');
+        $this->fs->addFile($dir . '/data/a.jpg', 'img');
         $this->albumMapper->expects($this->once())->method('deleteAlbum')->with(self::USER, 'a1');
 
         $response = $this->controller()->deleteAlbum('a1');
 
         $this->assertSame('OK', $response->getData());
-        $this->assertFalse($this->pathExists($dir));
-        $this->assertFalse($this->pathExists($dir . '/data/a.jpg'));
+        $this->assertFalse($this->fs->exists($dir));
+        $this->assertFalse($this->fs->exists($dir . '/data/a.jpg'));
     }
 
     public function testDeleteAlbumNotFound(): void {
@@ -547,7 +550,7 @@ class Api2ControllerTest extends TestCase {
 
     public function testAssetProbeFindsLocalAsset(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile($dir . '/data/a.jpg', '12345');
+        $this->fs->addFile($dir . '/data/a.jpg', '12345');
 
         $data = $this->controller()->assetExistsInAlbum('a1', 'data/a.jpg')->getData();
 
@@ -556,8 +559,8 @@ class Api2ControllerTest extends TestCase {
 
     public function testAssetProbeFollowsAssetLink(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '1234567');
-        $this->addFile($dir . '/data/a.jpg.lnk',
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '1234567');
+        $this->fs->addFile($dir . '/data/a.jpg.lnk',
             json_encode(['assetPath' => self::USER_ROOT . '/Photos/a.jpg', 'assetSize' => 7]));
 
         $data = $this->controller()->assetExistsInAlbum('a1', 'data/a.jpg')->getData();
@@ -567,7 +570,7 @@ class Api2ControllerTest extends TestCase {
 
     public function testAssetProbeReportsBrokenLinkAsMissing(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile($dir . '/data/a.jpg.lnk',
+        $this->fs->addFile($dir . '/data/a.jpg.lnk',
             json_encode(['assetPath' => self::USER_ROOT . '/Photos/deleted.jpg', 'assetSize' => 7]));
 
         $data = $this->controller()->assetExistsInAlbum('a1', 'data/a.jpg')->getData();
@@ -591,51 +594,51 @@ class Api2ControllerTest extends TestCase {
 
     public function testAssetSearchLinksSameNameAndSizeFileAndDropsUpload(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile($dir . '/data/a.jpg', '12345');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
+        $this->fs->addFile($dir . '/data/a.jpg', '12345');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
 
         $data = $this->controller()->assetSearch('a1', 'data/a.jpg', 'a.jpg', '5')->getData();
 
         $this->assertSame(['linkCreated' => 'OK', 'status' => 'found'], $data);
-        $this->assertFalse($this->pathExists($dir . '/data/a.jpg'));
+        $this->assertFalse($this->fs->exists($dir . '/data/a.jpg'));
         $this->assertSame(['assetPath' => self::USER_ROOT . '/Photos/a.jpg', 'assetSize' => 5],
-            json_decode($this->files[$dir . '/data/a.jpg.lnk'], true));
+            json_decode($this->fs->content($dir . '/data/a.jpg.lnk'), true));
     }
 
     public function testAssetSearchCreatesLinkWhenAssetNotUploaded(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
 
         $data = $this->controller()->assetSearch('a1', 'data/a.jpg', 'a.jpg', '5')->getData();
 
         $this->assertSame('found', $data['status']);
-        $this->assertTrue($this->pathExists($dir . '/data/a.jpg.lnk'));
+        $this->assertTrue($this->fs->exists($dir . '/data/a.jpg.lnk'));
     }
 
     public function testAssetSearchIgnoresSizeMismatch(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
 
         $data = $this->controller()->assetSearch('a1', 'data/a.jpg', 'a.jpg', '6')->getData();
 
         $this->assertSame(['status' => 'notfound'], $data);
-        $this->assertFalse($this->pathExists($dir . '/data/a.jpg.lnk'));
+        $this->assertFalse($this->fs->exists($dir . '/data/a.jpg.lnk'));
     }
 
     public function testAssetSearchNeverLinksToAnotherAlbum(): void {
         $dir = $this->addAlbum('a1');
         $other = $this->addAlbum('a2');
-        $this->addFile($other . '/data/a.jpg', '12345');
+        $this->fs->addFile($other . '/data/a.jpg', '12345');
 
         $data = $this->controller()->assetSearch('a1', 'data/a.jpg', 'a.jpg', '5')->getData();
 
         $this->assertSame(['status' => 'notfound'], $data);
-        $this->assertFalse($this->pathExists($dir . '/data/a.jpg.lnk'));
+        $this->assertFalse($this->fs->exists($dir . '/data/a.jpg.lnk'));
     }
 
     public function testAssetSearchNeedsNameAndSize(): void {
         $this->addAlbum('a1');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
         $controller = $this->controller();
 
         $this->assertSame(['status' => 'notfound'], $controller->assetSearch('a1', 'data/a.jpg', '', '5')->getData());
@@ -644,15 +647,15 @@ class Api2ControllerTest extends TestCase {
 
     public function testAssetSearchShortCircuitsOnValidLink(): void {
         $dir = $this->addAlbum('a1');
-        $this->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/a.jpg', '12345');
         $link = json_encode(['assetPath' => self::USER_ROOT . '/Photos/a.jpg', 'assetSize' => 5]);
-        $this->addFile($dir . '/data/a.jpg.lnk', $link);
+        $this->fs->addFile($dir . '/data/a.jpg.lnk', $link);
 
         // name and size would not match anything: the existing link is enough
         $data = $this->controller()->assetSearch('a1', 'data/a.jpg', 'other.jpg', '1')->getData();
 
         $this->assertSame('found', $data['status']);
-        $this->assertSame($link, $this->files[$dir . '/data/a.jpg.lnk']);
+        $this->assertSame($link, $this->fs->content($dir . '/data/a.jpg.lnk'));
     }
 
     public function testAssetSearchAlbumNotFound(): void {
@@ -671,33 +674,33 @@ class Api2ControllerTest extends TestCase {
                     'name' => 'v.mp4', 'size' => 2],
             ]]],
         ]);
-        $this->addFile($dir . '/data/kept.jpg', 'keep');
-        $this->addFile($dir . '/data/kept.jpg_thumb', 'thumb');   // name-prefixed derivative: kept
-        $this->addFile($dir . '/data/cover.jpg', 'cover');
-        $this->addFile($dir . '/data/dup.jpg', 'dup');
-        $this->addFile($dir . '/data/v.jpg', 'vv');
-        $this->addFile($dir . '/data/v.mp4', 'vv');
-        $this->addFile($dir . '/data/orphan.jpg', 'orphan');
-        $this->addFile(self::USER_ROOT . '/Photos/dup.jpg', 'dup');
-        $this->addFile(self::USER_ROOT . '/Videos/v.mp4', 'vv');
-        $this->addFile(self::USER_ROOT . '/Videos/v.jpg', 'vv');
+        $this->fs->addFile($dir . '/data/kept.jpg', 'keep');
+        $this->fs->addFile($dir . '/data/kept.jpg_thumb', 'thumb');   // name-prefixed derivative: kept
+        $this->fs->addFile($dir . '/data/cover.jpg', 'cover');
+        $this->fs->addFile($dir . '/data/dup.jpg', 'dup');
+        $this->fs->addFile($dir . '/data/v.jpg', 'vv');
+        $this->fs->addFile($dir . '/data/v.mp4', 'vv');
+        $this->fs->addFile($dir . '/data/orphan.jpg', 'orphan');
+        $this->fs->addFile(self::USER_ROOT . '/Photos/dup.jpg', 'dup');
+        $this->fs->addFile(self::USER_ROOT . '/Videos/v.mp4', 'vv');
+        $this->fs->addFile(self::USER_ROOT . '/Videos/v.jpg', 'vv');
 
         $response = $this->controller()->cleanAssets('a1');
 
         $this->assertSame('OK', $response->getData());
-        $this->assertFalse($this->pathExists($dir . '/data/orphan.jpg'));
-        $this->assertTrue($this->pathExists($dir . '/data/kept.jpg'));
-        $this->assertTrue($this->pathExists($dir . '/data/kept.jpg_thumb'));
-        $this->assertTrue($this->pathExists($dir . '/data/cover.jpg'));
+        $this->assertFalse($this->fs->exists($dir . '/data/orphan.jpg'));
+        $this->assertTrue($this->fs->exists($dir . '/data/kept.jpg'));
+        $this->assertTrue($this->fs->exists($dir . '/data/kept.jpg_thumb'));
+        $this->assertTrue($this->fs->exists($dir . '/data/cover.jpg'));
         // duplicate found elsewhere in the user's files: replaced by a link
-        $this->assertFalse($this->pathExists($dir . '/data/dup.jpg'));
+        $this->assertFalse($this->fs->exists($dir . '/data/dup.jpg'));
         $this->assertSame(self::USER_ROOT . '/Photos/dup.jpg',
-            json_decode($this->files[$dir . '/data/dup.jpg.lnk'], true)['assetPath']);
+            json_decode($this->fs->content($dir . '/data/dup.jpg.lnk'), true)['assetPath']);
         // video: only the video file is linked, the generated preview image stays
-        $this->assertFalse($this->pathExists($dir . '/data/v.mp4'));
-        $this->assertTrue($this->pathExists($dir . '/data/v.mp4.lnk'));
-        $this->assertTrue($this->pathExists($dir . '/data/v.jpg'));
-        $this->assertFalse($this->pathExists($dir . '/data/v.jpg.lnk'));
+        $this->assertFalse($this->fs->exists($dir . '/data/v.mp4'));
+        $this->assertTrue($this->fs->exists($dir . '/data/v.mp4.lnk'));
+        $this->assertTrue($this->fs->exists($dir . '/data/v.jpg'));
+        $this->assertFalse($this->fs->exists($dir . '/data/v.jpg.lnk'));
     }
 
     public function testCleanAlbumNotFound(): void {
