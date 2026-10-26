@@ -29,12 +29,12 @@ define("BATCH_MAX_ITEMS",500);
 class Api2Controller extends ApiController {
 	private $userId;
 	private $userFolder;
+	private $rootFolder;
+	private $albumMapper;
 	private $il10n;
 	private $shareMapper;
 	private $urlGen;
 	private $config;
-	private $rootFolder;
-	private $albumMapper;
 	private $albumLock;
 
 	public function __construct($AppName, IRequest $request, $UserId, IRootFolder $rootFolder, IL10N $il10n, 
@@ -427,9 +427,9 @@ class Api2Controller extends ApiController {
 				$pageLastEditDate = $album->setPageLastEditDate();
 				$album->save();
 				return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
-			} else {
-				return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
 			}
+			//no page with this id in the album
+			return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 		});
 	}
 

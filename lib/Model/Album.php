@@ -32,7 +32,7 @@ class Album {
     private $confFile = null;
 
     private function __construct() {
-        $contentArray = array();
+        $this->contentArray = array();
     }
 
     public static function withFolder(Folder $albumNode) {

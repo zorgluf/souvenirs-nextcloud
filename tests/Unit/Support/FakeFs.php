@@ -1,6 +1,6 @@
 <?php
 
-namespace OCA\Souvenirs\Tests\Unit;
+namespace OCA\Souvenirs\Tests\Unit\Support;
 
 use OCP\Files\File;
 use OCP\Files\Folder;
@@ -66,6 +66,11 @@ class FakeFs {
 	public function content(string $path): ?string {
 		$path = self::norm($path);
 		return $this->files[$path]['content'] ?? null;
+	}
+
+	/** @return string[] absolute paths of every file */
+	public function filePaths(): array {
+		return array_keys($this->files);
 	}
 
 	public function resetCalls(): void {

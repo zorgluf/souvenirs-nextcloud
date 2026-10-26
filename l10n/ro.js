@@ -7,12 +7,16 @@ OC.L10N.register(
     "Choose" : "Alege",
     "Pen" : "Peniță",
     "Confirm" : "Confirmă",
+    "New album" : "Album nou",
+    "Album name" : "Numele albumului",
     "Date" : "Dată",
     "Create" : "Crează",
     "Save" : "Save",
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
     "Remove" : "Elimină",
+    "Add media" : "Adaugă fișiere media",
+    "Drag to move" : "Trage pentru a muta",
     "Remove image" : "Înlătură imagine"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

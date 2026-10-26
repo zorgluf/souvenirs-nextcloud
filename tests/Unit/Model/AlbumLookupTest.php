@@ -3,7 +3,7 @@
 namespace OCA\Souvenirs\Tests\Unit\Model;
 
 use OCA\Souvenirs\Model\Album;
-use OCA\Souvenirs\Tests\Unit\FakeFs;
+use OCA\Souvenirs\Tests\Unit\Support\FakeFs;
 use PHPUnit\Framework\TestCase;
 
 /**
