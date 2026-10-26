@@ -38,13 +38,6 @@ settings remove the biggest costs that are outside the app:
 
       'memcache.local' => '\OC\Memcache\APCu',
 
-- **File versions**: the Versions app keeps a copy of `album.json` at each
-  change (the editor batches and debounces its writes, but a long editing
-  session still produces many versions). If you do not need versions, disable
-  the app with `occ app:disable files_versions`; otherwise
-  `versions_retention_obligation` in `config.php` controls how long they are
-  kept.
-
 - **Video posters**: when the server has a video preview provider enabled
   (`OC\Preview\Movie` in `enabledPreviewProviders`, which needs `ffmpeg`), the
   web editor uses the server's preview as the poster of a picked video;
