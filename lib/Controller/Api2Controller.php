@@ -24,6 +24,8 @@ define("ALBUM_LIST_PAGE_SIZE",10);
 class Api2Controller extends ApiController {
 	private $userId;
 	private $userFolder;
+	private $rootFolder;
+	private $albumMapper;
 	private $il10n;
 	private $shareMapper;
 	private $urlGen;
@@ -342,9 +344,9 @@ class Api2Controller extends ApiController {
 			$pageLastEditDate = $album->setPageLastEditDate();
 			$album->save();
 			return new JSONResponse(array("pageLastEditDate" => $pageLastEditDate));
-		} else {
-			return new JSONResponse(array(), Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
+		//no page with this id in the album
+		return new JSONResponse(array(), Http::STATUS_NOT_FOUND);
 	}
 
 	/**

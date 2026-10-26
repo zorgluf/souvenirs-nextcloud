@@ -15,7 +15,7 @@ class Album {
     private $contentArray;
 
     private function __construct() {
-        $contentArray = array();
+        $this->contentArray = array();
     }
 
     public static function withFolder(Folder $albumNode) {
