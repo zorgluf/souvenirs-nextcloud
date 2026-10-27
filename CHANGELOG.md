@@ -1,22 +1,26 @@
-## Unreleased
-### Changed
-- Faster edit mode on slow storage or a remote database [#50](https://github.com/zorgluf/souvenirs-nextcloud/issues/50): text, resize, pan & zoom and layout edits are saved in the background (no more blocking overlay), adding media and moving an element to another page take one request instead of one per page, uploads no longer probe the server, and the asset cleanup runs in the background and no longer searches the whole user tree on every edit
-- Posters of videos picked from Nextcloud are captured while streaming the video (or taken from the server preview) instead of downloading the whole file
-
+## 2.6.0 - 2026-10-27
 ### Added
-- API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints keep their contract (the album load of the web editor, with `apath`, also returns the album path)
-- `Server-Timing` header on API and preview responses, to measure the edit-mode API of an instance
-- Database index on the albums table (user, album id)
-- Support of Nextcloud 35 [#53](https://github.com/zorgluf/souvenirs-nextcloud/issues/53)
+- API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints keep their contract (the album load of the web editor, with `apath`, also returns the album path) [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- `Server-Timing` header on API and preview responses, to measure the edit-mode API of an instance [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Database index on the albums table (user, album id) [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Support of Nextcloud 35 [#54](https://github.com/zorgluf/souvenirs-nextcloud/pull/54)
+
+### Changed
+- Faster edit mode on slow storage or a remote database ([#50](https://github.com/zorgluf/souvenirs-nextcloud/issues/50), [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)): text, resize, pan & zoom and layout edits are saved in the background (no more blocking overlay), adding media and moving an element to another page take one request instead of one per page, uploads no longer probe the server, and the asset cleanup runs in the background and no longer searches the whole user tree on every edit
+- Posters of videos picked from Nextcloud are captured while streaming the video (or taken from the server preview) instead of downloading the whole file [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Page toolbar buttons (add media, add text, paint, change layout) are icon-only, in a horizontal row
 
 ### Fixed
-- Concurrent edits of the same album (two tabs, web and Android) could overwrite each other
-- Asset cleanup could delete a file uploaded moments before the page referencing it was saved
-- Linking existing media matched files whose name merely contained the searched one
-- Preview revalidations (304) regenerated the preview every time
-- Asset and preview endpoints only serve files of the album owner, whatever a link file points to
-- Admin settings page no longer relies on the global jQuery library removed by the server
-- Register the "Open Album" file action with the modern @nextcloud/files API: the legacy OCA.Files.fileActions API was removed by the server
+- Concurrent edits of the same album (two tabs, web and Android) could overwrite each other [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Asset cleanup could delete a file uploaded moments before the page referencing it was saved [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Linking existing media matched files whose name merely contained the searched one [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Preview revalidations (304) regenerated the preview every time [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Asset and preview endpoints only serve files of the album owner, whatever a link file points to [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
+- Selection frame missing on some chosen media in the media chooser [#49](https://github.com/zorgluf/souvenirs-nextcloud/issues/49)
+- Deleting an unknown page returns 404 instead of a server error
+- Album creation no longer uses the deprecated PHP `strftime` function
+- Admin settings page no longer relies on the global jQuery library removed by the server [#54](https://github.com/zorgluf/souvenirs-nextcloud/pull/54)
+- Register the "Open Album" file action with the modern @nextcloud/files API: the legacy OCA.Files.fileActions API was removed by the server [#54](https://github.com/zorgluf/souvenirs-nextcloud/pull/54)
 
 ## 2.5.0 - 2026-10-14
 ### Added
