@@ -15,6 +15,7 @@ OC.L10N.register(
     "Fullscreen" : "Fylla skjáinn",
     "Remove" : "Fjarlægja",
     "Add media" : "Bæta við gögnum",
+    "Change layout" : "Breyta framsetningu",
     "Remove image" : "Fjarlægja mynd"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

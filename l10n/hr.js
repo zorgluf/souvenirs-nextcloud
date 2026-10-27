@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Preuzmi",
     "Fullscreen" : "Cijeli zaslon",
     "Remove" : "Ukloni",
+    "Change layout" : "Promijeni raspored",
     "Drag to move" : "Povucite za premještanje",
     "Remove image" : "Ukloni sliku"
 },

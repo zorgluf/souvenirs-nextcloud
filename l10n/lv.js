@@ -14,6 +14,7 @@ OC.L10N.register(
     "Download" : "Lejupielādēt",
     "Fullscreen" : "Pilnekrāna",
     "Remove" : "Noņemt",
+    "Change layout" : "Mainīt izkārtojumu",
     "Remove image" : "Novākt attēlu"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

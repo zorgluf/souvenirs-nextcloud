@@ -10,6 +10,7 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Last ned",
     "Remove" : "Fjern",
+    "Change layout" : "Endra oppsett",
     "Remove image" : "Fjern bilete"
 },
 "nplurals=2; plural=(n != 1);");

@@ -11,6 +11,7 @@ OC.L10N.register(
     "Download" : "Shkarko",
     "Fullscreen" : "I gjithë ekrani",
     "Remove" : "Hiqe",
+    "Change layout" : "Ndrysho paraqitjen",
     "Remove image" : "Hiqe figurën"
 },
 "nplurals=2; plural=(n != 1);");

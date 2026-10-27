@@ -23,6 +23,7 @@ OC.L10N.register(
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
     "Add page" : "Přidat stránku",
+    "Saving changes…" : "Ukládání změn…",
     "Remove" : "Odebrat",
     "Add text" : "Přidat text",
     "Paint" : "Malovat",

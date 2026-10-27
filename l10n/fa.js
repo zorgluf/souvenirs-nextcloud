@@ -20,6 +20,7 @@ OC.L10N.register(
     "Download" : "دانلود",
     "Fullscreen" : "تمام‌صفحه",
     "Click to download album in a zip file." : "برای دانلود آلبوم به صورت فایل فشرده کلیک کنید",
+    "Saving changes…" : "در حال ذخیره تغییرات…",
     "Remove" : "حذف",
     "Change layout" : "تغییر چیدمان",
     "Drag to move" : "کشیدن برای جابجایی",

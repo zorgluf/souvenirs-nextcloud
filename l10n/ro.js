@@ -14,8 +14,10 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
+    "Saving changes…" : "Se salvează modificările…",
     "Remove" : "Elimină",
     "Add media" : "Adaugă fișiere media",
+    "Change layout" : "Schimbă aspectul",
     "Drag to move" : "Trage pentru a muta",
     "Remove image" : "Înlătură imagine"
 },
