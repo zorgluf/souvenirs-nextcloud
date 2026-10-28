@@ -12,6 +12,7 @@ OC.L10N.register(
     "Date" : "Dată",
     "Create" : "Crează",
     "Save" : "Save",
+    "Expires on" : "Expiră la",
     "Download" : "Descărcare",
     "Fullscreen" : "Fullscreen",
     "Saving changes…" : "Se salvează modificările…",

@@ -44,6 +44,7 @@ OC.L10N.register(
     "Remove audio" : "Odstrániť zvuk",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "Odstrániť zvuk tejto stránky? Pri zobrazení stránky sa už hudba nebude prehrávať.",
     "Remove" : "Odobrať",
+    "Could not save your last changes. Reload the album to check what was saved." : "Nepodarilo sa uložiť vaše posledné zmeny. Znovu načítajte album a skontrolujte, čo sa uložilo.",
     "Could not delete the page." : "Stránku sa nepodarilo odstrániť.",
     "Could not remove the image." : "Obrázok sa nepodarilo odstrániť.",
     "Could not move the page." : "Stránku sa nepodarilo presunúť.",

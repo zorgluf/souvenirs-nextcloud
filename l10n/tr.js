@@ -44,6 +44,7 @@ OC.L10N.register(
     "Remove audio" : "Sesi kaldır",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "Bu sayfanın sesi kaldırılsın mı? Sayfa görüntülendiğinde artık müzik çalmayacak.",
     "Remove" : "Kaldır",
+    "Could not save your last changes. Reload the album to check what was saved." : "Son değişiklikleriniz kaydedilemedi. Nelerin kaydedildiğini denetlemek için albümü yeniden yükleyin.",
     "Could not delete the page." : "Sayfa silinemedi.",
     "Could not remove the image." : "Görsel kaldırılamadı.",
     "Could not move the page." : "Sayfa taşınamadı.",

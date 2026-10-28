@@ -44,6 +44,7 @@ OC.L10N.register(
     "Remove audio" : "Fjern lyd",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "Vil du fjerne lyden fra denne side? Musikken afspilles ikke længere, når siden vises.",
     "Remove" : "Fjern",
+    "Could not save your last changes. Reload the album to check what was saved." : "Dine seneste ændringer kunne ikke gemmes. Genindlæs albummet for at se, hvad der blev gemt.",
     "Could not delete the page." : "Siden kunne ikke slettes.",
     "Could not remove the image." : "Billedet kunne ikke fjernes.",
     "Could not move the page." : "Siden kunne ikke flyttes.",
