@@ -44,6 +44,7 @@ OC.L10N.register(
     "Remove audio" : "Удалить аудио",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "Удалить аудио этой страницы? Музыка больше не будет воспроизводиться при показе страницы.",
     "Remove" : "Удалить",
+    "Could not save your last changes. Reload the album to check what was saved." : "Не удалось сохранить последние изменения. Обновите альбом, чтобы проверить, что сохранилось.",
     "Could not delete the page." : "Не удалось удалить страницу.",
     "Could not remove the image." : "Не удалось удалить изображение.",
     "Could not move the page." : "Не удалось переместить страницу.",
