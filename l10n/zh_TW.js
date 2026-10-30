@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Souvenirs" : "紀念品",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "在您的 Nextcloud 伺服器上，為您的照片、影片與全景照片建立、展示並分享「復古風格」的相簿。",
+    "Relive your memories the way you used to with paper albums: page after page, story after story.\n\n**Souvenirs** lets you craft \"old school\" albums from the photos and videos already stored on your Nextcloud — and share them with the people who matter.\n\n### ✨ What you can do\n\n- 📖 **Browse albums like a book** — turn pages instead of scrolling through photo grids\n- 🎨 **Create and edit albums** right from the web interface: pick your photos, arrange your pages, give each album a name and a date\n- 🎬 **Mix media freely** — photos, videos, audio recordings and even 360° panoramas on the same page\n- 🌐 **Explore panoramas** interactively thanks to the integrated 360° viewer\n- 🔗 **Share with a simple link** — family and friends can enjoy your albums without a Nextcloud account\n- 📱 **Pair with the [Souvenirs Android app](https://github.com/zorgluf/souvenirs-android)** to build albums on the go and sync them with your server\n- ♻️ **Save space** — media already on your server is reused, not duplicated\n\n### 🔒 Your souvenirs, your server\nAlbums are stored as plain folders and files on your own Nextcloud. No third-party service, no lock-in: your souvenirs stay yours." : "以昔日紙本相簿的方式重溫回憶：一頁接一頁，一個故事接一個故事。\n\n**Souvenirs** 讓你利用已儲存在 Nextcloud 的相片及影片製作「舊式」相簿，並與重要的人分享。\n\n### ✨ 功能特色\n\n- 📖 **像翻書般瀏覽相簿** —— 翻頁而非捲動相片網格\n- 🎨 **直接於網頁介面建立及編輯相簿**：挑選相片、排列頁面、為每本相簿設定名稱及日期\n- 🎬 **自由混合媒體內容** —— 同一頁可放置相片、影片、錄音，甚至 360° 全景照片\n- 🌐 **互動式探索全景照片** —— 內建 360° 檢視器\n- 🔗 **透過簡單連結分享** —— 親友無需 Nextcloud 帳戶亦可欣賞你的相簿\n- 📱 **配合 [Souvenirs Android 應用程式](https://github.com/zorgluf/souvenirs-android)**，隨時建立相簿並與伺服器同步\n- ♻️ **節省空間** —— 重用伺服器上的媒體檔案，而非複製它們\n\n### 🔒 你的回憶，你的伺服器\n相簿會以一般資料夾及檔案形式儲存在你自己的 Nextcloud 中。不依賴第三方服務，沒有供應商鎖定：你的回憶永遠屬於你。",
     "Choose media" : "選擇媒體",
     "All files" : "所有檔案",
     "Upload" : "上傳",
@@ -43,6 +44,7 @@ OC.L10N.register(
     "Remove audio" : "移除音訊",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "移除此頁面的音訊？顯示此頁面時將不再播放音樂。",
     "Remove" : "移除",
+    "Could not save your last changes. Reload the album to check what was saved." : "無法儲存您最近的變更。請重新載入相簿，確認哪些變更已成功儲存。",
     "Could not delete the page." : "無法刪除頁面。",
     "Could not remove the image." : "無法移除影像。",
     "Could not move the page." : "無法移動頁面。",
