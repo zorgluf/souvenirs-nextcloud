@@ -2,6 +2,7 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenýry",
+    "Choose media" : "Zvolit médium",
     "All files" : "Všechny soubory",
     "Upload" : "Nahrát",
     "Cancel" : "Zrušit",
@@ -24,8 +25,10 @@ OC.L10N.register(
     "Download" : "Stáhnout",
     "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
+    "Edit (E)" : "Upravit (E)",
     "Add page" : "Přidat stránku",
     "Saving changes…" : "Ukládání změn…",
+    "Remove audio" : "Odebrat zvuk",
     "Remove" : "Odebrat",
     "Add media" : "Přidat média",
     "Add text" : "Přidat text",
