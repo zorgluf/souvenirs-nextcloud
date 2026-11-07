@@ -20,8 +20,10 @@
 		</NcButton>
 		<!-- Toggles the framing (issue #45): back to the default cover-fit
 		     (zoom 100, no offset) after pan & zoom gestures, or — when already
-		     at the default — to a centered contain-fit showing the whole image. -->
-		<NcButton v-if="editMode && sClass.endsWith('ImageElement')" class="s-element-pan-reset" type="primary"
+		     at the default — to a centered contain-fit showing the whole image.
+		     Video elements get it too (issue #55): they have no pan & zoom
+		     gestures, but the same toggle picks cover-fit vs whole video. -->
+		<NcButton v-if="canResetPanZoom" class="s-element-pan-reset" type="primary"
 			:aria-label="resetPanZoomTitle" :title="resetPanZoomTitle" v-on:click="onPanZoomReset">
 			<template #icon>
 				<FitToScreen :size="20" />
@@ -43,7 +45,7 @@
 			:value="sText" :editable="editMode && isTextElement" :auto-fit="true"
 			@save="onTextSave" />
         <video v-bind:id="sId+'video'" v-if="sClass.endsWith('VideoElement')" v-on:click="openVideo"
-            v-bind:class="['video-element', sZoom == 100 ? 'centercrop' : 'fill' ]" 
+            v-bind:class="['video-element', effectiveZoom == 100 ? 'centercrop' : 'fill' ]" 
             loop="true" preload="auto" :key="videoUrlSrc"
             v-on:waiting="waitingVideo" v-on:canplay="playingVideo" v-on:loadstart="waitingVideo">
             <source v-bind:src="videoUrlSrc">
@@ -292,8 +294,19 @@ export default {
             return this.isCommittedCoverFit;
         },
         'resetPanZoomTitle': function() {
-            return this.isEffectiveCoverFit ? t("souvenirs","Fit whole image")
-                : t("souvenirs","Reset zoom and position");
+            if (!this.isEffectiveCoverFit) {
+                return t("souvenirs","Reset zoom and position");
+            }
+            return this.isVideoElement ? t("souvenirs","Fit whole video")
+                : t("souvenirs","Fit whole image");
+        },
+        'isVideoElement': function() {
+            return this.sClass != null && this.sClass.endsWith('VideoElement');
+        },
+        'canResetPanZoom': function() {
+            // The framing toggle applies to image and video elements in edit mode.
+            return this.editMode && this.sClass != null
+                && (this.sClass.endsWith('ImageElement') || this.isVideoElement);
         },
         'canPanZoom': function() {
             // Pan & zoom applies to image elements in edit mode (issue #27),
@@ -644,14 +657,15 @@ export default {
                     { zoom: 100, offsetX: 0, offsetY: 0, transformType: IMG_ZOOMOFFSET });
                 return;
             }
-            if (this.imgSize == null || this.imgSize.width <= 0 || this.imgSize.height <= 0) {
+            var mediaSize = this.framingMediaSize();
+            if (mediaSize == null) {
                 return;
             }
             var box = this.$refs.eldiv.getBoundingClientRect();
             if (box.width <= 0 || box.height <= 0) {
                 return;
             }
-            var fit = roundPanZoom(containPanZoom(box, this.imgSize));
+            var fit = roundPanZoom(containPanZoom(box, mediaSize));
             // Aspect ratios match: contain-fit is cover-fit, nothing to change.
             if (fit.zoom === 100) {
                 this.panZoomPreview = null;
@@ -662,6 +676,21 @@ export default {
             this.refreshImageStyle();
             this.$emit("pan-zoom-element", this.sId,
                 { zoom: fit.zoom, offsetX: fit.offsetX, offsetY: fit.offsetY, transformType: IMG_ZOOMOFFSET });
+        },
+        framingMediaSize: function() {
+            // Natural size of the framed media: the loaded image (for a video,
+            // its poster frame, same aspect ratio), or — for a video without a
+            // poster — the video's own intrinsic size once its metadata loaded.
+            if (this.imgSize != null && this.imgSize.width > 0 && this.imgSize.height > 0) {
+                return this.imgSize;
+            }
+            if (this.isVideoElement) {
+                var video = document.getElementById(this.sId + "video");
+                if (video != null && video.videoWidth > 0 && video.videoHeight > 0) {
+                    return { width: video.videoWidth, height: video.videoHeight };
+                }
+            }
+            return null;
         },
         onResizeStart: function(event, corner) {
             if (!this.isResizable || this.resizing != null) {

@@ -230,6 +230,55 @@ describe('selement pan & zoom reset button', () => {
     })
 })
 
+describe('selement reset button on video elements (issue #55)', () => {
+    async function mountVideoTile(props = {}) {
+        return mountImageTile({ sClass: 'VideoElement', sVideo: 'data/clip.mp4', sImage: 'data/poster.jpg', ...props })
+    }
+
+    it('shows on video elements in edit mode only', async () => {
+        expect((await mountVideoTile()).find('.s-element-pan-reset').exists()).toBe(true)
+        expect((await mountVideoTile({ editMode: false })).find('.s-element-pan-reset').exists()).toBe(false)
+    })
+
+    it('resets a zoomed video to plain cover-fit', async () => {
+        const wrapper = await mountVideoTile({ sZoom: 50, sOffsetX: 50, sOffsetY: 50 })
+        expect(wrapper.find('.s-element-pan-reset').attributes('title')).toBe('Reset zoom and position')
+        await wrapper.find('.s-element-pan-reset').trigger('click')
+        expect(wrapper.emitted('pan-zoom-element')).toEqual([
+            ['el-1', { zoom: 100, offsetX: 0, offsetY: 0, transformType: 2 }],
+        ])
+        // The video follows the preview right away (cover).
+        expect(wrapper.find('video').classes()).toContain('centercrop')
+    })
+
+    it('fits the whole video from the default framing, using the poster size', async () => {
+        const wrapper = await mountVideoTile()
+        wrapper.vm.imgSize = { width: 2000, height: 1000 }
+        await wrapper.vm.$nextTick()
+        expect(wrapper.find('.s-element-pan-reset').attributes('title')).toBe('Fit whole video')
+        await wrapper.find('.s-element-pan-reset').trigger('click')
+        expect(wrapper.emitted('pan-zoom-element')).toEqual([
+            ['el-1', { zoom: 50, offsetX: 50, offsetY: 50, transformType: 2 }],
+        ])
+        expect(wrapper.find('video').classes()).toContain('fill')
+    })
+
+    it('falls back to the video intrinsic size without a poster', async () => {
+        // Own id: tiles mounted by earlier tests stay attached to the document,
+        // and the video is looked up by its DOM id.
+        const wrapper = await mountVideoTile({ sId: 'el-noposter', sImage: '' })
+        wrapper.vm.imgSize = null
+        await wrapper.vm.$nextTick()
+        const video = wrapper.find('video').element
+        Object.defineProperty(video, 'videoWidth', { value: 1920 })
+        Object.defineProperty(video, 'videoHeight', { value: 960 })
+        await wrapper.find('.s-element-pan-reset').trigger('click')
+        expect(wrapper.emitted('pan-zoom-element')).toEqual([
+            ['el-noposter', { zoom: 50, offsetX: 50, offsetY: 50, transformType: 2 }],
+        ])
+    })
+})
+
 describe('selement caption editor scope', () => {
     it('shows no caption field on an image element without text', async () => {
         const wrapper = await mountImageTile()
