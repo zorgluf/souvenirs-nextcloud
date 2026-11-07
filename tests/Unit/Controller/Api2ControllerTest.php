@@ -295,6 +295,8 @@ class Api2ControllerTest extends TestCase {
         $this->assertSame('new-id', $saved['id']);
         $this->assertMatchesRegularExpression('/^\d{14}$/', $saved['lastEditDate']);
         $this->assertMatchesRegularExpression('/^\d{14}$/', $saved['pageLastEditDate']);
+        // same default spacing between elements as the Android app (issue #57)
+        $this->assertSame(1, $saved['elementMargin']);
         $this->assertTrue($this->fs->exists($dir . '/data'));
     }
 

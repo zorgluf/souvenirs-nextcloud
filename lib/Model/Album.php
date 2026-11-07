@@ -25,6 +25,8 @@ class Album {
      * show up later (e.g. the phone's auto-upload of the original photo)
      */
     const DUPLICATE_CHECK_TTL_SECONDS = 86400;
+    /** space around page elements (% of page) for a new album, same default as the Android app (issue #57) */
+    const DEFAULT_ELEMENT_MARGIN = 1;
 
     private $albumNode;
     private $contentArray;
@@ -46,6 +48,7 @@ class Album {
         $album = new self();
         $album->setAlbumNode($albumNode);
         $album->setId($id);
+        $album->setContent('elementMargin', self::DEFAULT_ELEMENT_MARGIN);
         $album->setLastEditDate();
         $album->setPageLastEditDate();
         $album->save();
