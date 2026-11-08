@@ -24,6 +24,13 @@
                 <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">{{ sStopSh }}</NcActionButton>
                 <NcActionSeparator/>
                 <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">{{ sDownload }}</NcActionButton>
+                <NcActionSeparator/>
+                <NcActionButton @click="openHelp()" :close-after-click="true">
+                    <template #icon>
+                        <HelpCircleOutline :size="20"/>
+                    </template>
+                    {{ sHelp }}
+                </NcActionButton>
             </NcActions>
         </div>
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
@@ -82,6 +89,9 @@
         <image-chooser-dialog v-if="imageChooserPageId != null" :saving="imageChooserSaving"
             v-on:close="closeImageChooser" v-on:pick="onImagePick" v-on:upload="onImageUpload">
         </image-chooser-dialog>
+        <help-dialog v-if="helpOpen" :can-edit="canEdit" :is-touch-device="isTouchDevice"
+            :initial-section="helpSection" v-on:close="closeHelp">
+        </help-dialog>
         <NcDialog v-if="audioRemovePageId != null" :name="sRemoveAudioTitle"
             :message="sRemoveAudioMsg" :buttons="removeAudioButtons"
             @update:open="onRemoveAudioDialogOpen">
@@ -114,10 +124,12 @@ import { SaveQueue } from '../utils/saveQueue.js'
 import { planMediaInsertion, applyPageOperationsLocally } from '../utils/mediaInsertion.js'
 import PaintDialog from './PaintDialog.vue'
 import ImageChooserDialog from './ImageChooserDialog.vue'
+import HelpDialog from './HelpDialog.vue'
 import { showError } from '@nextcloud/dialogs'
 import '@nextcloud/dialogs/style.css'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
+import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 
 export default {
     props: {
@@ -166,6 +178,11 @@ export default {
             "sFinishEdit": t("souvenirs","Finish editing (E)"),
             "sAddPage": t("souvenirs","Add page"),
             "sSaving": t("souvenirs","Saving changes…"),
+            "sHelp": t("souvenirs","Help (?)"),
+            // In-app user guide (issue #47): open flag and the section it
+            // opens on (the "?" key lands on the shortcuts).
+            "helpOpen": false,
+            "helpSection": "structure",
             "elementMargin": 1,
             "isTouchDevice": isTouchDevice(),
             // Id of the page currently open in the paint dialog (null = closed),
@@ -377,6 +394,25 @@ export default {
         closeDownload: function() {
             this.downloadModal = false;
         },
+        openHelp: function(section) {
+            // The dialog lives in the document body: in fullscreen only the
+            // album element is shown, so leave fullscreen to make it visible.
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            this.helpSection = section || "structure";
+            this.helpOpen = true;
+        },
+        closeHelp: function() {
+            this.helpOpen = false;
+            // Give the keyboard back to the album (arrows, Space, E).
+            this.$nextTick(function() {
+                var album = document.querySelector(".s-album");
+                if (album) {
+                    album.focus();
+                }
+            });
+        },
         download: async function() {
             this.downloadProgress = 0;
             this.downloadActive = true;
@@ -513,6 +549,10 @@ export default {
                 case " ":
                     event.preventDefault();
                     this.diaporama(!this.diaporamaMode);
+                    break;
+                case "?":
+                    event.preventDefault();
+                    this.openHelp("shortcuts");
                     break;
             }
         },
@@ -1179,6 +1219,7 @@ export default {
         AudioPlayer: AudioPlayer,
         "paint-dialog": PaintDialog,
         "image-chooser-dialog": ImageChooserDialog,
+        "help-dialog": HelpDialog,
         NcModal,
         NcDialog,
         NcProgressBar,
@@ -1191,6 +1232,7 @@ export default {
         Plus,
         Pencil,
         PencilOff,
+        HelpCircleOutline,
     },
 }
 

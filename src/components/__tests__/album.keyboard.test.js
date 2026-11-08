@@ -12,6 +12,7 @@ function makeContext() {
         showPrev: vi.fn(),
         showNext: vi.fn(),
         diaporama: vi.fn(),
+        openHelp: vi.fn(),
     }
 }
 
@@ -66,6 +67,21 @@ describe('album onKeydown', () => {
         onKeydown.call(ctx, keyEvent(' ', { tagName: 'INPUT' }))
         onKeydown.call(ctx, keyEvent(' ', { tagName: 'TEXTAREA' }))
         expect(ctx.diaporama).not.toHaveBeenCalled()
+    })
+
+    it('"?" opens the guide on the shortcuts section', () => {
+        const ctx = makeContext()
+        const e = keyEvent('?')
+        onKeydown.call(ctx, e)
+        expect(ctx.openHelp).toHaveBeenCalledWith('shortcuts')
+        expect(e.preventDefault).toHaveBeenCalled()
+    })
+
+    it('ignores "?" while typing', () => {
+        const ctx = makeContext()
+        onKeydown.call(ctx, keyEvent('?', { isContentEditable: true }))
+        onKeydown.call(ctx, keyEvent('?', { tagName: 'INPUT' }))
+        expect(ctx.openHelp).not.toHaveBeenCalled()
     })
 
     it('leaves unrelated keys alone', () => {
