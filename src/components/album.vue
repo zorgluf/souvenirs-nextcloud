@@ -1,6 +1,6 @@
 <template>
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown="onKeydown"
-    v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver">
+    v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver" v-on:click="onAlbumClick">
         <div class="top-right">
             <!-- Background saves in progress (issue #50): light edits no longer
                  block the page, this is the only sign they are being sent. -->
@@ -32,6 +32,7 @@
             v-bind:elements="page.elements" v-bind:album-path="path" v-bind:is-win-portrait="isWinPortrait"
             v-bind:token="token" v-on:imagefull="openImgFull" v-on:videofull="openVideoFull" v-bind:element-margin="elementMargin"
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+            v-bind:selected-element-id="selectedElementId" v-on:select-element="onSelectElement"
             v-bind:is-last="index === pages.length - 1"
             v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
             v-on:pan-zoom-element="onPanZoomElement"
@@ -194,6 +195,9 @@ export default {
             // Edit-mode writes not yet confirmed by the server (issue #50):
             // drives the discreet "saving" indicator.
             "pendingSaves": 0,
+            // Element selected in edit mode (issue #56): the only one showing
+            // its move/resize/framing controls and taking pan & zoom gestures.
+            "selectedElementId": null,
         }
     },
     created: function() {
@@ -235,6 +239,11 @@ export default {
         console.log(this.$device);
     },
     watch: {
+        editMode(newValue) {
+            if (!newValue) {
+                this.selectedElementId = null;
+            }
+        },
         fullscreenMode(newValue, oldValue) {
             if (newValue == true) {
                 document.querySelector(".s-album").requestFullscreen();
@@ -467,6 +476,21 @@ export default {
                 // Finishing the edit session: persist what is still pending.
                 this.saveQueue.flush();
             }
+        },
+        onSelectElement: function(elementId) {
+            this.selectedElementId = elementId;
+        },
+        onAlbumClick: function(event) {
+            // A click outside any editable tile deselects (issue #56); clicks
+            // inside one are handled by the tile itself (it selects itself).
+            if (this.selectedElementId == null) {
+                return;
+            }
+            var target = event.target;
+            if (target && target.closest && target.closest(".s-element--draggable")) {
+                return;
+            }
+            this.selectedElementId = null;
         },
         onKeydown: function(event) {
             // Navigation/slideshow shortcuts don't apply while typing in a

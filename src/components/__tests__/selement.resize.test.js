@@ -26,6 +26,7 @@ function mountTile(props = {}) {
             token: '',
             preload: false,
             isFocus: false,
+            isSelected: true,
             elementMargin: 1,
             ...props,
         },
@@ -49,6 +50,10 @@ describe('selement corner resize', () => {
     it('shows the four corner handles in edit mode only', () => {
         expect(mountTile().findAll('.s-element-resize-handle')).toHaveLength(4)
         expect(mountTile({ editMode: false }).findAll('.s-element-resize-handle')).toHaveLength(0)
+    })
+
+    it('shows the handles on the selected element only (issue #56)', () => {
+        expect(mountTile({ isSelected: false }).findAll('.s-element-resize-handle')).toHaveLength(0)
     })
 
     it('does not show handles on non-resizable elements (audio)', () => {

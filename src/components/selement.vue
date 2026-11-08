@@ -1,7 +1,8 @@
 <template>
     <div ref="eldiv" v-bind:class="['s-element', ((sClass.endsWith('ImageElement') || sClass.endsWith('VideoElement')) && effectiveZoom < 100) ? 'blur-back' : '',
-    { 's-element--draggable': isDraggable, 's-element--dragging': isDragging, 's-element--dragover': isDragOver }]"
-    v-bind:id="sId"
+    { 's-element--draggable': isDraggable, 's-element--selected': showControls,
+      's-element--dragging': isDragging, 's-element--dragover': isDragOver }]"
+    v-bind:id="sId" v-on:click="onSelect"
     v-on:dragenter="onDragEnter" v-on:dragleave="onDragLeave"
     v-on:dragover="onDragOver" v-on:drop="onDrop"
     v-bind:style="rootStyle">
@@ -10,7 +11,8 @@
 		</button>
 		<!-- The handle is the only drag source for moving the element to another
 		     page/slot (issue #27): the tile surface itself is reserved for the
-		     pan & zoom gestures on image elements. -->
+		     pan & zoom gestures on image elements. Unlike the resize handles and
+		     the framing toggle, it shows on unselected elements too (issue #56). -->
 		<NcButton v-if="isDraggable" class="s-element-drag-handle" type="primary"
 			:aria-label="sDragToMove" :title="sDragToMove"
 			draggable="true" v-on:dragstart="onDragStart" v-on:dragend="onDragEnd">
@@ -29,7 +31,7 @@
 				<FitToScreen :size="20" />
 			</template>
 		</NcButton>
-		<template v-if="isResizable">
+		<template v-if="isResizable && isSelected">
 			<div v-for="corner in resizeCorners" v-bind:key="'resize-'+corner"
 				v-bind:class="['s-element-resize-handle', 's-element-resize-handle--'+corner]"
 				:title="sDragToResize"
@@ -129,6 +131,10 @@ export default {
       "token": String,
       "sMime": String,
       "isFocus": Boolean,
+      // Edit mode: this element is the selected one (issue #56). Only the
+      // selected element shows its move/resize/framing controls and takes the
+      // pan & zoom gestures; unselected tiles let a touch drag scroll the album.
+      "isSelected": Boolean,
       "elementMargin": Number,
     },
     data: function() {
@@ -187,6 +193,12 @@ export default {
                 this.panZoomPreview = null;
             }
             this.refreshImageStyle();
+        },
+        "isSelected": function(newSelected) {
+            // Deselecting commits a still-pending wheel zoom.
+            if (!newSelected) {
+                this.commitPanZoom();
+            }
         },
         "editMode": function(newEdit) {
             // Leaving edit mode commits a still-pending wheel zoom.
@@ -304,8 +316,9 @@ export default {
             return this.sClass != null && this.sClass.endsWith('VideoElement');
         },
         'canResetPanZoom': function() {
-            // The framing toggle applies to image and video elements in edit mode.
-            return this.editMode && this.sClass != null
+            // The framing toggle applies to selected image and video elements
+            // in edit mode.
+            return this.editMode && this.isSelected && this.sClass != null
                 && (this.sClass.endsWith('ImageElement') || this.isVideoElement);
         },
         'canPanZoom': function() {
@@ -313,7 +326,9 @@ export default {
             // once the image is loaded (the math needs its natural size) — and
             // only on the currently displayed page: on a peeking neighbor page
             // a touch drag must keep scrolling the album, not pan the image.
-            return this.editMode && this.isFocus
+            // And only once selected (issue #56): a touch drag on an
+            // unselected image scrolls the album too.
+            return this.editMode && this.isFocus && this.isSelected
                 && this.sClass != null && this.sClass.endsWith('ImageElement')
                 && this.imgSize != null && this.imgSize.width > 0 && this.imgSize.height > 0;
         },
@@ -346,6 +361,11 @@ export default {
         'isResizable': function() {
             // Any tile that can be dragged can also be resized (issue #20).
             return this.isDraggable;
+        },
+        'showControls': function() {
+            // The selected tile (issue #56): highlighted, with its resize
+            // corners and framing toggle shown.
+            return this.isDraggable && this.isSelected;
         },
         'displayGeometry': function() {
             // Live preview while a corner is being dragged, committed props otherwise.
@@ -448,7 +468,20 @@ export default {
             }
             this.$emit("imagefull",this.imageUrl(true),this.isPhotosphere());
         },
+        onSelect: function() {
+            // A click (or tap: unlike pointerdown, it does not fire when the
+            // touch turned into a scroll) on an editable tile selects it. The
+            // album deselects on clicks landing outside any editable tile.
+            if (this.isDraggable && !this.isSelected) {
+                this.$emit("select-element", this.sId);
+            }
+        },
         openVideo: function() {
+            // In edit mode a click on the video selects the tile (issue #56)
+            // instead of opening the fullscreen player.
+            if (this.editMode) {
+                return;
+            }
             document.getElementById(this.sId+"video").pause();
             this.$emit("videofull",this.videoUrl);
         },
@@ -911,6 +944,13 @@ function basename(path) {
    done from the handle button only. */
 .s-element--draggable {
 	pointer-events: all;
+}
+
+/* The selected tile (edit mode, issue #56): inset frame (the tile clips its
+   overflow, so an offset outline would be cut on the page edges). */
+.s-element--selected {
+	outline: 3px solid var(--color-primary-element, #0082c9);
+	outline-offset: -3px;
 }
 
 /* The tile being dragged: ghost it so the user sees it is in flight. */
