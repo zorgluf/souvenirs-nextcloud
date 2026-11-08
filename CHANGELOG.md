@@ -1,3 +1,12 @@
+## 2.6.1 - 2026-11-08
+### Added
+- In-app user guide, from the "Help (?)" entry of the album menu or the "?" key: how an album is built, the viewing / editing / slideshow / fullscreen modes, the supported media and the keyboard shortcuts ([#47](https://github.com/zorgluf/souvenirs-nextcloud/issues/47), [#61](https://github.com/zorgluf/souvenirs-nextcloud/pull/61))
+
+### Fixed
+- In edit mode, elements are selected by click or tap before they can be panned, zoomed or resized, so a touch drag on an image scrolls the album; pages get a dotted separator ([#56](https://github.com/zorgluf/souvenirs-nextcloud/issues/56), [#60](https://github.com/zorgluf/souvenirs-nextcloud/pull/60))
+- New albums are created with the default element margin, so elements no longer touch each other ([#57](https://github.com/zorgluf/souvenirs-nextcloud/issues/57), [#59](https://github.com/zorgluf/souvenirs-nextcloud/pull/59))
+- Reset/fit framing button on video elements in edit mode ([#55](https://github.com/zorgluf/souvenirs-nextcloud/issues/55), [#58](https://github.com/zorgluf/souvenirs-nextcloud/pull/58))
+
 ## 2.6.0 - 2026-10-27
 ### Added
 - API endpoints `POST apiv2/album/{id}/pages` (several page operations in one album write) and `POST apiv2/album/{id}/assetsearch` (link several files at once); existing endpoints keep their contract (the album load of the web editor, with `apath`, also returns the album path) [#52](https://github.com/zorgluf/souvenirs-nextcloud/pull/52)
