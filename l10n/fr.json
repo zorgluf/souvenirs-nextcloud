@@ -68,8 +68,8 @@
     "Move page right" : "Déplacer la page vers la droite",
     "Drag to move" : "Faites glisser pour déplacer",
     "Drag to resize" : "Faites glisser pour redimensionner",
-    "Fit whole image" : "Afficher l'image entière",
     "Reset zoom and position" : "Réinitialiser le zoom et la position",
+    "Fit whole image" : "Afficher l'image entière",
     "Remove text" : "Supprimer le texte",
     "Remove image" : "Supprimer l’image"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"

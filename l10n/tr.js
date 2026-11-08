@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Sayfayı sağa taşı",
     "Drag to move" : "Taşımak için sürükleyin",
     "Drag to resize" : "Yeniden boyutlandırmak için sürükleyin",
-    "Fit whole image" : "Tüm görseli sığdır",
     "Reset zoom and position" : "Yakınlaştırmayı ve konumu sıfırla",
+    "Fit whole image" : "Tüm görseli sığdır",
     "Remove text" : "Yazıyı kaldır",
     "Remove image" : "Görseli kaldır"
 },

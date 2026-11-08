@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Переместить страницу вправо",
     "Drag to move" : "Перетащите, чтобы переместить",
     "Drag to resize" : "Перетащите, чтобы изменить размер",
-    "Fit whole image" : "Вписать изображение целиком",
     "Reset zoom and position" : "Сбросить масштаб и положение",
+    "Fit whole image" : "Вписать изображение целиком",
     "Remove text" : "Удалить текст",
     "Remove image" : "Удалить изображение"
 },

@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Mută pagina la dreapta",
     "Drag to move" : "Trage pentru a muta",
     "Drag to resize" : "Trage pentru a redimensiona",
-    "Fit whole image" : "Potrivește întreaga imagine",
     "Reset zoom and position" : "Resetează zoomul și poziția",
+    "Fit whole image" : "Potrivește întreaga imagine",
     "Remove text" : "Elimină textul",
     "Remove image" : "Elimină imaginea"
 },

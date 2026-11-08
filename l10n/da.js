@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Flyt side til højre",
     "Drag to move" : "Træk for at flytte",
     "Drag to resize" : "Træk for at ændre størrelsen",
-    "Fit whole image" : "Vis hele billedet",
     "Reset zoom and position" : "Nulstil zoom og position",
+    "Fit whole image" : "Vis hele billedet",
     "Remove text" : "Fjern tekst",
     "Remove image" : "Fjern billede"
 },

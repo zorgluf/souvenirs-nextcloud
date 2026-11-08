@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Bog an leathanach ar dheis",
     "Drag to move" : "Tarraing le bogadh",
     "Drag to resize" : "Tarraing chun athrú méide",
-    "Fit whole image" : "Oiriúnaigh an íomhá iomlán",
     "Reset zoom and position" : "Athshocraigh súmáil agus suíomh",
+    "Fit whole image" : "Oiriúnaigh an íomhá iomlán",
     "Remove text" : "Bain téacs",
     "Remove image" : "Bain íomhá"
 },

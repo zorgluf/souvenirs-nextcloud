@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Presunúť stránku doprava",
     "Drag to move" : "Potiahnutím presuniete",
     "Drag to resize" : "Potiahnutím zmeníte veľkosť",
-    "Fit whole image" : "Prispôsobiť celý obrázok",
     "Reset zoom and position" : "Obnoviť priblíženie a polohu",
+    "Fit whole image" : "Prispôsobiť celý obrázok",
     "Remove text" : "Odstrániť text",
     "Remove image" : "Zmazať obrázok"
 },

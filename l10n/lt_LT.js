@@ -68,8 +68,8 @@ OC.L10N.register(
     "Move page right" : "Perkelti puslapį į dešinę",
     "Drag to move" : "Perkelkite vilkdami",
     "Drag to resize" : "Tempkite, norėdami pakeisti dydį",
-    "Fit whole image" : "Pritaikyti visą vaizdą",
     "Reset zoom and position" : "Atkurti mastelį ir padėtį",
+    "Fit whole image" : "Pritaikyti visą vaizdą",
     "Remove text" : "Pašalinti tekstą",
     "Remove image" : "Šalinti paveikslą"
 },

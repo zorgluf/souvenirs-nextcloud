@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Tõsta leht paremale",
     "Drag to move" : "Teisaldamiseks lohista",
     "Drag to resize" : "Suuruse muutmiseks lohista",
-    "Fit whole image" : "Sobita kogu pilt",
     "Reset zoom and position" : "Lähtesta suumimine ja asukoht",
+    "Fit whole image" : "Sobita kogu pilt",
     "Remove text" : "Eemalda tekst",
     "Remove image" : "Eemalda pilt"
 },

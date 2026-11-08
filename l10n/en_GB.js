@@ -70,8 +70,8 @@ OC.L10N.register(
     "Move page right" : "Move page right",
     "Drag to move" : "Drag to move",
     "Drag to resize" : "Drag to resize",
-    "Fit whole image" : "Fit whole image",
     "Reset zoom and position" : "Reset zoom and position",
+    "Fit whole image" : "Fit whole image",
     "Remove text" : "Remove text",
     "Remove image" : "Remove image"
 },
