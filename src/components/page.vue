@@ -1,5 +1,5 @@
 <template>
-    <div v-bind:class="(isWinPortrait ? 's-page-vert' : 's-page-hori')" v-bind:id="sId"
+    <div v-bind:class="[isWinPortrait ? 's-page-vert' : 's-page-hori', { 's-page--separated': editMode && sNum > 0 }]" v-bind:id="sId"
         v-on:dragover="onPageDragOver" v-on:drop="onPageDrop">
 	<selement v-for="element in elements" v-bind:s-id="element.id" v-bind:s-top="element.top"
 				v-bind:s-bottom="element.bottom" v-bind:s-left="element.left"
@@ -14,6 +14,8 @@
                 v-bind:s-video="element.video" v-bind:is-focus="isFocus"
                 v-on:imagefull="openImgFull" v-on:videofull="openVideoFull"
                 v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
+                v-bind:is-selected="editMode && selectedElementId === element.id"
+                v-on:select-element="onSelectElement"
                 v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
                 v-on:pan-zoom-element="onPanZoomElement"
                 v-bind:s-page-id="sId" v-on:element-drop="onElementDrop"
@@ -100,6 +102,8 @@ export default {
       "elementMargin": Number,
       "editMode": Boolean,
       "isLast": Boolean,
+      // Id of the element selected in edit mode (issue #56), null if none.
+      "selectedElementId": String,
     },
     data: function() {
         return {
@@ -234,6 +238,9 @@ export default {
       onMoveRight: function() {
         this.$emit("move-page", this.sNum, 1);
       },
+      onSelectElement: function(elementId) {
+        this.$emit("select-element", elementId);
+      },
       onRemoveAudio: function() {
         // Ask the album to confirm and remove this page's audio track.
         this.$emit("remove-audio", this.sId);
@@ -288,6 +295,30 @@ function isFullyVisible(el) {
   height: 100%;
   aspect-ratio: 1 / 1;
   position: relative;
+}
+
+/* Dotted delimiter on the seam with the previous page (edit mode, issue #56):
+   an overlay on the page's leading edge rather than a border, so it does not
+   change the page size the album's scroll math relies on. */
+.s-page--separated::before {
+  content: '';
+  position: absolute;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.s-page-vert.s-page--separated::before {
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-top: 3px dotted var(--color-border-maxcontrast, #7f7f7f);
+}
+
+.s-page-hori.s-page--separated::before {
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-left: 3px dotted var(--color-border-maxcontrast, #7f7f7f);
 }
 
 /* Clear of the album's progress dots (album.vue .progress: bottom 20px,

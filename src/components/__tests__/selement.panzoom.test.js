@@ -29,6 +29,8 @@ async function mountImageTile(props = {}) {
             preload: false,
             // Pan & zoom only works on the currently displayed page.
             isFocus: true,
+            // ...and on the selected element only (issue #56).
+            isSelected: true,
             elementMargin: 1,
             ...props,
         },
@@ -156,6 +158,61 @@ describe('selement image pan & zoom (edit mode)', () => {
         await img(wrapper).trigger('wheel', { deltaY: -100, clientX: 0, clientY: 0 })
         expect(wrapper.emitted('pan-zoom-element')).toBeFalsy()
         expect(wrapper.vm.panZoomPreview).toBe(null)
+    })
+})
+
+describe('selement selection (issue #56)', () => {
+    it('ignores gestures on an unselected image, so a touch drag scrolls the album', async () => {
+        const wrapper = await mountImageTile({ isSelected: false })
+        expect(img(wrapper).classes()).not.toContain('image-element--pan')
+        await img(wrapper).trigger('pointerdown', { pointerId: 1, clientX: 100, clientY: 100 })
+        await img(wrapper).trigger('pointermove', { pointerId: 1, clientX: 200, clientY: 200 })
+        await img(wrapper).trigger('pointerup', { pointerId: 1, clientX: 200, clientY: 200 })
+        await img(wrapper).trigger('wheel', { deltaY: -100, clientX: 0, clientY: 0 })
+        expect(wrapper.emitted('pan-zoom-element')).toBeFalsy()
+        expect(wrapper.vm.panZoomPreview).toBe(null)
+    })
+
+    it('hides the framing toggle until selected, keeps the move handle', async () => {
+        const wrapper = await mountImageTile({ isSelected: false })
+        expect(wrapper.find('.s-element-drag-handle').exists()).toBe(true)
+        expect(wrapper.find('.s-element-pan-reset').exists()).toBe(false)
+        expect(wrapper.classes()).not.toContain('s-element--selected')
+        await wrapper.setProps({ isSelected: true })
+        expect(wrapper.find('.s-element-drag-handle').exists()).toBe(true)
+        expect(wrapper.find('.s-element-pan-reset').exists()).toBe(true)
+        expect(wrapper.classes()).toContain('s-element--selected')
+    })
+
+    it('selects itself on click in edit mode', async () => {
+        const wrapper = await mountImageTile({ isSelected: false })
+        await img(wrapper).trigger('click')
+        expect(wrapper.emitted('select-element')).toEqual([['el-1']])
+    })
+
+    it('does not emit select when already selected or outside edit mode', async () => {
+        const selected = await mountImageTile()
+        await img(selected).trigger('click')
+        expect(selected.emitted('select-element')).toBeFalsy()
+        const viewing = await mountImageTile({ editMode: false, isSelected: false })
+        await img(viewing).trigger('click')
+        expect(viewing.emitted('select-element')).toBeFalsy()
+    })
+
+    it('commits a pending wheel zoom when deselected', async () => {
+        const wrapper = await mountImageTile()
+        await img(wrapper).trigger('wheel', { deltaY: -100, clientX: 250, clientY: 250 })
+        expect(wrapper.emitted('pan-zoom-element')).toBeFalsy()
+        await wrapper.setProps({ isSelected: false })
+        expect(wrapper.emitted('pan-zoom-element')).toHaveLength(1)
+    })
+
+    it('selects a video tile on click instead of opening the fullscreen player', async () => {
+        const wrapper = await mountImageTile({ sClass: 'VideoElement', sVideo: 'data/clip.mp4',
+            sImage: 'data/poster.jpg', isSelected: false })
+        await wrapper.find('video').trigger('click')
+        expect(wrapper.emitted('videofull')).toBeFalsy()
+        expect(wrapper.emitted('select-element')).toEqual([['el-1']])
     })
 })
 
