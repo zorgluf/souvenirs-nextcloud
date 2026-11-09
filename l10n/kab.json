@@ -1,4 +1,10 @@
 { "translations": {
+    "or" : "neɣ",
+    "Media" : "Amidya",
+    "Page" : "Asebter",
+    "Editing" : "Asiẓreg",
+    "Slideshow" : "Tigri",
+    "Fullscreen" : "Plein écran",
     "All files" : "Akk ifuyla",
     "Upload" : "Sili",
     "Cancel" : "Semmet",
@@ -10,9 +16,14 @@
     "Create" : "Snulfu-d",
     "Save" : "Sekles",
     "Download" : "Sider",
-    "Fullscreen" : "Plein écran",
     "Remove" : "Kkes",
     "Add media" : "Rnu amidya",
-    "Change layout" : "Snifel taneγruft"
+    "Change layout" : "Snifel taneγruft",
+    "Photos" : "Tiwlafin",
+    "Videos" : "Tividyutin",
+    "Audio" : "Imesli",
+    "Text" : "Aḍris",
+    "Previous page" : "Asebter yezrin",
+    "Next page" : "Asebter d-iteddun"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

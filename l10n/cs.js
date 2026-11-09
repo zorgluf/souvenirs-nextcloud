@@ -2,6 +2,12 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenýry",
+    "Android app" : "Aplikace pro Android",
+    "Structure" : "Struktura",
+    "Media" : "Média",
+    "Shortcuts" : "Zkratky",
+    "Editing" : "Upravování",
+    "Fullscreen" : "Na celou obrazovku",
     "Choose media" : "Zvolit médium",
     "All files" : "Všechny soubory",
     "Upload" : "Nahrát",
@@ -23,7 +29,6 @@ OC.L10N.register(
     "Expires on" : "Platnost skončí",
     "Slideshow speed" : "Rychlost promítání",
     "Download" : "Stáhnout",
-    "Fullscreen" : "Na celou obrazovku",
     "Click to download album in a zip file." : "Kliknutím si album stáhnete v podobě jediného souboru (zip archiv).",
     "Edit (E)" : "Upravit (E)",
     "Add page" : "Přidat stránku",
@@ -36,6 +41,10 @@ OC.L10N.register(
     "Change layout" : "Změnit rozvržení",
     "Drag to move" : "Přesuňte přetažením",
     "Remove text" : "Odebrat text",
-    "Remove image" : "Odebrat obrázek"
+    "Remove image" : "Odebrat obrázek",
+    "Photos" : "Fotky",
+    "Text" : "Text",
+    "Previous page" : "Předchozí stránka",
+    "Next page" : "Následující stránka"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

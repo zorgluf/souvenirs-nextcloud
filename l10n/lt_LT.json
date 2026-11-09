@@ -1,6 +1,13 @@
 { "translations": {
     "Souvenirs" : "Suvenyrai",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Sukurkite, peržiūrėkite ir dalinkitės „senosios mokyklos“ stiliaus albumais su savo nuotraukomis, vaizdo įrašais ir panoraminėmis nuotraukomis savo „Nextcloud“ serveryje.",
+    "or" : "ar",
+    "Media" : "Medija",
+    "Album" : "Albumas",
+    "Page" : "Puslapis",
+    "Editing" : "Redagavimas",
+    "Slideshow" : "Skaidrių rodymas",
+    "Fullscreen" : "Visas ekranas",
     "Choose media" : "Pasirinkite mediją",
     "All files" : "Visi failai",
     "Upload" : "Įkelti",
@@ -32,7 +39,6 @@
     "Stop slideshow ( )" : "Stabdyti skaidrių rodymą ( )",
     "Slideshow speed" : "Skaidrių rodymo greitis",
     "Download" : "Atsisiųsti",
-    "Fullscreen" : "Visas ekranas",
     "Click to download album in a zip file." : "Spustelėkite, norėdami atsisiųsti albumą kaip zip failą.",
     "Edit (E)" : "Redaguoti (E)",
     "Finish editing (E)" : "Baigti redaguoti (E)",
@@ -69,6 +75,12 @@
     "Reset zoom and position" : "Atkurti mastelį ir padėtį",
     "Fit whole image" : "Pritaikyti visą vaizdą",
     "Remove text" : "Pašalinti tekstą",
-    "Remove image" : "Šalinti paveikslą"
+    "Remove image" : "Šalinti paveikslą",
+    "Photos" : "Nuotraukos",
+    "Videos" : "Vaizdo įrašai",
+    "Audio" : "Garso įrašai",
+    "Text" : "Tekstas",
+    "Previous page" : "Ankstesnis puslapis",
+    "Next page" : "Kitas puslapis"
 },"pluralForm" :"nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);"
 }

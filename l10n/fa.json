@@ -1,5 +1,13 @@
 { "translations": {
     "Souvenirs" : "یادگاری‌ها",
+    "or" : "یا",
+    "Android app" : "برنامه Android",
+    "Media" : "رسانه",
+    "Shortcuts" : "Shortcuts",
+    "Page" : "صفحه",
+    "Editing" : "ویرایش",
+    "Slideshow" : "نمایش اسلاید",
+    "Fullscreen" : "تمام‌صفحه",
     "All files" : "همه فایل‌ها",
     "Upload" : "آپلود",
     "Cancel" : "انصراف",
@@ -16,12 +24,17 @@
     "Expires on" : "تاریخ انقضا",
     "Slideshow speed" : "سرعت نمایش اسلاید",
     "Download" : "دانلود",
-    "Fullscreen" : "تمام‌صفحه",
     "Click to download album in a zip file." : "برای دانلود آلبوم به صورت فایل فشرده کلیک کنید",
     "Saving changes…" : "در حال ذخیره تغییرات…",
     "Remove" : "حذف",
     "Change layout" : "تغییر چیدمان",
     "Drag to move" : "کشیدن برای جابجایی",
-    "Remove image" : "تصویر پاک شود"
+    "Remove image" : "تصویر پاک شود",
+    "Photos" : "عکس‌ها",
+    "Videos" : "فیلم ها ",
+    "Audio" : "صدا",
+    "Text" : "متن",
+    "Previous page" : "صفحه قبل",
+    "Next page" : "صفحه بعد"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

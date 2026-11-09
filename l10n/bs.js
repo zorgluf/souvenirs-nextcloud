@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Android app" : "Android aplikacija",
     "All files" : "Sve datoteke",
     "Upload" : "Učitaj",
     "Cancel" : "Cancel",
@@ -10,6 +11,7 @@ OC.L10N.register(
     "Download" : "Preuzmi",
     "Remove" : "Ukloni",
     "Change layout" : "Promijeni raspored",
-    "Remove image" : "Ukloni sliku"
+    "Remove image" : "Ukloni sliku",
+    "Text" : "Tekst"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

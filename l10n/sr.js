@@ -2,6 +2,15 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувенири",
+    "or" : "или",
+    "Android app" : "Андроид апликација",
+    "Media" : "Медији",
+    "Shortcuts" : "Пречице",
+    "Album" : "Албум",
+    "Page" : "Страница",
+    "Editing" : "Уређивање",
+    "Slideshow" : "Пројектор слајдова",
+    "Fullscreen" : "Цео екран",
     "All files" : "Сви фајлови",
     "Upload" : "Отпреми",
     "Cancel" : "Cancel",
@@ -18,10 +27,13 @@ OC.L10N.register(
     "Expires on" : "Истиче дана",
     "Slideshow speed" : "Брзина пројекције слајдова",
     "Download" : "Преузми",
-    "Fullscreen" : "Цео екран",
     "Click to download album in a zip file." : "Кликните да преузмете албум у zip фајлу.",
     "Remove" : "Уклони",
     "Change layout" : "Промени распоред",
-    "Remove image" : "Уклони слику"
+    "Remove image" : "Уклони слику",
+    "Photos" : "Фотографије",
+    "Videos" : "Видео снимци",
+    "Audio" : "Звук",
+    "Text" : "Текст"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

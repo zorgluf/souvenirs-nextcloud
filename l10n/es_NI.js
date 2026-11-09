@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "o",
+    "Android app" : "Aplicación android",
+    "Fullscreen" : "Pantalla completa",
     "All files" : "Todos los archivos",
     "Upload" : "Cargar",
     "Cancel" : "Cancel",
@@ -8,7 +11,8 @@ OC.L10N.register(
     "Confirm" : "Confirmar",
     "Save" : "Save",
     "Download" : "Descargar",
-    "Fullscreen" : "Pantalla completa",
-    "Remove image" : "Eliminar imagen"
+    "Remove image" : "Eliminar imagen",
+    "Videos" : "Videos",
+    "Text" : "Texto"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

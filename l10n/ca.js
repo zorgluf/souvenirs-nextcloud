@@ -1,6 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Android app" : "Aplicació d'Android",
+    "Media" : "Multimèdia",
+    "Shortcuts" : "Enllaços directes",
+    "Editing" : "Edició",
+    "Fullscreen" : "Pantalla completa",
     "All files" : "Tots els fitxers",
     "Upload" : "Puja",
     "Cancel" : "Cancel",
@@ -12,9 +17,12 @@ OC.L10N.register(
     "Create" : "Crea",
     "Save" : "Desa",
     "Download" : "Baixada",
-    "Fullscreen" : "Pantalla completa",
     "Remove" : "Suprimir",
     "Change layout" : "Canviar diseny",
-    "Remove image" : "Suprimir imatge"
+    "Remove image" : "Suprimir imatge",
+    "Photos" : "Fotos",
+    "Text" : "Text",
+    "Previous page" : "Pàgina anterior",
+    "Next page" : "Pàgina següent"
 },
 "nplurals=2; plural=(n != 1);");

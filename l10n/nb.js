@@ -2,6 +2,15 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "or" : "eller",
+    "Android app" : "Android-app",
+    "Media" : "Media",
+    "Shortcuts" : "Snarveier",
+    "Album" : "Album",
+    "Page" : "Side",
+    "Editing" : "Rediger",
+    "Slideshow" : "Lysbildefremvisning",
+    "Fullscreen" : "Fullskjerm",
     "All files" : "Alle filer",
     "Upload" : "Last opp",
     "Cancel" : "Cancel",
@@ -18,10 +27,15 @@ OC.L10N.register(
     "Expires on" : "Utløper den",
     "Slideshow speed" : "Hastighet på lysbildefremvisning",
     "Download" : "Last ned",
-    "Fullscreen" : "Fullskjerm",
     "Click to download album in a zip file." : "Klikk for å laste ned album i en zip-fil.",
     "Remove" : "Fjern",
     "Change layout" : "Endre utforming",
-    "Remove image" : "Fjern bilde"
+    "Remove image" : "Fjern bilde",
+    "Photos" : "Bilder",
+    "Videos" : "Filmer",
+    "Audio" : "Lyd",
+    "Text" : "Tekst",
+    "Previous page" : "Forrige side",
+    "Next page" : "Neste side"
 },
 "nplurals=2; plural=(n != 1);");

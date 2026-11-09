@@ -1,4 +1,8 @@
 { "translations": {
+    "or" : "or",
+    "Android app" : "Android app",
+    "Media" : "Media",
+    "Editing" : "Editing",
     "All files" : "All files",
     "Upload" : "Upload",
     "Cancel" : "გაუქმება",
@@ -8,6 +12,9 @@
     "Create" : "Create",
     "Save" : "Save",
     "Download" : "Download",
-    "Remove" : "Remove"
+    "Remove" : "Remove",
+    "Videos" : "Videos",
+    "Audio" : "Audio",
+    "Text" : "Text"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

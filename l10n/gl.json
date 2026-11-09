@@ -1,5 +1,14 @@
 { "translations": {
     "Souvenirs" : "Acordanzas",
+    "or" : "ou",
+    "Android app" : "Aplicación de Android",
+    "Media" : "Multimedia",
+    "Shortcuts" : "Atallos",
+    "Album" : "Álbum",
+    "Page" : "Páxina",
+    "Editing" : "Editando",
+    "Slideshow" : "Diaporama",
+    "Fullscreen" : "Pantalla completa",
     "All files" : "Todos os ficheiros",
     "Upload" : "Enviar",
     "Cancel" : "Cancelar",
@@ -16,11 +25,16 @@
     "Expires on" : "Caduca o",
     "Slideshow speed" : "Velocidade do diaporama",
     "Download" : "Descargar",
-    "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Prema para descargar o álbum nun arquivo zip.",
     "Remove" : "Retirar",
     "Change layout" : "Cambiar o deseño",
     "Drag to move" : "Arrastrar para mover",
-    "Remove image" : "Retirar a imaxe"
+    "Remove image" : "Retirar a imaxe",
+    "Photos" : "Fotos",
+    "Videos" : "Vídeos",
+    "Audio" : "Son",
+    "Text" : "Texto",
+    "Previous page" : "Páxina anterior",
+    "Next page" : "Páxina seguinte"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

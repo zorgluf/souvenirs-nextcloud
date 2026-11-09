@@ -1,6 +1,17 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
+    "or" : "ou",
+    "Android app" : "Aplicativo Android",
+    "Structure" : "Estrutura",
+    "Media" : "Mídia",
+    "Shortcuts" : "Atalhos",
+    "Album" : "Álbum",
+    "Page" : "Página",
+    "Tile" : "Bloco",
+    "Editing" : "Editando",
+    "Slideshow" : "Apresentação de slides",
+    "Fullscreen" : "Tela inteira",
     "Choose media" : "Escolher mídia",
     "All files" : "Todos os arquivos",
     "Upload" : "Fazer upload",
@@ -32,7 +43,6 @@
     "Stop slideshow ( )" : "Encerrar apresentação de slides ( )",
     "Slideshow speed" : "Velocidade da apresentação de slides",
     "Download" : "Baixar",
-    "Fullscreen" : "Tela inteira",
     "Click to download album in a zip file." : "Clique para baixar o álbum em um arquivo zip.",
     "Edit (E)" : "Editar (E)",
     "Finish editing (E)" : "Concluir a edição (E)",
@@ -70,6 +80,13 @@
     "Reset zoom and position" : "Redefinir zoom e posição",
     "Fit whole image" : "Ajustar a imagem inteira",
     "Remove text" : "Remover texto",
-    "Remove image" : "Remover imagem"
+    "Remove image" : "Remover imagem",
+    "Photos" : "Fotos",
+    "Videos" : "Vídeos",
+    "Audio" : "Áudio",
+    "Text" : "Texto",
+    "Drawings" : "Desenhos",
+    "Previous page" : "Página anterior",
+    "Next page" : "Próxima página"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

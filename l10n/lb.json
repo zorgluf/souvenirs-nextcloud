@@ -1,4 +1,6 @@
 { "translations": {
+    "Android app" : "Android-App",
+    "Media" : "Medien",
     "All files" : "All d'Fichieren",
     "Upload" : "Eroplueden",
     "Cancel" : "Cancel",
@@ -8,6 +10,8 @@
     "Create" : "Erstellen",
     "Save" : "Save",
     "Download" : "Eroflueden",
-    "Remove" : "Ewechhuelen"
+    "Remove" : "Ewechhuelen",
+    "Audio" : "Toun",
+    "Text" : "Text"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -3,6 +3,11 @@ OC.L10N.register(
     {
     "Souvenirs" : "Αναμνηστικά",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Δημιουργήστε, εμφανίστε και μοιραστείτε \"old school\" άλμπουμ για τις φωτογραφίες, τα βίντεο και τις πανοραμικές λήψεις σας, στον διακομιστή Nextcloud.",
+    "Android app" : "Εφαρμογή Android",
+    "Media" : "Πολυμέσα",
+    "Shortcuts" : "Συντομεύσεις",
+    "Editing" : "Επεξεργασία",
+    "Fullscreen" : "Πλήρης οθόνη",
     "All files" : "Όλα τα αρχεία",
     "Upload" : "Μεταφόρτωση",
     "Cancel" : "Ακύρωση",
@@ -29,7 +34,6 @@ OC.L10N.register(
     "Expires on" : "Λήξη στις",
     "Slideshow speed" : "Ταχύτητα παρουσίασης",
     "Download" : "Λήψη",
-    "Fullscreen" : "Πλήρης οθόνη",
     "Click to download album in a zip file." : "Κάντε κλικ για λήψη του άλμπουμ σε ένα αρχείο zip.",
     "Add page" : "Προσθήκη σελίδας",
     "Saving changes…" : "Αποθήκευση αλλαγών…",
@@ -57,6 +61,10 @@ OC.L10N.register(
     "Drag to resize" : "Σύρετε για αλλαγή μεγέθους",
     "Reset zoom and position" : "Επαναφορά εστίασης και θέσης",
     "Remove text" : "Αφαίρεση κειμένου",
-    "Remove image" : "Αφαίρεση εικόνας"
+    "Remove image" : "Αφαίρεση εικόνας",
+    "Photos" : "Φωτογραφίες",
+    "Text" : "Κείμενο",
+    "Previous page" : "Προηγούμενη σελίδα",
+    "Next page" : "Επόμενη σελίδα"
 },
 "nplurals=2; plural=(n != 1);");

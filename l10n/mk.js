@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "или",
+    "Android app" : "Android апликација",
+    "Media" : "Медија",
+    "Album" : "Албум",
+    "Page" : "Страница",
+    "Editing" : "Уредување",
+    "Slideshow" : "Слајдшоу",
+    "Fullscreen" : "Цел екран",
     "All files" : "Сите датотеки",
     "Upload" : "Прикачи",
     "Cancel" : "Cancel",
@@ -13,9 +21,12 @@ OC.L10N.register(
     "Create" : "Креирај",
     "Save" : "Save",
     "Download" : "Преземи",
-    "Fullscreen" : "Цел екран",
     "Remove" : "Отстрани ",
     "Change layout" : "Промени распоред",
-    "Remove image" : "Отстрани ја фотографијата"
+    "Remove image" : "Отстрани ја фотографијата",
+    "Photos" : "Фотографии",
+    "Videos" : "Видеа",
+    "Audio" : "Аудио",
+    "Text" : "Текст"
 },
 "nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;");

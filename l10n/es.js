@@ -2,6 +2,12 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "Android app" : "Aplicación de Android",
+    "Media" : "Medios",
+    "Shortcuts" : "Atajos",
+    "Editing" : "Editando",
+    "Slideshow" : "Presentación de diapositivas",
+    "Fullscreen" : "Pantalla completa",
     "All files" : "Todos los archivos",
     "Upload" : "Subir",
     "Cancel" : "Cancelar",
@@ -18,11 +24,15 @@ OC.L10N.register(
     "Expires on" : "Caduca en",
     "Slideshow speed" : "Velocidad de la presentación de diapositivas",
     "Download" : "Descargar",
-    "Fullscreen" : "Pantalla completa",
     "Click to download album in a zip file." : "Pulse para descargar el álbum en un archivo zip.",
     "Remove" : "Quitar",
     "Change layout" : "Cambiar diseño",
     "Drag to move" : "Arrastrar para mover",
-    "Remove image" : "Borrar imagen"
+    "Remove image" : "Borrar imagen",
+    "Photos" : "Fotos",
+    "Videos" : "Vídeos",
+    "Text" : "Texto",
+    "Previous page" : "Página anterior",
+    "Next page" : "Página siguiente"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

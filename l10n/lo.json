@@ -1,4 +1,11 @@
 { "translations": {
+    "or" : "ຫຼື",
+    "Android app" : "Android app",
+    "Media" : "ຊື່ມວນຊົນ",
+    "Album" : "ອະລະບໍ້າ",
+    "Page" : "ໜ້າ",
+    "Editing" : "Editing",
+    "Slideshow" : "ສະໄລ້ໂຊ",
     "All files" : "ຟາຍທັງໝົດ",
     "Upload" : "ອັບໂຫລດ",
     "Cancel" : "Cancel",
@@ -14,6 +21,10 @@
     "Download" : "ດາວໂຫລດ",
     "Remove" : "ລຶບອອກ",
     "Change layout" : "ປ່ຽນໂຄງຮ່າງ",
-    "Drag to move" : "ລາກເພື່ອຍ້າຍ"
+    "Drag to move" : "ລາກເພື່ອຍ້າຍ",
+    "Photos" : "ຮູບພາບ",
+    "Videos" : "ວິດີໂອ",
+    "Audio" : "ສຽງ",
+    "Text" : "ຂໍ້ຄວາມ"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

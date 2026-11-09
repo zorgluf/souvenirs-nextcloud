@@ -2,6 +2,14 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Oroigarriak",
+    "or" : "edo",
+    "Android app" : "Android aplikazioa",
+    "Media" : "Media",
+    "Shortcuts" : "Lasterbideak",
+    "Page" : "Orria",
+    "Editing" : "Edizioa",
+    "Slideshow" : "Diapositiba-aurkezpena",
+    "Fullscreen" : "Pantaila osoa",
     "All files" : "Fitxategi guztiak",
     "Upload" : "Igo",
     "Cancel" : "Cancel",
@@ -16,11 +24,16 @@ OC.L10N.register(
     "Expires on" : "Iraungitze-data",
     "Slideshow speed" : "Diapositiba-aurkezpenaren abiadura",
     "Download" : "Deskargatu",
-    "Fullscreen" : "Pantaila osoa",
     "Click to download album in a zip file." : "Egin klik albuma zip fitxategi batean deskargatzeko.",
     "Remove" : "Kendu",
     "Add media" : "Gehitu multimedia",
     "Change layout" : "Aldatu diseinua",
-    "Remove image" : "Kendu irudia"
+    "Remove image" : "Kendu irudia",
+    "Photos" : "Argazkiak",
+    "Videos" : "Bideoak",
+    "Audio" : "Audio",
+    "Text" : "Testua",
+    "Previous page" : "Aurreko orria",
+    "Next page" : "Hurrengo orria"
 },
 "nplurals=2; plural=(n != 1);");

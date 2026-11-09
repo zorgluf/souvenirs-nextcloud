@@ -2,6 +2,15 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "خاتىرە بۇيۇملار",
+    "or" : "ياكى",
+    "Android app" : "ئاندىرويىد دېتالى",
+    "Media" : "كۆپ-ۋاستە",
+    "Shortcuts" : "تېزلەتمە",
+    "Album" : "توپلام",
+    "Page" : "بەت",
+    "Editing" : "تەھرىرلەش",
+    "Slideshow" : "تام تەسۋىر",
+    "Fullscreen" : "تولۇق ئېكران",
     "All files" : "بارلىق ھۆججەتلەر",
     "Upload" : "يۈكلەش",
     "Cancel" : "Cancel",
@@ -18,10 +27,15 @@ OC.L10N.register(
     "Expires on" : "ۋاقتى توشىدۇ",
     "Slideshow speed" : "تام تەسۋىر سۈرئىتى",
     "Download" : "چۈشۈر",
-    "Fullscreen" : "تولۇق ئېكران",
     "Click to download album in a zip file." : "Zip ھۆججىتىدىكى پىلاستىنكىنى چۈشۈرۈش ئۈچۈن چېكىڭ.",
     "Remove" : "ئۆچۈرۈڭ",
     "Change layout" : "ئورۇنلاشتۇرۇش",
-    "Drag to move" : "سۆرەپ يۆتكىڭ"
+    "Drag to move" : "سۆرەپ يۆتكىڭ",
+    "Photos" : "سۈرەتلەر",
+    "Videos" : "سىنلار",
+    "Audio" : "ئاۋاز",
+    "Text" : "تېكىست",
+    "Previous page" : "ئالدىنقى بەت",
+    "Next page" : "كېيىنكى بەت"
 },
 "nplurals=2; plural=(n != 1);");

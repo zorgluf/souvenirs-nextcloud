@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Page" : "Side",
     "All files" : "Alle filer",
     "Upload" : "Last opp",
     "Cancel" : "Cancel",
@@ -11,6 +12,10 @@ OC.L10N.register(
     "Download" : "Last ned",
     "Remove" : "Fjern",
     "Change layout" : "Endra oppsett",
-    "Remove image" : "Fjern bilete"
+    "Remove image" : "Fjern bilete",
+    "Photos" : "Bilete",
+    "Videos" : "Video",
+    "Audio" : "Lyd",
+    "Text" : "Tekst"
 },
 "nplurals=2; plural=(n != 1);");

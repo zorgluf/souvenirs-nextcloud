@@ -1,6 +1,9 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Android app" : "Aplicación p'Android",
+    "Media" : "Multimedia",
+    "Shortcuts" : "Atayos",
     "All files" : "Tolos ficheros",
     "Upload" : "Xunir",
     "Cancel" : "Cancel",
@@ -15,6 +18,8 @@ OC.L10N.register(
     "Slideshow speed" : "Velocidá de la proyeición",
     "Download" : "Baxar",
     "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
-    "Remove" : "Quitar"
+    "Remove" : "Quitar",
+    "Photos" : "Semeyes",
+    "Text" : "Testu"
 },
 "nplurals=2; plural=(n != 1);");

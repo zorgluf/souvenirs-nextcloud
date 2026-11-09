@@ -1,6 +1,13 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "或いは",
+    "Android app" : "Android アプリ",
+    "Media" : "メディア",
+    "Shortcuts" : "ショートカットキー",
+    "Album" : "アルバム",
+    "Editing" : "編集中",
+    "Fullscreen" : "全画面",
     "All files" : "すべてのファイル",
     "Upload" : "アップロード",
     "Cancel" : "キャンセル",
@@ -12,10 +19,15 @@ OC.L10N.register(
     "Create" : "作成",
     "Save" : "保存する",
     "Download" : "ダウンロード",
-    "Fullscreen" : "全画面",
     "Saving changes…" : "変更を保存中…",
     "Remove" : "削除",
     "Drag to move" : "ドラッグして移動",
-    "Remove image" : "画像を削除"
+    "Remove image" : "画像を削除",
+    "Photos" : "写真",
+    "Videos" : "動画",
+    "Audio" : "オーディオ",
+    "Text" : "テキスト",
+    "Previous page" : "前のページ",
+    "Next page" : "次のページ"
 },
 "nplurals=1; plural=0;");

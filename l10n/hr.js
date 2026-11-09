@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "ili",
+    "Android app" : "Aplikacija za Android",
+    "Media" : "Medij",
+    "Shortcuts" : "Prečaci",
+    "Album" : "Album",
+    "Page" : "Stranica",
+    "Editing" : "Uređivanje",
+    "Fullscreen" : "Cijeli zaslon",
     "All files" : "Sve datoteke",
     "Upload" : "Učitaj",
     "Cancel" : "Otkaži",
@@ -12,10 +20,13 @@ OC.L10N.register(
     "Create" : "Stvori",
     "Save" : "Spremi",
     "Download" : "Preuzmi",
-    "Fullscreen" : "Cijeli zaslon",
     "Remove" : "Ukloni",
     "Change layout" : "Promijeni raspored",
     "Drag to move" : "Povucite za premještanje",
-    "Remove image" : "Ukloni sliku"
+    "Remove image" : "Ukloni sliku",
+    "Photos" : "Fotografije",
+    "Videos" : "Videozapisi",
+    "Audio" : "Zvuk",
+    "Text" : "Tekst"
 },
 "nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;");

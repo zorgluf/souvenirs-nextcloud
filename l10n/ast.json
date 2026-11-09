@@ -1,4 +1,7 @@
 { "translations": {
+    "Android app" : "Aplicación p'Android",
+    "Media" : "Multimedia",
+    "Shortcuts" : "Atayos",
     "All files" : "Tolos ficheros",
     "Upload" : "Xunir",
     "Cancel" : "Cancel",
@@ -13,6 +16,8 @@
     "Slideshow speed" : "Velocidá de la proyeición",
     "Download" : "Baxar",
     "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
-    "Remove" : "Quitar"
+    "Remove" : "Quitar",
+    "Photos" : "Semeyes",
+    "Text" : "Testu"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

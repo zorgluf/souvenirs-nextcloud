@@ -1,6 +1,12 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "o",
+    "Android app" : "Aplicatzione Android",
+    "Media" : "Elementos multimediales",
+    "Shortcuts" : "Incurtzaduras",
+    "Album" : "Album",
+    "Fullscreen" : "Totu ischermu",
     "All files" : "Totu is archìvios",
     "Upload" : "Càrriga",
     "Cancel" : "Cancel",
@@ -11,8 +17,10 @@ OC.L10N.register(
     "Create" : "Crea",
     "Save" : "Save",
     "Download" : "Iscàrriga",
-    "Fullscreen" : "Totu ischermu",
     "Remove" : "Boga",
-    "Remove image" : "Boga•nche s'imàgine"
+    "Remove image" : "Boga•nche s'imàgine",
+    "Photos" : "Fotos",
+    "Videos" : "Vìdeos",
+    "Text" : "Testu"
 },
 "nplurals=2; plural=(n != 1);");

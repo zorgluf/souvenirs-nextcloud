@@ -10,6 +10,7 @@ OC.L10N.register(
     "Create" : "සාදන්න",
     "Save" : "Save",
     "Download" : "බාගන්න",
-    "Remove" : "ඉවත් කරන්න"
+    "Remove" : "ඉවත් කරන්න",
+    "Photos" : "ඡායාරූප"
 },
 "nplurals=2; plural=(n != 1);");

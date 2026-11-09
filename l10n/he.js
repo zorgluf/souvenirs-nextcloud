@@ -1,6 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "או",
+    "Android app" : "יישומון ל־Android",
+    "Media" : "מדיה",
+    "Shortcuts" : "קיצורי דרך",
+    "Fullscreen" : "מסך מלא",
     "All files" : "כל הקבצים",
     "Upload" : "העלאה",
     "Cancel" : "Cancel",
@@ -11,8 +16,12 @@ OC.L10N.register(
     "Create" : "יצירה",
     "Save" : "Save",
     "Download" : "הורדה",
-    "Fullscreen" : "מסך מלא",
     "Remove" : "הסרה",
-    "Remove image" : "הסרת תמונה"
+    "Remove image" : "הסרת תמונה",
+    "Videos" : "סרטונים",
+    "Audio" : "קובץ שמע",
+    "Text" : "טקסט",
+    "Previous page" : "דף קודם",
+    "Next page" : "דף הבא"
 },
 "nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;");

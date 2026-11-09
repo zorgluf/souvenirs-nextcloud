@@ -1,6 +1,15 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "或",
+    "Android app" : "安卓应用",
+    "Media" : "媒体",
+    "Shortcuts" : "快捷方式",
+    "Album" : "专辑",
+    "Page" : "页面",
+    "Editing" : "编辑",
+    "Slideshow" : "幻灯片",
+    "Fullscreen" : "全屏",
     "All files" : "全部文件",
     "Upload" : "上传",
     "Cancel" : "Cancel",
@@ -14,9 +23,12 @@ OC.L10N.register(
     "Save" : "Save",
     "Expires on" : "过期于",
     "Download" : "下载",
-    "Fullscreen" : "全屏",
     "Remove" : "移除",
     "Change layout" : "更变布局",
-    "Remove image" : "删除图片"
+    "Remove image" : "删除图片",
+    "Photos" : "照片",
+    "Videos" : "视频",
+    "Audio" : "音频",
+    "Text" : "文本 "
 },
 "nplurals=1; plural=0;");

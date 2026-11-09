@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "또는",
+    "Android app" : "Android 앱",
+    "Media" : "미디어",
+    "Shortcuts" : "단축키",
+    "Album" : "앨범",
+    "Editing" : "글 수정",
+    "Slideshow" : "슬라이드쇼",
+    "Fullscreen" : "전체 화면",
     "All files" : "모든 파일",
     "Upload" : "업로드",
     "Cancel" : "Cancel",
@@ -14,8 +22,11 @@ OC.L10N.register(
     "Save" : "Save",
     "Expires on" : "만료일",
     "Download" : "다운로드",
-    "Fullscreen" : "전체 화면",
     "Remove" : "삭제",
-    "Remove image" : "그림 삭제"
+    "Remove image" : "그림 삭제",
+    "Photos" : "사진",
+    "Videos" : "동영상",
+    "Audio" : "오디오",
+    "Text" : "텍스트"
 },
 "nplurals=1; plural=0;");

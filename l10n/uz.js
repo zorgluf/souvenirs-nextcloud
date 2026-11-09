@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Suvenirlar",
+    "or" : "yoki",
+    "Page" : "Sahifa",
+    "Editing" : "Tahrirlash",
+    "Fullscreen" : "Toʻliq ekran",
     "All files" : "Barcha filtrlar",
     "Upload" : "Yuklash",
     "Cancel" : "Bekor qilish",
@@ -14,9 +18,11 @@ OC.L10N.register(
     "Save" : "Saqlash",
     "Slideshow speed" : "Slayd-shou tezligi",
     "Download" : "Yuklab olish",
-    "Fullscreen" : "Toʻliq ekran",
     "Click to download album in a zip file." : "Albomni zip faylda yuklab olish uchun bosing.",
     "Remove" : "O'chirish",
-    "Change layout" : "Tartibni o'zgartirish"
+    "Change layout" : "Tartibni o'zgartirish",
+    "Photos" : "Photos",
+    "Videos" : "Videolar",
+    "Text" : "Matn"
 },
 "nplurals=1; plural=0;");

@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "tai",
+    "Android app" : "Android-sovellus",
+    "Media" : "Media",
+    "Album" : "Albumi",
+    "Page" : "Sivu",
+    "Editing" : "Muokkaaminen",
+    "Slideshow" : "Diaesitys",
+    "Fullscreen" : "Koko näyttö",
     "All files" : "Kaikki tiedostot",
     "Upload" : "Lähetä",
     "Cancel" : "Cancel",
@@ -15,11 +23,16 @@ OC.L10N.register(
     "Expires on" : "Vanhenee",
     "Slideshow speed" : "Diaesityksen nopeus",
     "Download" : "Lataa",
-    "Fullscreen" : "Koko näyttö",
     "Click to download album in a zip file." : "Napsauta ladataksesi albumin zip-tiedostona.",
     "Remove" : "Poista",
     "Change layout" : "Vaihda asettelua",
     "Drag to move" : "Vedä siirtääksesi",
-    "Remove image" : "Poista kuva"
+    "Remove image" : "Poista kuva",
+    "Photos" : "Kuvat",
+    "Videos" : "Videot",
+    "Audio" : "Ääni",
+    "Text" : "Teksti",
+    "Previous page" : "Edellinen sivu",
+    "Next page" : "Seuraava sivu"
 },
 "nplurals=2; plural=(n != 1);");

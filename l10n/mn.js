@@ -2,6 +2,13 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Дурсамж",
+    "or" : "эсвэл",
+    "Android app" : "Android апп",
+    "Media" : "Медиа",
+    "Album" : "Цомог",
+    "Editing" : "Засварлаж байна",
+    "Slideshow" : "Слайд шоу",
+    "Fullscreen" : "Бүтэн дэлгэц",
     "All files" : "Бүх файлууд",
     "Upload" : "–±–∞–π—Ä—à—É—É–ª–∞—Ö",
     "Cancel" : "‚Äì¬±‚Äì√¶‚Äì¬™‚Äì‚àè‚Äî√â‚Äì¬™‚Äì‚àû‚Äî√ñ",
@@ -17,10 +24,13 @@ OC.L10N.register(
     "Expires on" : "–î—É—É—Å–∞—Ö —Ö—É–≥–∞—Ü–∞–∞",
     "Slideshow speed" : "Слайд шоуны хурд",
     "Download" : "Татах",
-    "Fullscreen" : "Бүтэн дэлгэц",
     "Click to download album in a zip file." : "Цомгийг zip файлаар татахын тулд дарна уу.",
     "Remove" : "–£—Å—Ç–≥–∞—Ö",
     "Drag to move" : "Зөөхийн тулд чирнэ үү",
-    "Remove image" : "Зургийг хасах"
+    "Remove image" : "Зургийг хасах",
+    "Photos" : "–ó—É—Ä–∞–≥–Ω—É—É–¥",
+    "Videos" : "Бичлэгүүд",
+    "Audio" : "Аудио",
+    "Text" : "Текст"
 },
 "nplurals=2; plural=(n != 1);");

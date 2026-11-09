@@ -1,4 +1,5 @@
 { "translations": {
+    "Android app" : "Android-aplikaĵo",
     "All files" : "Ĉiuj dosieroj",
     "Upload" : "Alŝuti",
     "Cancel" : "Cancel",
@@ -7,6 +8,9 @@
     "Date" : "Dato",
     "Save" : "Save",
     "Download" : "Elŝuti",
-    "Remove image" : "Forigi bildon"
+    "Remove image" : "Forigi bildon",
+    "Photos" : "Fotoj",
+    "Videos" : "Videaĵoj",
+    "Text" : "Teksto"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Android app" : "Android proqramı",
     "All files" : "Bütün fayllar",
     "Upload" : "Serverə yüklə",
     "Cancel" : "Cancel",

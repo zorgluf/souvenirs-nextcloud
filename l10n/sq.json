@@ -1,4 +1,7 @@
 { "translations": {
+    "Android app" : "Aplikacion Android",
+    "Page" : "Faqe",
+    "Fullscreen" : "I gjithë ekrani",
     "All files" : "Të gjithë skedarët",
     "Upload" : "Ngarkoni",
     "Cancel" : "Cancel",
@@ -7,9 +10,12 @@
     "Create" : "Krijo",
     "Save" : "Save",
     "Download" : "Shkarko",
-    "Fullscreen" : "I gjithë ekrani",
     "Remove" : "Hiqe",
     "Change layout" : "Ndrysho paraqitjen",
-    "Remove image" : "Hiqe figurën"
+    "Remove image" : "Hiqe figurën",
+    "Photos" : "Fotot",
+    "Videos" : "Videot",
+    "Audio" : "Audio",
+    "Text" : "Tekst"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

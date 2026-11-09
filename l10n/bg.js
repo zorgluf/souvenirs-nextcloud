@@ -2,6 +2,10 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувенири",
+    "Android app" : "Android приложение",
+    "Shortcuts" : "Преки пътища",
+    "Editing" : "Редактиране",
+    "Fullscreen" : "Цял екран",
     "All files" : "Всички файлове",
     "Upload" : "Качване",
     "Cancel" : "Cancel",
@@ -15,10 +19,13 @@ OC.L10N.register(
     "Expires on" : "Изтича на",
     "Slideshow speed" : "Скорост на слайдшоуто",
     "Download" : "Изтегляне",
-    "Fullscreen" : "Цял екран",
     "Click to download album in a zip file." : "Кликване/щракване/ за изтегляне на албума в zip файл.",
     "Remove" : "Премахване",
     "Change layout" : "Промени разположението",
-    "Remove image" : "Премахни изображението"
+    "Remove image" : "Премахни изображението",
+    "Photos" : "Снимки",
+    "Text" : "Текст",
+    "Previous page" : "Предишна страница",
+    "Next page" : "Следваща страница"
 },
 "nplurals=2; plural=(n != 1);");

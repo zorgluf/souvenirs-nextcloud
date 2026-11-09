@@ -1,6 +1,10 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Android app" : "Aplicación android",
+    "Media" : "Media",
+    "Editing" : "Editando",
+    "Fullscreen" : "Pantalla completa",
     "All files" : "Todos los archivos",
     "Upload" : "Cargar",
     "Cancel" : "Cancel",
@@ -9,9 +13,11 @@ OC.L10N.register(
     "Date" : "Fecha",
     "Save" : "Save",
     "Download" : "Descargar",
-    "Fullscreen" : "Pantalla completa",
     "Remove" : "Eliminar",
     "Change layout" : "Cambiar diseño",
-    "Remove image" : "Eliminar imagen"
+    "Remove image" : "Eliminar imagen",
+    "Photos" : "Fotos",
+    "Videos" : "Videos",
+    "Text" : "Texto"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

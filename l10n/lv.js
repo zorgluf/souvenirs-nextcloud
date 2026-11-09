@@ -1,6 +1,13 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "vai",
+    "Android app" : "Android lietotne",
+    "Media" : "Informācijas nesēji",
+    "Page" : "Lapa",
+    "Editing" : "Labošana",
+    "Slideshow" : "Slīdrāde",
+    "Fullscreen" : "Pilnekrāna",
     "All files" : "Visas datnes",
     "Upload" : "Augšupielādēt",
     "Cancel" : "Cancel",
@@ -12,9 +19,12 @@ OC.L10N.register(
     "Save" : "Save",
     "Slideshow speed" : "Slīdrādes ātrums",
     "Download" : "Lejupielādēt",
-    "Fullscreen" : "Pilnekrāna",
     "Remove" : "Noņemt",
     "Change layout" : "Mainīt izkārtojumu",
-    "Remove image" : "Novākt attēlu"
+    "Remove image" : "Novākt attēlu",
+    "Photos" : "Fotoattēli",
+    "Videos" : "Video",
+    "Audio" : "Audio",
+    "Text" : "Teksts"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

@@ -1,6 +1,8 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "Media" : "Meadhanan",
+    "Fullscreen" : "Làn-sgrìn",
     "All files" : "Na h-uile faidhle",
     "Upload" : "Luchdaich suas",
     "Cancel" : "Cancel",
@@ -8,7 +10,7 @@ OC.L10N.register(
     "Create" : "Cruthaich",
     "Save" : "Save",
     "Download" : "Luchdaich a-nuas",
-    "Fullscreen" : "Làn-sgrìn",
-    "Remove" : "Thoir air falbh"
+    "Remove" : "Thoir air falbh",
+    "Videos" : "Videothan"
 },
 "nplurals=4; plural=(n==1 || n==11) ? 0 : (n==2 || n==12) ? 1 : (n > 2 && n < 20) ? 2 : 3;");

@@ -1,5 +1,14 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
+    "or" : "of",
+    "Android app" : "Android app",
+    "Media" : "Media",
+    "Shortcuts" : "Snelkoppelingen",
+    "Album" : "Album",
+    "Page" : "Pagina",
+    "Editing" : "Bewerken",
+    "Slideshow" : "Diavoorstelling",
+    "Fullscreen" : "Volledig scherm",
     "All files" : "Alle bestanden",
     "Upload" : "Upload",
     "Cancel" : "Cancel",
@@ -14,11 +23,17 @@
     "Save" : "Save",
     "Slideshow speed" : "Diavoorstelling snelheid",
     "Download" : "Download",
-    "Fullscreen" : "Volledig scherm",
     "Click to download album in a zip file." : "Klik om het album in een zip-bestand te downloaden.",
     "Remove" : "Verwijderen",
     "Add media" : "Media toevoegen",
     "Change layout" : "Wijzig opmaak",
-    "Remove image" : "Afbeelding verwijderen"
+    "Remove image" : "Afbeelding verwijderen",
+    "Photos" : "Foto's",
+    "Videos" : "Video's",
+    "Audio" : "Geluid",
+    "Text" : "Tekst",
+    "Drawings" : "Tekeningen",
+    "Previous page" : "Voorgaande pagina",
+    "Next page" : "Volgende pagina"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

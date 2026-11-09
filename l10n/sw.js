@@ -2,6 +2,14 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Ukumbusho",
+    "or" : "au",
+    "Android app" : "Programu ya Android",
+    "Media" : "Midia",
+    "Shortcuts" : "Njia za mkato",
+    "Album" : "Albamu",
+    "Page" : "Ukurasa",
+    "Editing" : "Inahariri",
+    "Fullscreen" : "Skrini nzima",
     "All files" : "Faili zote",
     "Upload" : "Pakia",
     "Cancel" : "Ghairi",
@@ -17,9 +25,14 @@ OC.L10N.register(
     "Expires on" : "Inaisha muda ",
     "Slideshow speed" : "Kasi ya onyesho la slaidi",
     "Download" : "Pakua",
-    "Fullscreen" : "Skrini nzima",
     "Click to download album in a zip file." : "Bofya ili kupakua albamu katika faili ya zip.",
     "Remove" : "Ondoa",
-    "Change layout" : "Badilisha mpangilio"
+    "Change layout" : "Badilisha mpangilio",
+    "Photos" : "Picha",
+    "Videos" : "Picha mjongeo",
+    "Audio" : "Sauti",
+    "Text" : "Maandishi",
+    "Previous page" : "Ukurasa uliopita",
+    "Next page" : "Ukurasa unaofuata"
 },
 "nplurals=2; plural=(n != 1);");

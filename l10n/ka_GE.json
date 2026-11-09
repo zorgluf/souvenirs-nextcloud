@@ -1,4 +1,7 @@
 { "translations": {
+    "or" : "ან",
+    "Android app" : "Android აპლიკაცია",
+    "Fullscreen" : "მთელი ეკრანი",
     "All files" : "ყველა ფაილი",
     "Upload" : "ატვირთვა",
     "Cancel" : "Cancel",
@@ -6,7 +9,9 @@
     "Confirm" : "დადასტურება",
     "Save" : "Save",
     "Download" : "ჩამოტვირთვა",
-    "Fullscreen" : "მთელი ეკრანი",
-    "Remove image" : "სურათის წაშლა"
+    "Remove image" : "სურათის წაშლა",
+    "Photos" : "სურათები",
+    "Videos" : "ვიდეოები",
+    "Text" : "ტექსტი"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

@@ -2,6 +2,15 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "or" : "vagy",
+    "Android app" : "Androidos alkalmazás",
+    "Media" : "Média",
+    "Shortcuts" : "Gyorsbillentyűk",
+    "Album" : "Album",
+    "Page" : "Oldal",
+    "Editing" : "Szerkesztés",
+    "Slideshow" : "Diavetítés",
+    "Fullscreen" : "Teljes képernyő",
     "All files" : "Összes fájl",
     "Upload" : "Feltöltés",
     "Cancel" : "Mégse",
@@ -17,10 +26,15 @@ OC.L10N.register(
     "Expires on" : "Lejárat:",
     "Slideshow speed" : "Diavetítés sebessége",
     "Download" : "Letöltés",
-    "Fullscreen" : "Teljes képernyő",
     "Click to download album in a zip file." : "Kattintson az album ZIP-fájlban való letöltéséhez.",
     "Remove" : "Eltávolítás",
     "Change layout" : "Elrendezés módosítása",
-    "Remove image" : "Kép eltávolítása"
+    "Remove image" : "Kép eltávolítása",
+    "Photos" : "Fényképek",
+    "Videos" : "Videók",
+    "Audio" : "Hang",
+    "Text" : "Szöveg",
+    "Previous page" : "Előző oldal",
+    "Next page" : "Következő oldal"
 },
 "nplurals=2; plural=(n != 1);");

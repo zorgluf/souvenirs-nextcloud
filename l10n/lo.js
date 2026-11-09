@@ -1,6 +1,13 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "ຫຼື",
+    "Android app" : "Android app",
+    "Media" : "ຊື່ມວນຊົນ",
+    "Album" : "ອະລະບໍ້າ",
+    "Page" : "ໜ້າ",
+    "Editing" : "Editing",
+    "Slideshow" : "ສະໄລ້ໂຊ",
     "All files" : "ຟາຍທັງໝົດ",
     "Upload" : "ອັບໂຫລດ",
     "Cancel" : "Cancel",
@@ -16,6 +23,10 @@ OC.L10N.register(
     "Download" : "ດາວໂຫລດ",
     "Remove" : "ລຶບອອກ",
     "Change layout" : "ປ່ຽນໂຄງຮ່າງ",
-    "Drag to move" : "ລາກເພື່ອຍ້າຍ"
+    "Drag to move" : "ລາກເພື່ອຍ້າຍ",
+    "Photos" : "ຮູບພາບ",
+    "Videos" : "ວິດີໂອ",
+    "Audio" : "ສຽງ",
+    "Text" : "ຂໍ້ຄວາມ"
 },
 "nplurals=1; plural=0;");

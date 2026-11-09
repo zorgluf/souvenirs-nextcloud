@@ -1,5 +1,13 @@
 { "translations": {
     "Souvenirs" : "Souvenirs",
+    "or" : "atau",
+    "Android app" : "Aplikasi Android",
+    "Media" : "Media",
+    "Album" : "Album",
+    "Page" : "Halaman",
+    "Editing" : "Pengeditan",
+    "Slideshow" : "Tayangan slide",
+    "Fullscreen" : "Layar penuh",
     "All files" : "Semua berkas",
     "Upload" : "Unggah",
     "Cancel" : "Cancel",
@@ -15,11 +23,17 @@
     "Expires on" : "Kedaluwarsa pada",
     "Slideshow speed" : "Kecepatan slideshow",
     "Download" : "Unduh",
-    "Fullscreen" : "Layar penuh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Remove" : "Hapus",
     "Change layout" : "Ubah tata letak",
     "Drag to move" : "Seret untuk memindahkan",
-    "Remove image" : "Hapus gambar"
+    "Remove image" : "Hapus gambar",
+    "Photos" : "Foto",
+    "Videos" : "Video",
+    "Audio" : "Audio",
+    "Text" : "Teks",
+    "Drawings" : "Gambar",
+    "Previous page" : "Halaman sebelumnya",
+    "Next page" : "Halaman berikutnya"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

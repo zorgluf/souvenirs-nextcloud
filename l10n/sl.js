@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "ali",
+    "Android app" : "Odjemalec za Android",
+    "Shortcuts" : "Bližnjice",
+    "Album" : "Album",
+    "Page" : "Stran",
+    "Editing" : "Urejanje",
+    "Slideshow" : "Projekcija",
+    "Fullscreen" : "Celozaslonski način",
     "All files" : "Vse datoteke",
     "Upload" : "Iz datoteke",
     "Cancel" : "Cancel",
@@ -13,9 +21,14 @@ OC.L10N.register(
     "Save" : "Save",
     "Expires on" : "Poteče",
     "Download" : "Prejmi",
-    "Fullscreen" : "Celozaslonski način",
     "Remove" : "Odstrani",
     "Change layout" : "Spremeni postavitev",
-    "Remove image" : "Odstrani sliko"
+    "Remove image" : "Odstrani sliko",
+    "Photos" : "Fotografije",
+    "Videos" : "Video posnetki",
+    "Audio" : "Zvočni posnetek",
+    "Text" : "Besedilo",
+    "Previous page" : "Predhodna stran",
+    "Next page" : "Naslednja stran"
 },
 "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);");

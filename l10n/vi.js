@@ -1,6 +1,12 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "hoặc",
+    "Android app" : "Ứng dụng Android",
+    "Media" : "Phương tiện",
+    "Album" : "Album",
+    "Editing" : "Chỉnh sửa",
+    "Fullscreen" : "Toàn màn hình",
     "All files" : "Tất cả tệp tin",
     "Upload" : "Tải lên",
     "Cancel" : "Cancel",
@@ -10,8 +16,11 @@ OC.L10N.register(
     "Create" : "Tạo",
     "Save" : "Save",
     "Download" : "Tải xuống",
-    "Fullscreen" : "Toàn màn hình",
     "Remove" : "Xoá",
-    "Remove image" : "Xóa "
+    "Remove image" : "Xóa ",
+    "Photos" : "Ảnh",
+    "Videos" : "Video",
+    "Audio" : "Âm thanh",
+    "Text" : "Văn bản"
 },
 "nplurals=1; plural=0;");

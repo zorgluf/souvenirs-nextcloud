@@ -1,6 +1,12 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "neɣ",
+    "Media" : "Amidya",
+    "Page" : "Asebter",
+    "Editing" : "Asiẓreg",
+    "Slideshow" : "Tigri",
+    "Fullscreen" : "Plein écran",
     "All files" : "Akk ifuyla",
     "Upload" : "Sili",
     "Cancel" : "Semmet",
@@ -12,9 +18,14 @@ OC.L10N.register(
     "Create" : "Snulfu-d",
     "Save" : "Sekles",
     "Download" : "Sider",
-    "Fullscreen" : "Plein écran",
     "Remove" : "Kkes",
     "Add media" : "Rnu amidya",
-    "Change layout" : "Snifel taneγruft"
+    "Change layout" : "Snifel taneγruft",
+    "Photos" : "Tiwlafin",
+    "Videos" : "Tividyutin",
+    "Audio" : "Imesli",
+    "Text" : "Aḍris",
+    "Previous page" : "Asebter yezrin",
+    "Next page" : "Asebter d-iteddun"
 },
 "nplurals=2; plural=(n != 1);");

@@ -2,6 +2,14 @@ OC.L10N.register(
     "souvenirs",
     {
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Crie, exiba e compartilhe álbuns “à moda antiga” com suas fotos, vídeos e imagens panorâmicas no seu servidor Nextcloud.",
+    "or" : "ou",
+    "Android app" : "Aplicação Android",
+    "Media" : "Media",
+    "Album" : "Álbum",
+    "Page" : "Página",
+    "Editing" : "A editar",
+    "Slideshow" : "Apresentação de diapositivos",
+    "Fullscreen" : "Ecrã completo",
     "All files" : "Todos os ficheiros",
     "Upload" : "Enviar",
     "Cancel" : "Cancel",
@@ -20,7 +28,6 @@ OC.L10N.register(
     "Expires on" : "Expira em",
     "Slideshow speed" : "Velocidade da apresentação de slides",
     "Download" : "Transferir",
-    "Fullscreen" : "Ecrã completo",
     "Click to download album in a zip file." : "Clique para baixar o álbum em um arquivo zip.",
     "Remove" : "Remover",
     "Could not delete the page." : "Não foi possível excluir a página.",
@@ -35,6 +42,12 @@ OC.L10N.register(
     "Move page right" : "Mover a página para a direita",
     "Drag to move" : "Arraste para mover",
     "Remove text" : "Remover texto",
-    "Remove image" : "Remover imagem"
+    "Remove image" : "Remover imagem",
+    "Photos" : "Fotografias",
+    "Videos" : "Vídeos",
+    "Audio" : "Áudio",
+    "Text" : "Texto",
+    "Previous page" : "Página anterior",
+    "Next page" : "Próxima página"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

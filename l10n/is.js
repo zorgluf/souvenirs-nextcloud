@@ -1,6 +1,14 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "eða",
+    "Android app" : "Android-forrit",
+    "Media" : "Myndefni",
+    "Album" : "Hljómplata",
+    "Page" : "Síða",
+    "Editing" : "Breytingar",
+    "Slideshow" : "Skyggnusýning",
+    "Fullscreen" : "Fylla skjáinn",
     "All files" : "Allar skrár",
     "Upload" : "Senda inn",
     "Cancel" : "Cancel",
@@ -12,10 +20,13 @@ OC.L10N.register(
     "Create" : "Búa til",
     "Save" : "Save",
     "Download" : "Sækja",
-    "Fullscreen" : "Fylla skjáinn",
     "Remove" : "Fjarlægja",
     "Add media" : "Bæta við gögnum",
     "Change layout" : "Breyta framsetningu",
-    "Remove image" : "Fjarlægja mynd"
+    "Remove image" : "Fjarlægja mynd",
+    "Photos" : "Ljósmyndir",
+    "Videos" : "Myndskeið",
+    "Audio" : "Hljóð",
+    "Text" : "Texti"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");
