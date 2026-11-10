@@ -2,6 +2,7 @@ OC.L10N.register(
     "souvenirs",
     {
     "Android app" : "Android aplikacija",
+    "Page" : "Stranica",
     "All files" : "Sve datoteke",
     "Upload" : "Učitaj",
     "Cancel" : "Cancel",

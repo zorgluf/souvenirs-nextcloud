@@ -2,10 +2,14 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "تذكارات souvenirs",
+    "or" : "او",
     "Android app" : "تطبيق الأندرويد",
     "Media" : "الوسائط",
     "Shortcuts" : "الاختصارات",
+    "Album" : "الألبوم",
+    "Page" : "صفحة",
     "Editing" : "جارِ التعديل",
+    "Slideshow" : "عرض الشرائح",
     "Fullscreen" : "وضع ملء الشاشة",
     "All files" : "كل الملفات",
     "Upload" : "إرفَع",
@@ -28,6 +32,8 @@ OC.L10N.register(
     "Change layout" : "غيِّر مُخطّط العرض",
     "Remove image" : "إزالة الصورة",
     "Photos" : "الصور",
+    "Videos" : "مقاطع فيديو",
+    "Audio" : "صوت",
     "Text" : "نص"
 },
 "nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;");

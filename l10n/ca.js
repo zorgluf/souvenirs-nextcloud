@@ -1,9 +1,12 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "o",
     "Android app" : "Aplicació d'Android",
     "Media" : "Multimèdia",
     "Shortcuts" : "Enllaços directes",
+    "Album" : "Àlbum",
+    "Page" : "Pàgina",
     "Editing" : "Edició",
     "Fullscreen" : "Pantalla completa",
     "All files" : "Tots els fitxers",
@@ -21,6 +24,8 @@ OC.L10N.register(
     "Change layout" : "Canviar diseny",
     "Remove image" : "Suprimir imatge",
     "Photos" : "Fotos",
+    "Videos" : "Vídeos",
+    "Audio" : "Àudio",
     "Text" : "Text",
     "Previous page" : "Pàgina anterior",
     "Next page" : "Pàgina següent"

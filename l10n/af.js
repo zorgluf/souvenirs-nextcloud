@@ -9,6 +9,8 @@ OC.L10N.register(
     "Save" : "Save",
     "Download" : "Laai af",
     "Remove image" : "Verwyder beeld",
+    "Videos" : "Video's ",
+    "Audio" : "Oudio",
     "Text" : "Teks"
 },
 "nplurals=2; plural=(n != 1);");

@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "o",
     "Android app" : "Aplicación android",
     "Fullscreen" : "Pantalla completa",
     "All files" : "Todos los archivos",

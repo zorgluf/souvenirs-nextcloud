@@ -51,6 +51,7 @@ OC.L10N.register(
     "Finish editing (E)" : "Terminer la modification (E)",
     "Add page" : "Ajouter une page",
     "Saving changes…" : "Enregistrement des modifications…",
+    "Help (?)" : "Aide (?)",
     "Remove audio" : "Supprimer l'audio",
     "Remove this page's audio? The music will no longer play when the page is displayed." : "Supprimer l'audio de cette page ? La musique ne sera plus lue lors de l'affichage de la page.",
     "Remove" : "Supprimer",
@@ -91,6 +92,9 @@ OC.L10N.register(
     "Text" : "Texte",
     "Drawings" : "Dessins",
     "Previous page" : "Page précédente",
-    "Next page" : "Page suivante"
+    "Next page" : "Page suivante",
+    "Text editing" : "Édition de texte",
+    "Save the text" : "Enregistrer le texte",
+    "New line" : "Nouvelle ligne"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

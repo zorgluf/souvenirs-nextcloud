@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "neu",
     "All files" : "Pob ffeil",
     "Upload" : "Llwytho i fyny",
     "Cancel" : "Cancel",
@@ -8,6 +9,8 @@ OC.L10N.register(
     "Confirm" : "Cadarnhau",
     "Save" : "Save",
     "Download" : "Llwytho i lawr",
-    "Photos" : "Lluniau"
+    "Photos" : "Lluniau",
+    "Videos" : "Fideos",
+    "Audio" : "Sain"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

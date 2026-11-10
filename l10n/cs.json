@@ -1,10 +1,15 @@
 { "translations": {
     "Souvenirs" : "Suvenýry",
+    "or" : "nebo",
     "Android app" : "Aplikace pro Android",
     "Structure" : "Struktura",
     "Media" : "Média",
     "Shortcuts" : "Zkratky",
+    "Album" : "Album",
+    "Page" : "Stránka",
+    "Tile" : "Dlaždice",
     "Editing" : "Upravování",
+    "Slideshow" : "Promítání",
     "Fullscreen" : "Na celou obrazovku",
     "Choose media" : "Zvolit médium",
     "All files" : "Všechny soubory",
@@ -41,7 +46,10 @@
     "Remove text" : "Odebrat text",
     "Remove image" : "Odebrat obrázek",
     "Photos" : "Fotky",
+    "Videos" : "Videa",
+    "Audio" : "Zvuk",
     "Text" : "Text",
+    "Drawings" : "Kresby",
     "Previous page" : "Předchozí stránka",
     "Next page" : "Následující stránka"
 },"pluralForm" :"nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;"

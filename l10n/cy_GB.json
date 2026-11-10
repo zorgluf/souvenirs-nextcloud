@@ -1,4 +1,5 @@
 { "translations": {
+    "or" : "neu",
     "All files" : "Pob ffeil",
     "Upload" : "Llwytho i fyny",
     "Cancel" : "Cancel",
@@ -6,6 +7,8 @@
     "Confirm" : "Cadarnhau",
     "Save" : "Save",
     "Download" : "Llwytho i lawr",
-    "Photos" : "Lluniau"
+    "Photos" : "Lluniau",
+    "Videos" : "Fideos",
+    "Audio" : "Sain"
 },"pluralForm" :"nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;"
 }

@@ -2,9 +2,12 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Souvenirs",
+    "or" : "o",
     "Android app" : "Aplicación de Android",
     "Media" : "Medios",
     "Shortcuts" : "Atajos",
+    "Album" : "Álbum",
+    "Page" : "Página",
     "Editing" : "Editando",
     "Slideshow" : "Presentación de diapositivas",
     "Fullscreen" : "Pantalla completa",
@@ -31,7 +34,9 @@ OC.L10N.register(
     "Remove image" : "Borrar imagen",
     "Photos" : "Fotos",
     "Videos" : "Vídeos",
+    "Audio" : "Audio",
     "Text" : "Texto",
+    "Drawings" : "Dibujos",
     "Previous page" : "Página anterior",
     "Next page" : "Página siguiente"
 },

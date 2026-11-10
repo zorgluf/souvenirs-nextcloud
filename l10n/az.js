@@ -2,6 +2,7 @@ OC.L10N.register(
     "souvenirs",
     {
     "Android app" : "Android proqramı",
+    "Slideshow" : "Slayd şou",
     "All files" : "Bütün fayllar",
     "Upload" : "Serverə yüklə",
     "Cancel" : "Cancel",

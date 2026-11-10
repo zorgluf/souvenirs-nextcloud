@@ -6,6 +6,7 @@ OC.L10N.register(
     "Android app" : "Aplicación Android",
     "Media" : "Multimedia",
     "Shortcuts" : "Accesos directos",
+    "Album" : "Álbum",
     "Editing" : "Edición",
     "Slideshow" : "Presentación de Diapositivas",
     "Fullscreen" : "Pantalla completa",
@@ -27,6 +28,7 @@ OC.L10N.register(
     "Remove image" : "Eliminar imagen",
     "Photos" : "Fotos",
     "Videos" : "Videos",
+    "Audio" : "Audio",
     "Text" : "Texto"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

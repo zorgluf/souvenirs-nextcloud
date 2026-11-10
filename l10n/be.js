@@ -2,8 +2,11 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувеніры",
+    "or" : "або",
     "Android app" : "Праграма для Android",
     "Media" : "Медыя",
+    "Album" : "Альбом",
+    "Page" : "Старонка",
     "All files" : "Усе файлы",
     "Upload" : "Запампаваць",
     "Cancel" : "Cancel",
@@ -18,6 +21,10 @@ OC.L10N.register(
     "Remove" : "Выдаліць",
     "Change layout" : "Змяніць макет",
     "Photos" : "Фота",
-    "Text" : "Тэкст"
+    "Videos" : "Відэа",
+    "Audio" : "Аўдыя",
+    "Text" : "Тэкст",
+    "Previous page" : "Папярэдняя старонка",
+    "Next page" : "Наступная старонка"
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

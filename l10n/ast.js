@@ -1,9 +1,11 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "o",
     "Android app" : "Aplicación p'Android",
     "Media" : "Multimedia",
     "Shortcuts" : "Atayos",
+    "Album" : "Álbum",
     "All files" : "Tolos ficheros",
     "Upload" : "Xunir",
     "Cancel" : "Cancel",
@@ -20,6 +22,8 @@ OC.L10N.register(
     "Click to download album in a zip file." : "Calca pa baxar l'álbum nun ficheru ZIP.",
     "Remove" : "Quitar",
     "Photos" : "Semeyes",
+    "Videos" : "Vídeos",
+    "Audio" : "Audiu",
     "Text" : "Testu"
 },
 "nplurals=2; plural=(n != 1);");

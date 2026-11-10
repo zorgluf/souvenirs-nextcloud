@@ -1,10 +1,14 @@
 { "translations": {
     "Souvenirs" : "Αναμνηστικά",
     "Create, Display and Share \"old school\" albums for your photos, videos and panoramics, on your Nextcloud server." : "Δημιουργήστε, εμφανίστε και μοιραστείτε \"old school\" άλμπουμ για τις φωτογραφίες, τα βίντεο και τις πανοραμικές λήψεις σας, στον διακομιστή Nextcloud.",
+    "or" : "ή",
     "Android app" : "Εφαρμογή Android",
     "Media" : "Πολυμέσα",
     "Shortcuts" : "Συντομεύσεις",
+    "Album" : "Άλμπουμ",
+    "Page" : "Σελίδα",
     "Editing" : "Επεξεργασία",
+    "Slideshow" : "Παρουσίαση",
     "Fullscreen" : "Πλήρης οθόνη",
     "All files" : "Όλα τα αρχεία",
     "Upload" : "Μεταφόρτωση",
@@ -61,7 +65,10 @@
     "Remove text" : "Αφαίρεση κειμένου",
     "Remove image" : "Αφαίρεση εικόνας",
     "Photos" : "Φωτογραφίες",
+    "Videos" : "Βίντεο",
+    "Audio" : "Ήχος",
     "Text" : "Κείμενο",
+    "Drawings" : "Σχέδια",
     "Previous page" : "Προηγούμενη σελίδα",
     "Next page" : "Επόμενη σελίδα"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

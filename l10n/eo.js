@@ -1,6 +1,7 @@
 OC.L10N.register(
     "souvenirs",
     {
+    "or" : "aŭ",
     "Android app" : "Android-aplikaĵo",
     "All files" : "Ĉiuj dosieroj",
     "Upload" : "Alŝuti",
@@ -13,6 +14,7 @@ OC.L10N.register(
     "Remove image" : "Forigi bildon",
     "Photos" : "Fotoj",
     "Videos" : "Videaĵoj",
+    "Audio" : "Sonaĵo",
     "Text" : "Teksto"
 },
 "nplurals=2; plural=(n != 1);");

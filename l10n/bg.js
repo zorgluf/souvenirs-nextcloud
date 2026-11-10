@@ -2,9 +2,13 @@ OC.L10N.register(
     "souvenirs",
     {
     "Souvenirs" : "Сувенири",
+    "or" : "или",
     "Android app" : "Android приложение",
     "Shortcuts" : "Преки пътища",
+    "Album" : "Албум",
+    "Page" : "Страница",
     "Editing" : "Редактиране",
+    "Slideshow" : "Слайдшоу",
     "Fullscreen" : "Цял екран",
     "All files" : "Всички файлове",
     "Upload" : "Качване",
@@ -24,6 +28,8 @@ OC.L10N.register(
     "Change layout" : "Промени разположението",
     "Remove image" : "Премахни изображението",
     "Photos" : "Снимки",
+    "Videos" : "Видеа",
+    "Audio" : "Аудио",
     "Text" : "Текст",
     "Previous page" : "Предишна страница",
     "Next page" : "Следваща страница"
