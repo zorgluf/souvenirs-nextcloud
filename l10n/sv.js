@@ -88,6 +88,12 @@ OC.L10N.register(
     "Text" : "Text",
     "Drawings" : "Ritningar",
     "Previous page" : "Föregående sida",
-    "Next page" : "Nästa sida"
+    "Next page" : "Nästa sida",
+    "Swipe" : "Svep",
+    "Drag" : "Dra",
+    "Pinch" : "Nyp",
+    "Text editing" : "Textredigering",
+    "Save the text" : "Spara texten",
+    "New line" : "Ny rad"
 },
 "nplurals=2; plural=(n != 1);");
