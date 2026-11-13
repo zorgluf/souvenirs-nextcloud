@@ -7,6 +7,7 @@ OC.L10N.register(
     "Shortcuts" : "ショートカットキー",
     "Album" : "アルバム",
     "Editing" : "編集中",
+    "Slideshow" : "スライドショー",
     "Fullscreen" : "全画面",
     "All files" : "すべてのファイル",
     "Upload" : "アップロード",

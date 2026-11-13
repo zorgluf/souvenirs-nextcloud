@@ -27,6 +27,7 @@ OC.L10N.register(
     "Download" : "Unduh",
     "Click to download album in a zip file." : "Klik untuk mengunduh album dalam berkas zip.",
     "Remove" : "Hapus",
+    "Add media" : "Tambahkan media",
     "Change layout" : "Ubah tata letak",
     "Drag to move" : "Seret untuk memindahkan",
     "Remove image" : "Hapus gambar",
