@@ -27,6 +27,7 @@ OC.L10N.register(
     "Remove" : "Rimuovi",
     "Change layout" : "Cambia il layout",
     "Remove image" : "Rimuovi immagine",
+    "Photos" : "Foto",
     "Videos" : "Video",
     "Audio" : "Audio",
     "Text" : "Testo",
