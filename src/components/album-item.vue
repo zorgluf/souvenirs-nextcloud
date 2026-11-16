@@ -1,11 +1,17 @@
 <template>
 
-<div v-bind:class="isWinPortrait ? 's-box-portrait': 's-box'"> 
+<div v-bind:class="[isWinPortrait ? 's-box-portrait': 's-box', { 's-box--unavailable': unavailable }]"
+    v-bind:title="unavailable ? sUnavailable : null"> 
     <div class="s-spiral"></div>
+    <!-- Sync status of the album's copy on this device (issue #22). -->
+    <span v-if="badge != null" :class="['s-sync-badge', 's-sync-badge--' + badge.id]"
+        :title="badge.label" :aria-label="badge.label" role="img">
+        <component :is="badge.icon" :size="20" />
+    </span>
     <router-link :to="{ path: '/show', query: { apath: encodeURIComponent(aPath) }}">
         <div v-bind:class="isWinPortrait ? 's-square-portrait': 's-square'">
             <img v-bind:class="isWinPortrait ? 's-album-image-portrait': 's-album-image'" v-bind:src='albumImageUrl'
-            />
+            v-on:error="coverFailed = true" />
         </div>
         <div class="s-oneline s-title">
             {{name}}
@@ -15,7 +21,7 @@
         </div>
     </router-link>
     <div v-bind:class="[ 'right', isWinPortrait ? 's-action-menu-portrait': 's-action-menu' ]">
-        <NcActions default-icon="icon-shared" :force-menu="true" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
+        <NcActions default-icon="icon-shared" :force-menu="true" :disabled="!online" v-bind:style='(isShared) ? "opacity: 1" : "opacity: 0.3"'>
             <NcActionInput type="date" :is-native-picker="true" :label="sExpiresOn" v-model="shareExpiry" v-if="!(isShared)">{{sExpiresOn}}</NcActionInput>
             <NcActionButton icon="icon-shared" @click="toggleShare" v-if="!(isShared)">Share album</NcActionButton>
             <NcActionLink icon="icon-external" v-bind:href="shareUrl" target="_blank" v-if="isShared" v-on:click="copyShareUrlToClipboard">Link to public album</NcActionLink>
@@ -27,7 +33,13 @@
                 <Pencil :size="20" />
             </template>
         </NcButton>
-        <NcActions default-icon="icon-delete" :force-menu="true">
+        <NcButton variant="tertiary" :aria-label="sOffline" :title="sOffline" v-on:click="onOffline">
+            <template #icon>
+                <CloudDownload v-if="localState != null && localState.offline" :size="20" />
+                <CloudDownloadOutline v-else :size="20" />
+            </template>
+        </NcButton>
+        <NcActions default-icon="icon-delete" :force-menu="true" :disabled="!online">
             <NcActionButton icon="icon-error" @click="deleteAlbum">CONFIRM ALBUM DELETION</NcActionButton>
         </NcActions>
     </div>
@@ -43,6 +55,12 @@ import { NcActionLink, NcActionButton, NcActionInput, NcActionText, NcActions, N
 import { generateUrl, imagePath } from '@nextcloud/router'
 import { formatLongDate } from '../utils/dateFormat.js'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
+import CloudDownload from 'vue-material-design-icons/CloudDownload.vue'
+import CloudDownloadOutline from 'vue-material-design-icons/CloudDownloadOutline.vue'
+import CloudCheckOutline from 'vue-material-design-icons/CloudCheckOutline.vue'
+import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline.vue'
+import AlertCircleOutline from 'vue-material-design-icons/AlertCircleOutline.vue'
+import { formatBytes } from '../offline/format.js'
 import { defaultExpiryDate, toApiDate } from '../utils/shareExpiry.js'
 
 export default {
@@ -54,9 +72,20 @@ export default {
         'date': String,
         'albumId': String,
         'isWinPortrait': Boolean,
+        // Offline support (issue #22): status of the album's copy on this
+        // device ({ status, offline, offlineBytes }, absent without a copy),
+        // whether the server is reachable, and whether the album cannot be
+        // opened right now (offline and no copy).
+        'localState': { type: Object, default: null },
+        'online': { type: Boolean, default: true },
+        'unavailable': { type: Boolean, default: false },
     },
+    emits: ['edit-album', 'offline-album', 'refresh-albums', 'refresh-shares', 'snackbar'],
     data: function() {
         return {
+            "coverFailed": false,
+            "sOffline": t("souvenirs","Available offline"),
+            "sUnavailable": t("souvenirs","Not available offline: open this album once while connected"),
             "sEditAlbum": t("souvenirs","Edit album"),
             "sExpiresOn": t("souvenirs","Expires on"),
             "shareExpiry": defaultExpiryDate(),
@@ -70,8 +99,41 @@ export default {
         NcActionText,
         NcButton,
         Pencil,
+        CloudDownload,
+        CloudDownloadOutline,
+    },
+    watch: {
+        "albumImageUrl": function() {
+            this.coverFailed = false;
+        },
+        "online": function(newOnline) {
+            // a cover that failed offline is tried again
+            if (newOnline) {
+                this.coverFailed = false;
+            }
+        },
     },
     computed: {
+        "badge": function() {
+            // Nothing without a copy on this device: the album is simply online.
+            var state = this.localState;
+            if (state == null || state.status === "none") {
+                return null;
+            }
+            if (state.status === "conflict") {
+                return { id: "conflict", icon: AlertCircleOutline, label: t("souvenirs","Modified both here and on the server: open the album to choose") };
+            }
+            if (state.status === "pending") {
+                return { id: "pending", icon: CloudUploadOutline, label: t("souvenirs","Changes waiting to be synchronized") };
+            }
+            return {
+                id: "synced",
+                icon: CloudCheckOutline,
+                label: state.offline
+                    ? t("souvenirs","Synchronized, available offline ({size})", { size: formatBytes(state.offlineBytes) })
+                    : t("souvenirs","Synchronized"),
+            };
+        },
         "isShared": function() {
             return (this.shares.find(share => {
                     return share['albumId'] == this.albumId
@@ -106,7 +168,7 @@ export default {
             return "";
         },
         "albumImageUrl": function() {
-            if (this.albumImagePath == "") {
+            if (this.albumImagePath == "" || this.coverFailed) {
                 return imagePath("souvenirs","album_image.png");
             } else {
                 return "preview?apath="+encodeURIComponent(this.aPath)+"&file="+this.albumImagePath.replace(/.*\//,"")+"&width=256&height=256";
@@ -114,6 +176,10 @@ export default {
         }
     },
     methods: {
+        'onOffline': function() {
+            // Ask the list to open the "available offline" dialog for this album.
+            this.$emit("offline-album", { id: this.albumId, path: this.aPath, name: this.name });
+        },
         'onEditInfo': function() {
             // Ask the list to open the album-info dialog prefilled for editing.
             this.$emit("edit-album", { albumId: this.albumId, name: this.name, date: this.date });
@@ -257,6 +323,35 @@ export default {
 
 .s-box:hover {
 	box-shadow: 5px 5px var(--color-box-shadow);
+}
+
+.s-box--unavailable > a {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.s-sync-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+    display: flex;
+    padding: 4px;
+    border-radius: 50%;
+    color: var(--color-main-text, #222);
+    background-color: var(--color-main-background-translucent, rgba(255, 255, 255, 0.85));
+}
+
+.s-sync-badge--synced {
+    opacity: 0.75;
+}
+
+.s-sync-badge--pending {
+    color: var(--color-warning-text, #a37200);
+}
+
+.s-sync-badge--conflict {
+    color: var(--color-error-text, #c00);
 }
 
 .s-square {

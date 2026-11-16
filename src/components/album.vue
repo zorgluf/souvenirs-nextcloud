@@ -2,6 +2,12 @@
 	<div v-bind:class="['s-album', { 'editing': editMode }]" tabindex="0" v-on:keydown="onKeydown"
     v-on:keydown.e="onEditKey" v-on:dragover="onAlbumDragOver" v-on:click="onAlbumClick">
         <div class="top-right">
+            <!-- Sync status of the album (issue #22): synchronized, changes
+                 waiting, offline or conflict. -->
+            <span v-if="syncIndicator != null" :class="['sync-indicator', 'sync-indicator--' + syncIndicator.id]"
+                :title="syncIndicator.label" :aria-label="syncIndicator.label" role="status">
+                <component :is="syncIndicator.icon" :size="20" />
+            </span>
             <!-- Background saves in progress (issue #50): light edits no longer
                  block the page, this is the only sign they are being sent. -->
             <span v-if="editMode && pendingSaves > 0 && savingCount === 0" class="saving-indicator"
@@ -23,7 +29,7 @@
                 <NcActionInput icon="" type="number" @submit="diaporama(true)" v-if="!diaporamaMode" :value="diaporamaSpeed" @input="diaporamaSpeed=$event.target.value">{{ sSpeedSh }}</NcActionInput>
                 <NcActionButton icon="icon-pause" @click="diaporama(false)" v-if="diaporamaMode">{{ sStopSh }}</NcActionButton>
                 <NcActionSeparator/>
-                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true">{{ sDownload }}</NcActionButton>
+                <NcActionButton icon="icon-download" @click="openDownloadModal" :close-after-click="true" :disabled="!online">{{ sDownload }}</NcActionButton>
                 <NcActionSeparator/>
                 <NcActionButton @click="openHelp()" :close-after-click="true">
                     <template #icon>
@@ -33,6 +39,31 @@
                 </NcActionButton>
             </NcActions>
         </div>
+        <!-- Offline / session / conflict banners (issue #22). -->
+        <div v-if="statusBanner != null && !fullscreenMode" :class="['album-banner', 'album-banner--' + statusBanner.id]" role="status">
+            <span>{{ statusBanner.text }}</span>
+            <NcButton v-if="statusBanner.action != null" variant="secondary" v-on:click="statusBanner.action.run">
+                {{ statusBanner.action.label }}
+            </NcButton>
+        </div>
+        <div v-if="sync.conflicts != null && !fullscreenMode" class="album-banner album-banner--conflict" role="alert">
+            <p class="album-banner__title">{{ sConflictTitle }}</p>
+            <p>{{ sConflictIntro }}</p>
+            <div v-for="domain in conflictDomains" :key="domain.id" class="conflict-row">
+                <span class="conflict-row__label">{{ domain.label }}</span>
+                <NcButton :variant="conflictChoices[domain.id] === 'local' ? 'primary' : 'secondary'"
+                    :aria-pressed="String(conflictChoices[domain.id] === 'local')"
+                    v-on:click="conflictChoices[domain.id] = 'local'">{{ sKeepLocal }}</NcButton>
+                <NcButton :variant="conflictChoices[domain.id] === 'remote' ? 'primary' : 'secondary'"
+                    :aria-pressed="String(conflictChoices[domain.id] === 'remote')"
+                    v-on:click="conflictChoices[domain.id] = 'remote'">{{ sKeepRemote }}</NcButton>
+            </div>
+            <div class="conflict-actions">
+                <NcButton variant="tertiary" :disabled="!online" v-on:click="resolveAllConflicts('local')">{{ sAllLocal }}</NcButton>
+                <NcButton variant="tertiary" :disabled="!online" v-on:click="resolveAllConflicts('remote')">{{ sAllRemote }}</NcButton>
+                <NcButton variant="primary" :disabled="!online || !conflictChoicesComplete" v-on:click="applyConflictChoices">{{ sApplyChoices }}</NcButton>
+            </div>
+        </div>
 	    <i v-bind:class="isWinPortrait ? 'arrow-top': 'arrow-left'" v-on:click="showPrev"  v-if="!isTouchDevice"
             v-bind:style="{ visibility: aLeftVisible ? 'visible' : 'hidden', }"></i>
         <page v-for="(page, index) in pages" v-bind:s-num="index" v-bind:s-id="page.id" v-bind:displayed-page="displayedPage" v-bind:key="page.id"
@@ -41,6 +72,7 @@
             v-bind:edit-mode="editMode" v-on:edit-text="onEditText"
             v-bind:selected-element-id="selectedElementId" v-on:select-element="onSelectElement"
             v-bind:is-last="index === pages.length - 1"
+            v-bind:pending-assets="sync.pendingAssets" v-bind:online="online"
             v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
             v-on:pan-zoom-element="onPanZoomElement"
             v-on:add-image="onAddImage"
@@ -74,6 +106,13 @@
                 </NcLoadingIcon>
             </div>
         </Teleport>
+        <!-- Opened without the server and never kept on this device (issue #22). -->
+        <div v-if="unavailable && !loading" class="album-unavailable">
+            <CloudOffOutline :size="64" />
+            <h2>{{ sUnavailableTitle }}</h2>
+            <p>{{ sUnavailableText }}</p>
+            <NcButton variant="primary" v-on:click="backToList">{{ sBackToList }}</NcButton>
+        </div>
         <div v-if="canEdit && !loading && pages.length === 0" class="empty-album">
             <NcButton type="primary" v-on:click="onAddFirstPage">
                 <template #icon>
@@ -86,7 +125,7 @@
             :elements="paintPage.elements" :album-path="path" :element-margin="elementMargin"
             :saving="paintSaving" v-on:close="closePaint" v-on:confirm="onPaintConfirm">
         </paint-dialog>
-        <image-chooser-dialog v-if="imageChooserPageId != null" :saving="imageChooserSaving"
+        <image-chooser-dialog v-if="imageChooserPageId != null" :saving="imageChooserSaving" :offline="!online"
             v-on:close="closeImageChooser" v-on:pick="onImagePick" v-on:upload="onImageUpload">
         </image-chooser-dialog>
         <help-dialog v-if="helpOpen" :can-edit="canEdit" :is-touch-device="isTouchDevice"
@@ -127,9 +166,23 @@ import ImageChooserDialog from './ImageChooserDialog.vue'
 import HelpDialog from './HelpDialog.vue'
 import { showError } from '@nextcloud/dialogs'
 import '@nextcloud/dialogs/style.css'
+import { generateUrl } from '@nextcloud/router'
+import { AlbumSession } from '../offline/albumSession.js'
+import { connectivity, onReconnect } from '../offline/connectivity.js'
+import { isDeferrable } from '../offline/remote.js'
+import { notifySynced, notifyConflict } from '../offline/notify.js'
+import { forgetAlbum } from '../offline/offlineManager.js'
+import CloudOffOutline from 'vue-material-design-icons/CloudOffOutline.vue'
+import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline.vue'
+import CloudCheckOutline from 'vue-material-design-icons/CloudCheckOutline.vue'
+import AlertCircleOutline from 'vue-material-design-icons/AlertCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+
+// The write API used when the album has no local copy to go through (public
+// view, unit tests): the server, directly.
+const directApi = { updatePage, createPage, deletePage, movePage, pageOperations, cleanAssets }
 
 export default {
     props: {
@@ -215,6 +268,24 @@ export default {
             // Element selected in edit mode (issue #56): the only one showing
             // its move/resize/framing controls and taking pan & zoom gestures.
             "selectedElementId": null,
+            // Offline support (issue #22). Sync status of the album's local
+            // copy, as published by its AlbumSession.
+            "sync": { status: "none", conflicts: null, pendingAssets: [], authExpired: false, gone: false, offlineCopy: false },
+            // The album is neither reachable nor kept on this device.
+            "unavailable": false,
+            // The user's pick for each domain in conflict: 'local' / 'remote'.
+            "conflictChoices": { info: null, pages: null, content: null },
+            "connectivity": connectivity,
+            "sConflictTitle": t("souvenirs","This album was modified both on this device and on the server"),
+            "sConflictIntro": t("souvenirs","It is read-only until you choose, for each part, which version to keep. The other one is discarded."),
+            "sKeepLocal": t("souvenirs","This device"),
+            "sKeepRemote": t("souvenirs","Server"),
+            "sAllLocal": t("souvenirs","Keep everything from this device"),
+            "sAllRemote": t("souvenirs","Keep everything from the server"),
+            "sApplyChoices": t("souvenirs","Apply"),
+            "sUnavailableTitle": t("souvenirs","This album is not available offline"),
+            "sUnavailableText": t("souvenirs","Open it once while connected, or make it available offline from the album list. It can then be viewed and edited without a connection."),
+            "sBackToList": t("souvenirs","Back to the albums"),
         }
     },
     created: function() {
@@ -230,12 +301,31 @@ export default {
         this.cleanTimer = null;
         this.lastSaveErrorAt = 0;
         window.addEventListener("beforeunload", this.onBeforeUnload);
+        // Offline support (issue #22), authenticated view only: the album's
+        // local copy, and a sync each time the server becomes reachable again.
+        this.session = null;
+        this.syncing = false;
+        this.stopReconnectWatch = null;
+        if (this.token == "") {
+            this.stopReconnectWatch = onReconnect(function() { that.onReconnected(); });
+            document.addEventListener("visibilitychange", this.onVisibilityChange);
+        }
     },
     beforeUnmount: function() {
         // Leaving the album (router navigation): send the debounced writes
         // now instead of dropping them with the component.
         window.removeEventListener("beforeunload", this.onBeforeUnload);
-        this.saveQueue.flush();
+        document.removeEventListener("visibilitychange", this.onVisibilityChange);
+        if (this.stopReconnectWatch) {
+            this.stopReconnectWatch();
+        }
+        var session = this.session;
+        this.saveQueue.flush().then(function() {
+            // after the last writes: store the local copy as it now stands
+            if (session != null) {
+                session.close();
+            }
+        });
         if (this.cleanTimer) {
             clearTimeout(this.cleanTimer);
             this.cleanTimer = null;
@@ -281,8 +371,81 @@ export default {
     },
     computed: {
         'canEdit': function() {
-            // Editing is only available in the authenticated (non-public) view.
-            return (this.token == "");
+            // Editing is only available in the authenticated (non-public)
+            // view - and not while a conflict waits for the user's decision
+            // (issue #22), nor on an album that could not be loaded.
+            return (this.token == "") && !this.unavailable && this.sync.conflicts == null;
+        },
+        'online': function() {
+            return this.connectivity.online;
+        },
+        'syncIndicator': function() {
+            // What the status icon next to the menu shows (issue #22).
+            if (this.token != "" || this.unavailable || this.loading) {
+                return null;
+            }
+            var pending = this.sync.status === "pending";
+            if (this.sync.conflicts != null) {
+                return { id: "conflict", icon: AlertCircleOutline, label: t("souvenirs","Conflict: choose which version to keep") };
+            }
+            if (!this.online) {
+                return { id: "offline", icon: CloudOffOutline, label: pending
+                    ? t("souvenirs","Offline: changes are kept on this device")
+                    : t("souvenirs","Offline") };
+            }
+            if (pending) {
+                return { id: "pending", icon: CloudUploadOutline, label: t("souvenirs","Changes waiting to be synchronized") };
+            }
+            if (this.sync.status === "synced") {
+                return { id: "synced", icon: CloudCheckOutline, label: t("souvenirs","Synchronized") };
+            }
+            return null;
+        },
+        'statusBanner': function() {
+            // The one-line banner above the pages (issue #22), most pressing first.
+            if (this.token != "" || this.unavailable || this.loading) {
+                return null;
+            }
+            var that = this;
+            if (this.sync.authExpired) {
+                return {
+                    id: "auth",
+                    text: t("souvenirs","Your session has expired. Your changes are kept on this device until you log in again."),
+                    action: { label: t("souvenirs","Log in"), run: function() { that.goToLogin(); } },
+                };
+            }
+            if (this.sync.gone) {
+                return {
+                    id: "gone",
+                    text: t("souvenirs","This album no longer exists on the server: this is the copy kept on this device."),
+                    action: { label: t("souvenirs","Remove this copy"), run: function() { that.discardLocalCopy(); } },
+                };
+            }
+            if (!this.online) {
+                return {
+                    id: "offline",
+                    text: t("souvenirs","Offline: changes are kept on this device and sent when the connection is back."),
+                    action: null,
+                };
+            }
+            return null;
+        },
+        'conflictDomains': function() {
+            var conflicts = this.sync.conflicts || {};
+            var domains = [];
+            if (conflicts.info) {
+                domains.push({ id: "info", label: t("souvenirs","Album name and date") });
+            }
+            if (conflicts.pages) {
+                domains.push({ id: "pages", label: t("souvenirs","Pages: added, removed or reordered") });
+            }
+            if (conflicts.content && conflicts.content.length > 0) {
+                domains.push({ id: "content", label: n("souvenirs","Content of %n page","Content of %n pages", conflicts.content.length) });
+            }
+            return domains;
+        },
+        'conflictChoicesComplete': function() {
+            return this.conflictDomains.every(domain => this.conflictChoices[domain.id] != null);
         },
         'aLeftVisible': function() {
             return (this.displayedPage != 0);
@@ -485,25 +648,159 @@ export default {
                     that.loading = false;
                 });
             } else {
-                fetch("apiv2/album/unknown/full?apath="+this.path, {
-                    headers: {
-                        'requesttoken': OC.requestToken,
+                // Through the album's local copy (issue #22): from the server
+                // when it answers - sending first what was edited offline -,
+                // from this device otherwise.
+                var path = this.path;
+                try {
+                    path = decodeURIComponent(this.path);
+                } catch (decodeError) {
+                }
+                this.session = new AlbumSession({
+                    path: path,
+                    getPages: function() { return that.pages; },
+                    onState: function(state) { that.onSessionState(state); },
+                    onSyncWanted: function() { that.syncAlbum(); },
+                });
+                this.session.open().then(record => {
+                    if (record == null) {
+                        // unreachable server and no local copy; a missing
+                        // album is, as before, an empty view
+                        that.unavailable = !that.online;
+                    } else {
+                        that.applyRecord(record);
                     }
-                    })
-                .then(response => {
-                    response.json().then(data => {
-                        that.albumJson = JSON.stringify(data);
-                        that.sName = data.name;
-                        that.albumId = data.id;
-                        that.albumDavPath = data.path || "";
-                        that.pages = data.pages || [];
-                        that.elementMargin = data.elementMargin ??= 0;
-                        that.loading = false;
-                    })
+                    that.loading = false;
                 }).catch(error => {
                     console.log("Error in refresh album.");
                     that.loading = false;
                 });
+            }
+        },
+        applyRecord: function(record) {
+            // Show the album of a local copy (issue #22): at load, and after a
+            // sync that brought changes from the server.
+            this.albumJson = JSON.stringify({ ...record.info, pages: record.pages });
+            this.sName = record.info.name;
+            this.albumId = record.id;
+            this.albumDavPath = record.path || "";
+            this.pages = JSON.parse(JSON.stringify(record.pages || []));
+            this.elementMargin = record.info.elementMargin ?? 0;
+            if (this.displayedPage >= this.pages.length) {
+                this.displayedPage = Math.max(0, this.pages.length - 1);
+            }
+        },
+        onSessionState: function(state) {
+            this.sync = state;
+            if (state.conflicts != null) {
+                // read-only until the conflict is resolved
+                this.editMode = false;
+            }
+        },
+        remoteApi: function() {
+            // Where edits are written (issue #22): through the album's local
+            // copy when there is one - it sends them to the server, or keeps
+            // them on this device while the server cannot be reached.
+            return (this.session != null && this.session.record != null) ? this.session : directApi;
+        },
+        syncAlbum: function(choices) {
+            // Reconcile the local copy with the server (issue #22): after a
+            // reconnection, after edits kept locally, or with the user's
+            // conflict choices. Runs like a structural action - after every
+            // pending write, editor blocked - since it may replace pages.
+            if (this.session == null || this.session.record == null || this.syncing) {
+                return Promise.resolve();
+            }
+            var that = this;
+            if (this.imageChooserSaving || this.paintSaving) {
+                // media being added: their bytes are stored before the page
+                // that uses them, a sync in between would drop them
+                setTimeout(function() { that.syncAlbum(choices); }, 2000);
+                return Promise.resolve();
+            }
+            this.syncing = true;
+            var session = this.session;
+            // kept so that an upload confirmed meanwhile can wait for the end
+            // of the sync (see uploadNewAsset)
+            this.syncPromise = this.runBlocking(async function() {
+                var remote = await session.fetchRemote();
+                if (remote == null || !session.needsSync(remote)) {
+                    return null;
+                }
+                return session.reconcileWith(remote, choices || {});
+            }).then(function(result) {
+                if (result == null) {
+                    return;
+                }
+                if (result.pulled) {
+                    that.applyRecord(result.record);
+                }
+                if (result.record.conflicts != null) {
+                    notifyConflict(that.sName);
+                } else if (result.pushed) {
+                    notifySynced(that.sName);
+                }
+            }).catch(function(error) {
+                if (!isDeferrable(error)) {
+                    showError(t("souvenirs","Could not synchronize the album."));
+                }
+            }).finally(function() {
+                that.syncing = false;
+                that.syncPromise = null;
+            });
+            return this.syncPromise;
+        },
+        onReconnected: function() {
+            // The server is reachable again (issue #22).
+            if (this.session != null && this.session.record != null) {
+                return this.syncAlbum();
+            }
+            if (this.unavailable) {
+                // the album could not be shown at all: load it now
+                this.unavailable = false;
+                this.refreshAlbum();
+            }
+        },
+        resolveAllConflicts: function(side) {
+            // "Keep everything from ..." shortcuts of the conflict banner.
+            this.conflictChoices = { info: side, pages: side, content: side };
+            return this.applyConflictChoices();
+        },
+        applyConflictChoices: function() {
+            var choices = {};
+            for (const domain of this.conflictDomains) {
+                choices[domain.id] = this.conflictChoices[domain.id];
+            }
+            var that = this;
+            return this.syncAlbum(choices).then(function() {
+                that.conflictChoices = { info: null, pages: null, content: null };
+            });
+        },
+        discardLocalCopy: function() {
+            // The album is gone from the server (issue #22): drop its copy,
+            // unsent changes included, and leave.
+            var that = this;
+            var session = this.session;
+            var albumId = this.albumId;
+            // nothing must store the copy again on the way out
+            session.record = null;
+            return forgetAlbum(albumId).catch(() => {}).then(function() {
+                that.$router.push("/");
+            });
+        },
+        goToLogin: function() {
+            window.location.href = generateUrl("/login") + "?redirect_url="
+                + encodeURIComponent(window.location.pathname + window.location.search);
+        },
+        backToList: function() {
+            this.$router.push("/");
+        },
+        onVisibilityChange: function() {
+            // A hidden tab may be discarded without notice (mobile): send or
+            // store now what is still pending.
+            if (document.visibilityState === "hidden" && this.session != null) {
+                var session = this.session;
+                this.saveQueue.flush().then(function() { session.flush(); });
             }
         },
         toggleEdit: function() {
@@ -597,7 +894,7 @@ export default {
             var that = this;
             this.saveQueue.schedule("page:" + pageId, function() {
                 var page = that.pages.find(p => p.id === pageId);
-                return (page == null) ? Promise.resolve() : updatePage(that.albumId, page);
+                return (page == null) ? Promise.resolve() : that.remoteApi().updatePage(that.albumId, page);
             });
         },
         onSaveError: function(error) {
@@ -615,7 +912,15 @@ export default {
             // Closing or reloading the tab with writes still pending: send
             // them and ask the browser to confirm leaving.
             if (this.saveQueue == null || this.saveQueue.pending === 0) {
+                if (this.session != null) {
+                    // nothing left to send: store the local copy (issue #22)
+                    this.session.flush();
+                }
                 return;
+            }
+            var session = this.session;
+            if (session != null) {
+                this.saveQueue.idle().then(function() { session.flush(); });
             }
             this.saveQueue.flush();
             event.preventDefault();
@@ -636,7 +941,7 @@ export default {
                     that.scheduleClean();
                     return;
                 }
-                that.runSave(function() { return cleanAssets(that.albumId); }, { idempotent: true }).catch(() => {});
+                that.runSave(function() { return that.remoteApi().cleanAssets(that.albumId); }, { idempotent: true }).catch(() => {});
             }, 5000);
         },
         onEditText: function(pageId, elementId, newText) {
@@ -665,7 +970,7 @@ export default {
             // left with no pages and no way to add one.
             if (!hasVisibleElements(updatedPage) && this.pages.length > 1) {
                 this.saveQueue.cancel("page:" + pageId);
-                return this.runBlocking(() => deletePage(this.albumId, pageId))
+                return this.runBlocking(() => this.remoteApi().deletePage(this.albumId, pageId))
                     .then(() => {
                         var i = that.pages.findIndex(p => p.id === pageId);
                         if (i >= 0) {
@@ -681,7 +986,7 @@ export default {
                     });
             }
             this.pages.splice(index, 1, updatedPage);
-            return this.runBlocking(() => updatePage(this.albumId, updatedPage), { idempotent: true })
+            return this.runBlocking(() => this.remoteApi().updatePage(this.albumId, updatedPage), { idempotent: true })
                 .then(() => {
                     that.scheduleClean();
                 })
@@ -737,7 +1042,7 @@ export default {
             this.pages.splice(index, 1);
             this.pages.splice(newIndex, 0, page);
             this.$nextTick(() => { that.showN(newIndex); });
-            return this.runBlocking(() => movePage(this.albumId, page.id, pos)).catch(error => {
+            return this.runBlocking(() => this.remoteApi().movePage(this.albumId, page.id, pos)).catch(error => {
                 // Revert the optimistic move.
                 that.pages.splice(newIndex, 1);
                 that.pages.splice(index, 0, page);
@@ -787,7 +1092,7 @@ export default {
             if (deleteSrc) {
                 this.saveQueue.cancel("page:" + srcPageId);
             }
-            return this.runBlocking(() => pageOperations(this.albumId, operations))
+            return this.runBlocking(() => this.remoteApi().pageOperations(this.albumId, operations))
                 .then(() => {
                     var d = that.pages.findIndex(p => p.id === destPageId);
                     if (d >= 0) {
@@ -842,7 +1147,7 @@ export default {
             // Create a new empty page at `pos`, insert it locally, and navigate to it.
             var that = this;
             var page = buildPage();
-            return this.runBlocking(() => createPage(this.albumId, pos, page)).then(() => {
+            return this.runBlocking(() => this.remoteApi().createPage(this.albumId, pos, page)).then(() => {
                 that.pages.splice(pos, 0, page);
                 that.$nextTick(() => { that.showN(pos); });
             }).catch(error => {
@@ -885,7 +1190,7 @@ export default {
                 var cleared = removePaintElements(page);
                 this.paintSaving = true;
                 try {
-                    await this.runSave(() => updatePage(this.albumId, cleared), { idempotent: true });
+                    await this.runSave(() => this.remoteApi().updatePage(this.albumId, cleared), { idempotent: true });
                 } catch (error) {
                     this.paintSaving = false;
                     showError(t("souvenirs","Could not save the drawing."));
@@ -909,7 +1214,7 @@ export default {
                 // Upload before persisting the page, so a failed upload never
                 // leaves an element pointing at a missing asset.
                 await this.uploadNewAsset(element.image, blob);
-                await this.runSave(() => updatePage(this.albumId, updatedPage), { idempotent: true });
+                await this.runSave(() => this.remoteApi().updatePage(this.albumId, updatedPage), { idempotent: true });
             } catch (error) {
                 // Keep the dialog open so the drawing is not lost.
                 this.paintSaving = false;
@@ -950,7 +1255,7 @@ export default {
             // elements' geometry must survive the removal.
             var updatedPage = removeAudioElements(this.pages[index]);
             this.pages.splice(index, 1, updatedPage);
-            return this.runBlocking(() => updatePage(this.albumId, updatedPage), { idempotent: true })
+            return this.runBlocking(() => this.remoteApi().updatePage(this.albumId, updatedPage), { idempotent: true })
                 .then(() => {
                     // The player deliberately keeps playing when its URL goes
                     // away; a removed track must actually stop.
@@ -1077,7 +1382,7 @@ export default {
             if (elements.length > 0) {
                 var plan = planMediaInsertion(this.pages, targetIndex, elements);
                 try {
-                    await this.runSave(() => pageOperations(this.albumId, plan.operations));
+                    await this.runSave(() => this.remoteApi().pageOperations(this.albumId, plan.operations));
                 } catch (error) {
                     this.imageChooserSaving = false;
                     showError(this.mediaErrorString(elements[0]));
@@ -1126,6 +1431,17 @@ export default {
             // album was loaded (issue #50), so no assetprobe round trip: one
             // PUT, whose success means the file landed. The probe remains the
             // fallback should the path be unknown.
+            if (this.session != null && this.session.record != null) {
+                // Through the local copy (issue #22): on the server, or kept
+                // on this device until the next sync when it is unreachable.
+                // Not in the middle of a sync, though: the chooser and paint
+                // dialogs sit above its overlay, and bytes stored while it
+                // runs would be taken for unused and dropped.
+                if (this.syncPromise != null) {
+                    await this.syncPromise;
+                }
+                return this.session.uploadNewAsset(asset, blob);
+            }
             var davPath = this.albumDavPath ? (this.albumDavPath + "/" + asset) : null;
             if (davPath == null) {
                 var probe = await probeAsset(this.albumId, asset);
@@ -1233,6 +1549,7 @@ export default {
         Pencil,
         PencilOff,
         HelpCircleOutline,
+        CloudOffOutline,
     },
 }
 
@@ -1453,6 +1770,99 @@ function updateScrollWithPageDisplayed(el, dPage, isPortrait) {
     display: inline-flex;
     vertical-align: middle;
     margin-right: 6px;
+}
+
+.sync-indicator {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-right: 6px;
+    padding: 4px;
+    border-radius: 50%;
+    color: var(--color-main-text, #222);
+    background-color: var(--color-main-background-translucent, rgba(255, 255, 255, 0.8));
+}
+
+.sync-indicator--synced {
+    opacity: 0.6;
+}
+
+.sync-indicator--pending,
+.sync-indicator--offline {
+    color: var(--color-warning-text, #a37200);
+}
+
+.sync-indicator--conflict {
+    color: var(--color-error-text, #c00);
+}
+
+.album-banner {
+    position: fixed;
+    /* below the row of the menu button, which sits in the top right corner */
+    top: calc(var(--header-height, 50px) + 56px);
+    left: 50%;
+    transform: translateX(-50%);
+    /* same level as the menu: above every in-page control */
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(90vw, 640px);
+    padding: 8px 16px;
+    border-radius: var(--border-radius-large, 10px);
+    white-space: normal;
+    color: var(--color-main-text, #222);
+    background-color: var(--color-main-background, #fff);
+    border: 1px solid var(--color-border-dark, #ccc);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.album-banner--offline,
+.album-banner--auth,
+.album-banner--gone {
+    border-color: var(--color-warning, #e9a500);
+}
+
+.album-banner--conflict {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    border-color: var(--color-error, #e9322d);
+}
+
+.album-banner__title {
+    font-weight: bold;
+}
+
+.conflict-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.conflict-row__label {
+    flex: 1 1 auto;
+}
+
+.conflict-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.album-unavailable {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: min(90vw, 480px);
+    white-space: normal;
+    text-align: center;
+    color: var(--color-main-text, #222);
 }
 
 .s-album.editing {

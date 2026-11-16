@@ -5,6 +5,7 @@ import Album from './components/album.vue'
 import App from './app.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { generateUrl } from '@nextcloud/router'
+import { startOffline } from './offline/offlineManager.js'
 
 
 const routes = [
@@ -44,5 +45,11 @@ const router = createRouter({
 })
 
 const app = createApp(App).use(router).mount('#app-vue')
+
+// Offline support (issue #22): service worker and local data, for the
+// authenticated app only - a public share is always read from the server.
+if (!window.location.pathname.includes('/apps/souvenirs/public/')) {
+  startOffline()
+}
 
 

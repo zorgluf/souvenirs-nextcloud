@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { IMAGE_MIMES, VIDEO_MIMES, AUDIO_MIMES } from '../../api/davApi.js'
-import { MIME_LABELS, formatLabels, getMediaKinds, getShortcutGroups, SECTION_IDS } from '../helpContent.js'
+import { MIME_LABELS, formatLabels, getMediaKinds, getShortcutGroups, SECTION_IDS, getSectionIds, getOfflineTopics } from '../helpContent.js'
 
 describe('help content: formats', () => {
     it('labels every mimetype an album accepts', () => {
@@ -40,6 +40,22 @@ describe('help content: media kinds', () => {
 })
 
 describe('help content: shortcuts', () => {
+    it('adds the offline section for the owner only, before the shortcuts', () => {
+        expect(getSectionIds({ canEdit: false })).toEqual(['structure', 'modes', 'media', 'shortcuts'])
+        expect(getSectionIds({ canEdit: true })).toEqual(['structure', 'modes', 'media', 'offline', 'shortcuts'])
+        // the shared list is not modified
+        expect(SECTION_IDS).toEqual(['structure', 'modes', 'media', 'shortcuts'])
+    })
+
+    it('explains offline work topic by topic', () => {
+        const topics = getOfflineTopics()
+        expect(topics.map(topic => topic.id)).toEqual(['copy', 'media', 'edit', 'sync', 'conflict', 'device'])
+        for (const topic of topics) {
+            expect(topic.title).not.toBe('')
+            expect(topic.text).not.toBe('')
+        }
+    })
+
     it('has the guide sections in display order', () => {
         expect(SECTION_IDS).toEqual(['structure', 'modes', 'media', 'shortcuts'])
     })

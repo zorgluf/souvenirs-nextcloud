@@ -5,6 +5,23 @@ Create, Display and Share "old school" albums for your photos, videos and panora
 Better on device album edition with the [Souvenirs android application](https://github.com/zorgluf/souvenirs-android)
 
 
+## Working offline
+
+Albums can be viewed and edited without a connection, from the web interface:
+
+- every album you open is remembered by the browser (pages and texts only);
+- the *available offline* button of an album, in the album list, also keeps its
+  photos, videos and sounds on the device - the size is shown before the download,
+  and the *offline storage* button lists and removes these copies;
+- changes made offline are sent when the server is reachable again. If the same
+  part of an album was also changed elsewhere, nothing is overwritten: the album
+  asks which version to keep.
+
+The app can be installed from the browser menu (*Install* / *Add to Home Screen*):
+it then starts like a native app, and the browser no longer clears its offline
+copies on its own (on iOS, non-installed sites lose them after 7 days without use).
+Offline start needs HTTPS (service worker). Logging out clears the device.
+
 ## Building the app
 
 The app can be built by using the provided Makefile by running:

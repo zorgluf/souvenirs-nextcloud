@@ -10,6 +10,10 @@
 return [
     'routes' => [
 	['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
+	// album view of the SPA: same host page, so a reload works (issue #22)
+	['name' => 'page#show', 'url' => '/show', 'verb' => 'GET'],
+	// service worker of the offline mode (issue #22)
+	['name' => 'page#service_worker', 'url' => '/service-worker.js', 'verb' => 'GET'],
        // Large preview of a file
     ['name' => 'preview#get_preview', 'url'  => '/preview','verb' => 'GET','requirements' => array('apath' => '.+', 'file' => '.+')],
     ['name' => 'preview#get_asset', 'url' => '/asset', 'verb' => 'GET', 'requirements' => array('apath' => '.+', 'file' => '.+') ],

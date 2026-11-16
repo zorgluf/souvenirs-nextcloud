@@ -31,6 +31,13 @@
                 <div v-if="loading" class="chooser-center">
                     <NcLoadingIcon :size="44" />
                 </div>
+                <!-- Without the server (issue #22) its files cannot be listed;
+                     files of this device can still be added (Upload). -->
+                <NcEmptyContent v-else-if="offline" :name="sOffline" :description="sOfflineHint">
+                    <template #icon>
+                        <CloudOffOutline />
+                    </template>
+                </NcEmptyContent>
                 <NcEmptyContent v-else-if="entries.length === 0" :name="sEmpty">
                     <template #icon>
                         <ImageIcon />
@@ -107,6 +114,7 @@ import VideoIcon from 'vue-material-design-icons/Video.vue'
 import MusicNote from 'vue-material-design-icons/MusicNote.vue'
 import PlayCircleOutline from 'vue-material-design-icons/PlayCircleOutline.vue'
 import Check from 'vue-material-design-icons/Check.vue'
+import CloudOffOutline from 'vue-material-design-icons/CloudOffOutline.vue'
 import { showError } from '@nextcloud/dialogs'
 import { listFolder, getPreviewUrl, IMAGE_MIMES, VIDEO_MIMES, AUDIO_MIMES } from '../api/davApi.js'
 
@@ -120,6 +128,9 @@ export default {
         // every control so nothing can be chosen twice (same contract as
         // PaintDialog's saving prop).
         "saving": Boolean,
+        // The server cannot be reached (issue #22): no browsing of the
+        // Nextcloud files, only the upload of files of this device.
+        "offline": Boolean,
     },
     emits: ['close', 'pick', 'upload'],
     data: function() {
@@ -140,6 +151,8 @@ export default {
             "sCancel": t("souvenirs", "Cancel"),
             "sChoose": t("souvenirs", "Choose"),
             "sEmpty": t("souvenirs", "No media in this folder."),
+            "sOffline": t("souvenirs", "You are offline"),
+            "sOfflineHint": t("souvenirs", "Your Nextcloud files cannot be browsed without a connection. Use Upload to add files from this device."),
         }
     },
     components: {
@@ -157,6 +170,7 @@ export default {
         MusicNote,
         PlayCircleOutline,
         Check,
+        CloudOffOutline,
     },
     computed: {
         'crumbs': function() {
@@ -186,6 +200,9 @@ export default {
     mounted: function() {
         // Resume in the folder browsed last (this session); if it disappeared
         // meanwhile, fall back to the files root once.
+        if (this.offline) {
+            return;
+        }
         this.browse(lastBrowsedPath).then(ok => {
             if (!ok && lastBrowsedPath !== "") {
                 lastBrowsedPath = "";
