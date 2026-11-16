@@ -41,6 +41,7 @@
 
 import { NcActionLink, NcActionButton, NcActionInput, NcActionText, NcActions, NcButton } from '@nextcloud/vue'
 import { generateUrl, imagePath } from '@nextcloud/router'
+import { formatLongDate } from '../utils/dateFormat.js'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import { defaultExpiryDate, toApiDate } from '../utils/shareExpiry.js'
 
@@ -77,8 +78,7 @@ export default {
                 }) != undefined);
         },
         "dateString": function() {
-            moment.locale(window.navigator.language);
-            return moment(this.date, "YYYYMMDDhhmmss").format("LL");
+            return formatLongDate(this.date);
         },
         "shareToken": function() {
             if (this.isShared) {
@@ -94,8 +94,7 @@ export default {
                     return share['albumId'] == this.albumId
                 }).validUntil;
                 if (validUntil) {
-                    moment.locale(window.navigator.language);
-                    return moment(validUntil).format("LL");
+                    return formatLongDate(validUntil);
                 }
             }
             return "";
