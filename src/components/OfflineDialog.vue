@@ -164,16 +164,17 @@ export default {
             this.total = this.count
             this.step = 'downloading'
             try {
-                const record = await downloadOffline(this.album.id, {
+                await downloadOffline(this.album.id, {
                     signal: this.abort.signal,
                     onProgress: ({ done, total }) => {
                         this.done = done
                         this.total = total
                     },
                 })
-                this.bytes = record.offlineBytes || 0
-                this.step = 'offline'
+                // Done: the album's offline button in the list now tells it,
+                // nothing left to say here.
                 this.$emit('changed')
+                this.$emit('close')
             } catch (error) {
                 if (error != null && error.name === 'AbortError') {
                     // cancelled: back to the estimate

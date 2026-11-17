@@ -102,7 +102,7 @@ export function getOfflineTopics() {
         {
             id: 'sync',
             title: t('souvenirs', 'Synchronization'),
-            text: t('souvenirs', 'As soon as the server can be reached again, your changes are sent and those made elsewhere are fetched. The icon next to the menu, and the badge of each album in the list, tell whether everything is synchronized, waiting to be sent, or in conflict.'),
+            text: t('souvenirs', 'As soon as the server can be reached again, your changes are sent and those made elsewhere are fetched. The icon next to the menu, and the offline button of each album in the list, tell whether everything is synchronized, waiting to be sent, or in conflict.'),
         },
         {
             id: 'conflict',

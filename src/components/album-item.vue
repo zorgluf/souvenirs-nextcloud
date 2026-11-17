@@ -3,11 +3,6 @@
 <div v-bind:class="[isWinPortrait ? 's-box-portrait': 's-box', { 's-box--unavailable': unavailable }]"
     v-bind:title="unavailable ? sUnavailable : null"> 
     <div class="s-spiral"></div>
-    <!-- Sync status of the album's copy on this device (issue #22). -->
-    <span v-if="badge != null" :class="['s-sync-badge', 's-sync-badge--' + badge.id]"
-        :title="badge.label" :aria-label="badge.label" role="img">
-        <component :is="badge.icon" :size="20" />
-    </span>
     <router-link :to="{ path: '/show', query: { apath: encodeURIComponent(aPath) }}">
         <div v-bind:class="isWinPortrait ? 's-square-portrait': 's-square'">
             <img v-bind:class="isWinPortrait ? 's-album-image-portrait': 's-album-image'" v-bind:src='albumImageUrl'
@@ -33,10 +28,13 @@
                 <Pencil :size="20" />
             </template>
         </NcButton>
-        <NcButton variant="tertiary" :aria-label="sOffline" :title="sOffline" v-on:click="onOffline">
+        <!-- Offline copy of the album on this device (issue #22): greyed out
+             like an unshared album when there is none to report, the sync
+             status icon otherwise. -->
+        <NcButton variant="tertiary" :class="['s-offline-button', 's-offline-button--' + offlineState.id]"
+            :aria-label="offlineState.label" :title="offlineState.label" v-on:click="onOffline">
             <template #icon>
-                <CloudDownload v-if="localState != null && localState.offline" :size="20" />
-                <CloudDownloadOutline v-else :size="20" />
+                <component :is="offlineState.icon" :size="20" />
             </template>
         </NcButton>
         <NcActions default-icon="icon-delete" :force-menu="true" :disabled="!online">
@@ -55,7 +53,6 @@ import { NcActionLink, NcActionButton, NcActionInput, NcActionText, NcActions, N
 import { generateUrl, imagePath } from '@nextcloud/router'
 import { formatLongDate } from '../utils/dateFormat.js'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import CloudDownload from 'vue-material-design-icons/CloudDownload.vue'
 import CloudDownloadOutline from 'vue-material-design-icons/CloudDownloadOutline.vue'
 import CloudCheckOutline from 'vue-material-design-icons/CloudCheckOutline.vue'
 import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline.vue'
@@ -99,8 +96,6 @@ export default {
         NcActionText,
         NcButton,
         Pencil,
-        CloudDownload,
-        CloudDownloadOutline,
     },
     watch: {
         "albumImageUrl": function() {
@@ -114,25 +109,25 @@ export default {
         },
     },
     computed: {
-        "badge": function() {
-            // Nothing without a copy on this device: the album is simply online.
+        "offlineState": function() {
+            // Icon and label of the offline button. Changes waiting or in
+            // conflict are always reported; otherwise the button only lights
+            // up once the album was made available offline.
             var state = this.localState;
-            if (state == null || state.status === "none") {
-                return null;
-            }
-            if (state.status === "conflict") {
+            if (state != null && state.status === "conflict") {
                 return { id: "conflict", icon: AlertCircleOutline, label: t("souvenirs","Modified both here and on the server: open the album to choose") };
             }
-            if (state.status === "pending") {
+            if (state != null && state.status === "pending") {
                 return { id: "pending", icon: CloudUploadOutline, label: t("souvenirs","Changes waiting to be synchronized") };
             }
-            return {
-                id: "synced",
-                icon: CloudCheckOutline,
-                label: state.offline
-                    ? t("souvenirs","Synchronized, available offline ({size})", { size: formatBytes(state.offlineBytes) })
-                    : t("souvenirs","Synchronized"),
-            };
+            if (state != null && state.status !== "none" && state.offline) {
+                return {
+                    id: "synced",
+                    icon: CloudCheckOutline,
+                    label: t("souvenirs","Synchronized, available offline ({size})", { size: formatBytes(state.offlineBytes) }),
+                };
+            }
+            return { id: "none", icon: CloudDownloadOutline, label: this.sOffline };
         },
         "isShared": function() {
             return (this.shares.find(share => {
@@ -330,28 +325,9 @@ export default {
     opacity: 0.4;
 }
 
-.s-sync-badge {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    z-index: 2;
-    display: flex;
-    padding: 4px;
-    border-radius: 50%;
-    color: var(--color-main-text, #222);
-    background-color: var(--color-main-background-translucent, rgba(255, 255, 255, 0.85));
-}
-
-.s-sync-badge--synced {
-    opacity: 0.75;
-}
-
-.s-sync-badge--pending {
-    color: var(--color-warning-text, #a37200);
-}
-
-.s-sync-badge--conflict {
-    color: var(--color-error-text, #c00);
+/* Same light grey as the share button of an album that is not shared. */
+.s-offline-button--none {
+    opacity: 0.3;
 }
 
 .s-square {

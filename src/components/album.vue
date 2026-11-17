@@ -184,6 +184,9 @@ import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 // view, unit tests): the server, directly.
 const directApi = { updatePage, createPage, deletePage, movePage, pageOperations, cleanAssets }
 
+// How long the "Offline: ..." banner stays above the pages.
+const OFFLINE_NOTICE_MS = 5000
+
 export default {
     props: {
       "path": {
@@ -273,6 +276,9 @@ export default {
             "sync": { status: "none", conflicts: null, pendingAssets: [], authExpired: false, gone: false, offlineCopy: false },
             // The album is neither reachable nor kept on this device.
             "unavailable": false,
+            // The offline banner is a notice, not a permanent fixture: it goes
+            // away after a few seconds (the status icon next to the menu stays).
+            "offlineNoticeVisible": false,
             // The user's pick for each domain in conflict: 'local' / 'remote'.
             "conflictChoices": { info: null, pages: null, content: null },
             "connectivity": connectivity,
@@ -306,6 +312,8 @@ export default {
         this.session = null;
         this.syncing = false;
         this.stopReconnectWatch = null;
+        // (offlineNoticeTimer is owned by the offlineNotice watcher, which is
+        // immediate and so already ran: not reset here)
         if (this.token == "") {
             this.stopReconnectWatch = onReconnect(function() { that.onReconnected(); });
             document.addEventListener("visibilitychange", this.onVisibilityChange);
@@ -330,6 +338,7 @@ export default {
             clearTimeout(this.cleanTimer);
             this.cleanTimer = null;
         }
+        clearTimeout(this.offlineNoticeTimer);
     },
     destroyed: function() {
         window.removeEventListener("resize", this.resizeEventHandler);
@@ -367,7 +376,23 @@ export default {
             // Any track change (new page, re-added audio) cancels the forced
             // stop from a removal, so the next track plays normally.
             this.audioForceStop = false;
-        }
+        },
+        offlineNotice: {
+            // Shown each time the album turns out to be offline (opened without
+            // a connection, or the connection is lost), for a few seconds.
+            immediate: true,
+            handler(newValue) {
+                var that = this;
+                clearTimeout(this.offlineNoticeTimer);
+                this.offlineNoticeTimer = null;
+                this.offlineNoticeVisible = newValue;
+                if (newValue) {
+                    this.offlineNoticeTimer = setTimeout(function() {
+                        that.offlineNoticeVisible = false;
+                    }, OFFLINE_NOTICE_MS);
+                }
+            },
+        },
     },
     computed: {
         'canEdit': function() {
@@ -401,6 +426,10 @@ export default {
             }
             return null;
         },
+        'offlineNotice': function() {
+            // Whether the album is being viewed without the server.
+            return this.token == "" && !this.unavailable && !this.loading && !this.online;
+        },
         'statusBanner': function() {
             // The one-line banner above the pages (issue #22), most pressing first.
             if (this.token != "" || this.unavailable || this.loading) {
@@ -421,7 +450,7 @@ export default {
                     action: { label: t("souvenirs","Remove this copy"), run: function() { that.discardLocalCopy(); } },
                 };
             }
-            if (!this.online) {
+            if (this.offlineNoticeVisible) {
                 return {
                     id: "offline",
                     text: t("souvenirs","Offline: changes are kept on this device and sent when the connection is back."),

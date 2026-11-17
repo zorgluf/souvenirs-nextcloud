@@ -532,3 +532,77 @@ describe('album offline editing', () => {
         expect(ctx.pages[0].elements[0].text).toBe('offline text')
     })
 })
+
+describe('album offline banner', () => {
+    // The parts of the component the banner is made of, without mounting it.
+    function bannerContext(overrides) {
+        const ctx = Object.assign({
+            token: '',
+            unavailable: false,
+            loading: false,
+            online: false,
+            sync: { authExpired: false, gone: false },
+            offlineNoticeVisible: false,
+            offlineNoticeTimer: null,
+        }, overrides)
+        ctx.banner = () => album.computed.statusBanner.call(ctx)
+        ctx.notice = () => album.computed.offlineNotice.call(ctx)
+        ctx.watch = () => album.watch.offlineNotice.handler.call(ctx, ctx.notice())
+        return ctx
+    }
+
+    beforeEach(() => {
+        vi.useFakeTimers()
+    })
+    afterEach(() => {
+        vi.useRealTimers()
+    })
+
+    it('shows the offline banner for a few seconds only', () => {
+        const ctx = bannerContext()
+        ctx.watch()
+        expect(ctx.banner().id).toBe('offline')
+        vi.advanceTimersByTime(4000)
+        expect(ctx.banner().id).toBe('offline')
+        vi.advanceTimersByTime(2000)
+        expect(ctx.banner()).toBe(null)
+    })
+
+    it('shows it again each time the connection is lost', () => {
+        const ctx = bannerContext()
+        ctx.watch()
+        vi.advanceTimersByTime(6000)
+        ctx.online = true
+        ctx.watch()
+        expect(ctx.banner()).toBe(null)
+        ctx.online = false
+        ctx.watch()
+        expect(ctx.banner().id).toBe('offline')
+    })
+
+    it('drops it at once when the connection is back', () => {
+        const ctx = bannerContext()
+        ctx.watch()
+        ctx.online = true
+        ctx.watch()
+        expect(ctx.banner()).toBe(null)
+        expect(vi.getTimerCount()).toBe(0)
+    })
+
+    it('does not show it on a shared album, nor while loading', () => {
+        expect(bannerContext({ token: 'abc' }).notice()).toBe(false)
+        expect(bannerContext({ loading: true }).notice()).toBe(false)
+        expect(bannerContext({ unavailable: true }).notice()).toBe(false)
+    })
+
+    it('keeps the banners that ask for an action', () => {
+        const expired = bannerContext({ sync: { authExpired: true, gone: false } })
+        expired.watch()
+        vi.advanceTimersByTime(60000)
+        expect(expired.banner().id).toBe('auth')
+        const gone = bannerContext({ sync: { authExpired: false, gone: true } })
+        gone.watch()
+        vi.advanceTimersByTime(60000)
+        expect(gone.banner().id).toBe('gone')
+    })
+})
