@@ -45,7 +45,7 @@ describe('HelpDialog', () => {
         await wrapper.vm.$nextTick()
         expect(q('.help-section--offline')).not.toBeNull()
         expect(q('.help-nav__item--active').textContent).toContain('Offline')
-        expect(qa('.help-section--offline .help-term')).toHaveLength(6)
+        expect(qa('.help-section--offline .help-term')).toHaveLength(7)
         expect(q('.help-section--offline').textContent).toContain('Conflicts')
     })
 

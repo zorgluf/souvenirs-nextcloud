@@ -16,7 +16,7 @@ import {
     confirmLogout, orphanAlbums,
 } from '../offlineManager.js'
 import { MemoryStore } from '../store.js'
-import { connectivity, reportOnline } from '../connectivity.js'
+import { connectivity, reportOnline, setForcedOffline } from '../connectivity.js'
 import { recordFromRemote } from '../albumSync.js'
 import { MEDIA_CACHE, PENDING_CACHE, SHELL_CACHE, mediaKey } from '../mediaKeys.js'
 import { setActiveAlbum, backgroundSyncOf } from '../syncService.js'
@@ -46,6 +46,7 @@ beforeEach(() => {
     caches = new FakeCaches()
     vi.stubGlobal('caches', caches)
     vi.clearAllMocks()
+    connectivity.forced = false
     reportOnline()
     connectivity.online = true
     // albums the "server" holds, by id; fetch serves the token, the album
@@ -132,6 +133,25 @@ describe('ownership of the local data', () => {
         await wipeEverything(store)
         expect(await store.allAlbums()).toEqual([])
         expect(await store.getMeta('albumList')).toBeNull()
+    })
+
+    it('stops working offline by choice when everything is wiped', async () => {
+        await setForcedOffline(true)
+        expect(connectivity.online).toBe(false)
+        await wipeEverything(store)
+        // the choice is dropped at once; the server is asked in the background
+        expect(connectivity.forced).toBe(false)
+        await vi.waitFor(() => expect(connectivity.online).toBe(true))
+    })
+
+    it('syncs nothing in the background while working offline by choice', async () => {
+        const record = recordFromRemote(remoteAlbum())
+        record.dirty.info = true
+        await store.putAlbum(record)
+        await setForcedOffline(true)
+        fetch.mockClear()
+        await syncAll(() => {}, store)
+        expect(fetch).not.toHaveBeenCalled()
     })
 })
 

@@ -404,6 +404,11 @@ export default {
         'online': function() {
             return this.connectivity.online;
         },
+        'forcedOffline': function() {
+            // offline because the user chose to (the offline button of the
+            // album list), not because of the network
+            return this.connectivity.forced;
+        },
         'syncIndicator': function() {
             // What the status icon next to the menu shows (issue #22).
             if (this.token != "" || this.unavailable || this.loading) {
@@ -414,6 +419,11 @@ export default {
                 return { id: "conflict", icon: AlertCircleOutline, label: t("souvenirs","Conflict: choose which version to keep") };
             }
             if (!this.online) {
+                if (this.forcedOffline) {
+                    return { id: "offline", icon: CloudOffOutline, label: pending
+                        ? t("souvenirs","Working offline: changes are kept on this device")
+                        : t("souvenirs","Working offline") };
+                }
                 return { id: "offline", icon: CloudOffOutline, label: pending
                     ? t("souvenirs","Offline: changes are kept on this device")
                     : t("souvenirs","Offline") };
@@ -453,7 +463,9 @@ export default {
             if (this.offlineNoticeVisible) {
                 return {
                     id: "offline",
-                    text: t("souvenirs","Offline: changes are kept on this device and sent when the connection is back."),
+                    text: this.forcedOffline
+                        ? t("souvenirs","Working offline: changes are kept on this device and sent when you go back online, with the offline button of the album list.")
+                        : t("souvenirs","Offline: changes are kept on this device and sent when the connection is back."),
                     action: null,
                 };
             }

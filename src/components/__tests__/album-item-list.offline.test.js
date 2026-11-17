@@ -4,7 +4,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 vi.mock('@nextcloud/dialogs', () => ({ showError: vi.fn(), showSuccess: vi.fn(), showWarning: vi.fn() }))
 
 import AlbumItemList from '../album-item-list.vue'
-import { connectivity, reportOnline, reportOffline } from '../../offline/connectivity.js'
+import { connectivity, reportOnline, reportOffline, setForcedOffline } from '../../offline/connectivity.js'
 import { getStore } from '../../offline/store.js'
 import { rememberAlbumList } from '../../offline/offlineManager.js'
 import { recordFromRemote } from '../../offline/albumSync.js'
@@ -63,6 +63,8 @@ beforeEach(async () => {
     host.id = 'souvenirs-main'
     document.body.appendChild(host)
     serverUp = true
+    connectivity.forced = false
+    globalThis.localStorage.clear()
     reportOnline()
     connectivity.online = true
     await getStore().clear()
@@ -95,6 +97,7 @@ afterEach(() => {
         wrapper = null
     }
     host.remove()
+    connectivity.forced = false
     reportOnline()
     vi.unstubAllGlobals()
 })
@@ -159,6 +162,42 @@ describe('album list offline', () => {
         mountList()
         await settle()
         expect(wrapper.find('.create-album-fab').attributes('disabled')).toBeDefined()
+    })
+
+    it('works from the device when the user chose to work offline', async () => {
+        await rememberAlbumList(Object.values(ALBUMS))
+        await setForcedOffline(true)
+        fetch.mockClear()
+        mountList()
+        await settle()
+        expect(names()).toEqual(['Alpha', 'Beta'])
+        expect(wrapper.find('.offline-banner').text()).toContain('You are working offline')
+        expect(wrapper.find('.storage-fab').classes()).toContain('storage-fab--offline')
+        // not a single request: no list, no shares, no probe
+        expect(fetch).not.toHaveBeenCalled()
+    })
+
+    it('goes back online from the banner, and reloads the real list', async () => {
+        await rememberAlbumList([ALBUMS['album-1']])
+        await setForcedOffline(true)
+        mountList()
+        await settle()
+        expect(names()).toEqual(['Alpha'])
+        await wrapper.find('.offline-banner__action').trigger('click')
+        await settle()
+        expect(connectivity.forced).toBe(false)
+        expect(connectivity.online).toBe(true)
+        expect(wrapper.find('.offline-banner').exists()).toBe(false)
+        expect(names()).toEqual(['Alpha', 'Beta'])
+    })
+
+    it('has no "go online" shortcut when the server is simply unreachable', async () => {
+        await rememberAlbumList(Object.values(ALBUMS))
+        serverUp = false
+        mountList()
+        await settle()
+        expect(wrapper.find('.offline-banner').exists()).toBe(true)
+        expect(wrapper.find('.offline-banner__action').exists()).toBe(false)
     })
 
     it('reloads the real list when the server is back', async () => {

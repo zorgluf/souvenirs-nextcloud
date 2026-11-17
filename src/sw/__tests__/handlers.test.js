@@ -4,7 +4,7 @@ import { FakeCaches } from '../../../tests/frontend/fakeCaches.js'
 import { MEDIA_CACHE, PENDING_CACHE, SHELL_CACHE, mediaKey } from '../../offline/mediaKeys.js'
 import {
     route, isAppPage, isShellResource, handlePage, handleShellResource, handleMedia, respondWithStored,
-    warmShell, recordShellUse, shellPageKey, SHELL_MAX_AGE_MS,
+    warmShell, recordShellUse, shellPageKey, SHELL_MAX_AGE_MS, readForced, writeForced, isBlockedWhenForced,
 } from '../handlers.js'
 
 // Service worker request handling (issue #22), against an in-memory Cache
@@ -276,5 +276,98 @@ describe('shell upkeep', () => {
         expect(await cache.match(liveUrl)).toBeDefined()
         // the page itself is never aged out
         expect(await cache.match(shellPageKey(env))).toBeDefined()
+    })
+})
+
+describe('working offline by choice', () => {
+    const mediaUrl = APP + 'preview?apath=%2FSouvenirs%2Fa&file=x.jpg&width=300&height=200'
+
+    beforeEach(() => {
+        env.forced = true
+    })
+
+    async function blocked(req) {
+        const res = await route(req, env)
+        return res != null && res.type === 'error'
+    }
+
+    it('remembers the choice across restarts of the worker', async () => {
+        expect(await readForced(env)).toBe(false)
+        await writeForced(env, true)
+        expect(await readForced(env)).toBe(true)
+        // kept through the clean-up of old shell entries
+        await recordShellUse([], env, 1000000)
+        await recordShellUse([], env, 1000000 + SHELL_MAX_AGE_MS * 2)
+        expect(await readForced(env)).toBe(true)
+        await writeForced(env, false)
+        expect(await readForced(env)).toBe(false)
+    })
+
+    it('lets no request leave the device', async () => {
+        expect(await blocked(request(APP + 'apiv2/album/1'))).toBe(true)
+        expect(await blocked(request(APP + 'apiv2/album/1', { method: 'POST' }))).toBe(true)
+        expect(await blocked(request('/remote.php/webdav/Souvenirs/a/data/x.jpg', { method: 'PUT' }))).toBe(true)
+        expect(await blocked(request('/index.php/csrftoken'))).toBe(true)
+        expect(await blocked(request('/ocs/v2.php/apps/notifications/api/v2/notifications'))).toBe(true)
+        expect(await blocked(request('/index.php/avatar/bob/64', { destination: 'image' }))).toBe(true)
+        expect(await blocked(request('https://elsewhere.example.com/a.js', { destination: 'script' }))).toBe(true)
+        expect(network).not.toHaveBeenCalled()
+    })
+
+    it('leaves navigations, public shares and non-network requests alone', () => {
+        expect(route(request('/index.php/apps/files/', { mode: 'navigate' }), env)).toBeNull()
+        expect(route(request(APP + 'public/token', { mode: 'navigate' }), env)).toBeNull()
+        expect(route(request(APP + 'public/token/album'), env)).toBeNull()
+        expect(route(request(APP + 'public/token/preview?file=a.jpg', { destination: 'image' }), env)).toBeNull()
+        expect(isBlockedWhenForced({ mode: 'cors' }, new URL('blob:' + ORIGIN + '/1234'), env)).toBe(false)
+        expect(isBlockedWhenForced({ mode: 'no-cors' }, new URL('data:image/png;base64,AAAA'), env)).toBe(false)
+    })
+
+    it('blocks nothing when the choice is off', () => {
+        env.forced = false
+        expect(route(request(APP + 'apiv2/album/1'), env)).toBeNull()
+        expect(route(request(APP + 'apiv2/album/1', { method: 'POST' }), env)).toBeNull()
+    })
+
+    it('serves the page from the shell without asking the server', async () => {
+        await (await env.caches.open(SHELL_CACHE)).put(shellPageKey(env), new Response('<html>shell</html>'))
+        const res = await route(request(APP + 'show?apath=%2FSouvenirs%2Fa', { mode: 'navigate' }), env)
+        expect(await res.text()).toBe('<html>shell</html>')
+        expect(network).not.toHaveBeenCalled()
+    })
+
+    it('asks the server for a page only when there is no shell to start from', async () => {
+        network.mockResolvedValue(response('<html>list</html>', { type: 'text/html' }))
+        const res = await route(request(APP, { mode: 'navigate' }), env)
+        expect(await res.text()).toBe('<html>list</html>')
+        expect(network).toHaveBeenCalledTimes(1)
+    })
+
+    it('serves shell files from their copy, versioned or not, even of another version', async () => {
+        const cache = await env.caches.open(SHELL_CACHE)
+        await cache.put(ORIGIN + '/apps/souvenirs/js/vite/index.mjs', new Response('unversioned'))
+        await cache.put(ORIGIN + '/dist/core-common.js?v=old', new Response('old release'))
+        const plain = await route(request('/apps/souvenirs/js/vite/index.mjs', { destination: 'script' }), env)
+        expect(await plain.text()).toBe('unversioned')
+        const other = await route(request('/dist/core-common.js?v=new', { destination: 'script' }), env)
+        expect(await other.text()).toBe('old release')
+        expect(network).not.toHaveBeenCalled()
+    })
+
+    it('fetches a shell file that is missing, so the app still starts', async () => {
+        network.mockResolvedValue(response('fresh file'))
+        const res = await route(request('/dist/core-main.js?v=1', { destination: 'script' }), env)
+        expect(await res.text()).toBe('fresh file')
+        expect(network).toHaveBeenCalledTimes(1)
+    })
+
+    it('serves media from the device only', async () => {
+        const key = mediaKey(ORIGIN, 'Souvenirs/a', 'x.jpg')
+        expect((await route(request(mediaUrl, { destination: 'image' }), env)).status).toBe(503)
+        await (await env.caches.open(MEDIA_CACHE)).put(key, new Response('copy', { headers: { 'Content-Type': 'image/jpeg' } }))
+        expect(await (await route(request(mediaUrl, { destination: 'image' }), env)).text()).toBe('copy')
+        await (await env.caches.open(PENDING_CACHE)).put(key, new Response('pending', { headers: { 'Content-Type': 'image/jpeg' } }))
+        expect(await (await route(request(mediaUrl, { destination: 'image' }), env)).text()).toBe('pending')
+        expect(network).not.toHaveBeenCalled()
     })
 })

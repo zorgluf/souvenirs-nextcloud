@@ -1,11 +1,25 @@
 <template>
-    <!-- Storage management of the offline copies (issue #22): space used per
-         album and in total, removal of copies, and the device-level settings
-         that make them last (persistent storage, notifications). -->
+    <!-- Everything about working offline (issue #22), behind the offline
+         button of the album list: the switch to work offline by choice,
+         then the storage of the offline copies - space used per album and
+         in total, removal of copies, and the device-level settings that
+         make them last (persistent storage, notifications). -->
     <NcModal size="normal" :name="sTitle" @close="$emit('close')">
         <div class="storage-dialog">
             <h2>{{ sTitle }}</h2>
 
+            <NcCheckboxRadioSwitch type="switch" class="storage-dialog__switch" :model-value="forced"
+                :loading="switching" :disabled="switching || (!forced && !serviceWorker)"
+                @update:model-value="setForced">
+                {{ sWorkOffline }}
+            </NcCheckboxRadioSwitch>
+            <p class="storage-dialog__hint">{{ sWorkOfflineHint }}</p>
+            <p v-if="!serviceWorker" class="storage-dialog__hint storage-dialog__warning">{{ sNoWorker }}</p>
+            <p class="storage-dialog__status" role="status">{{ statusText }}</p>
+            <p v-if="pendingText !== ''" class="storage-dialog__hint">{{ pendingText }}</p>
+            <p v-if="forced && !loading && usage.albums.length === 0" class="storage-dialog__hint storage-dialog__warning">{{ sNothingKept }}</p>
+
+            <h3>{{ sAlbums }}</h3>
             <div v-if="loading" class="storage-dialog__center">
                 <NcLoadingIcon :size="44" />
             </div>
@@ -28,7 +42,6 @@
 
                 <h3>{{ sDevice }}</h3>
                 <p class="storage-dialog__hint">{{ usage.persisted ? sPersisted : sNotPersisted }}</p>
-                <p v-if="!serviceWorker" class="storage-dialog__hint storage-dialog__warning">{{ sNoWorker }}</p>
                 <div v-if="notifications === 'default'" class="storage-dialog__row">
                     <span>{{ sNotifications }}</span>
                     <NcButton v-on:click="enableNotifications">{{ sEnable }}</NcButton>
@@ -52,9 +65,10 @@
 
 <script>
 
-import { NcModal, NcButton, NcLoadingIcon, NcProgressBar } from '@nextcloud/vue'
+import { NcModal, NcButton, NcLoadingIcon, NcProgressBar, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
-import { storageUsage, removeOffline, wipeEverything, hasServiceWorker } from '../offline/offlineManager.js'
+import { storageUsage, removeOffline, wipeEverything, hasServiceWorker, localStates } from '../offline/offlineManager.js'
+import { connectivity, setForcedOffline } from '../offline/connectivity.js'
 import { notificationPermission, requestNotifications } from '../offline/notify.js'
 import { formatBytes } from '../offline/format.js'
 
@@ -66,6 +80,7 @@ export default {
         NcButton,
         NcLoadingIcon,
         NcProgressBar,
+        NcCheckboxRadioSwitch,
         Delete,
     },
     data: function() {
@@ -75,7 +90,16 @@ export default {
             notifications: notificationPermission(),
             serviceWorker: hasServiceWorker(),
             confirmingWipe: false,
-            sTitle: t('souvenirs', 'Offline storage'),
+            connectivity: connectivity,
+            // the switch is being applied: the worker is told, the server asked
+            switching: false,
+            // albums with changes not sent to the server yet
+            pendingCount: 0,
+            sTitle: t('souvenirs', 'Offline'),
+            sWorkOffline: t('souvenirs', 'Work offline'),
+            sWorkOfflineHint: t('souvenirs', 'For a slow or paid connection: Souvenirs then uses no data. Only the albums kept on this device can be viewed and edited, and your changes wait here until you switch this off.'),
+            sNothingKept: t('souvenirs', 'No album is kept on this device: photos and videos will not be shown while you work offline.'),
+            sAlbums: t('souvenirs', 'Albums kept on this device'),
             sNone: t('souvenirs', 'No album is kept on this device. Use the offline button of an album to keep a copy of it.'),
             sRemove: t('souvenirs', 'Remove offline copy'),
             sDevice: t('souvenirs', 'This device'),
@@ -92,6 +116,26 @@ export default {
         }
     },
     computed: {
+        forced: function() {
+            return this.connectivity.forced
+        },
+        statusText: function() {
+            if (this.forced) {
+                return t('souvenirs', 'You are working offline: nothing is downloaded or sent.')
+            }
+            return this.connectivity.online
+                ? t('souvenirs', 'Connected to the server.')
+                : t('souvenirs', 'The server cannot be reached. Your changes are sent as soon as it answers.')
+        },
+        pendingText: function() {
+            if (this.pendingCount === 0) {
+                return ''
+            }
+            return n('souvenirs',
+                '%n album has changes waiting to be sent.',
+                '%n albums have changes waiting to be sent.',
+                this.pendingCount)
+        },
         totalText: function() {
             return t('souvenirs', 'Total kept offline: {size}', { size: formatBytes(this.usage.total) })
         },
@@ -113,9 +157,24 @@ export default {
         refresh: async function() {
             try {
                 this.usage = await storageUsage()
+                this.pendingCount = Object.values(await localStates())
+                    .filter(state => state.status === 'pending').length
             } finally {
                 this.loading = false
             }
+        },
+        setForced: async function(forced) {
+            if (this.switching) {
+                return
+            }
+            this.switching = true
+            try {
+                // back online, the album list sends what was edited meanwhile
+                await setForcedOffline(forced)
+            } finally {
+                this.switching = false
+            }
+            this.$emit('changed')
         },
         remove: async function(album) {
             await removeOffline(album.id)
@@ -180,7 +239,8 @@ export default {
     color: var(--color-text-maxcontrast, #767676);
 }
 
-.storage-dialog__total {
+.storage-dialog__total,
+.storage-dialog__status {
     font-weight: bold;
 }
 

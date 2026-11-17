@@ -3,7 +3,10 @@
         <!-- Shown from this device while the server cannot be reached (issue #22). -->
         <div v-if="!online" class="offline-banner" role="status">
             <CloudOffOutline :size="20" />
-            <span>{{ sOfflineBanner }}</span>
+            <span>{{ forcedOffline ? sForcedBanner : sOfflineBanner }}</span>
+            <!-- offline by choice: the way back, without opening the dialog -->
+            <NcButton v-if="forcedOffline" variant="secondary" class="offline-banner__action" :disabled="goingOnline"
+                v-on:click="goOnline">{{ sGoOnline }}</NcButton>
         </div>
         <album-item v-for='(album, index) in albumList' v-bind:key='index' v-bind:a-path='album["path"]'
         v-bind:album-image-path='("albumImage" in album) ? album["albumImage"] : ""'
@@ -30,9 +33,14 @@
         </div>
         <div id="snackbar">{{snackbarText}}
         </div>
-        <NcButton variant="secondary" class="storage-fab" :aria-label="sStorage" :title="sStorage" v-on:click="showStorage = true">
+        <!-- The one offline button (issue #22): working offline by choice and
+             the storage of the offline copies, in one dialog. Its icon tells
+             whether the server is being used. -->
+        <NcButton variant="secondary" :class="['storage-fab', online ? '' : 'storage-fab--offline']"
+            :aria-label="offlineButtonLabel" :title="offlineButtonLabel" v-on:click="showStorage = true">
             <template #icon>
-                <Harddisk :size="24" />
+                <CloudOutline v-if="online" :size="24" />
+                <CloudOffOutline v-else :size="24" />
             </template>
         </NcButton>
         <offline-dialog v-if="offlineAlbum != null" :album="offlineAlbum" :online="online"
@@ -66,12 +74,12 @@ import { NcLoadingIcon, NcModal, NcButton, NcTextField, NcDateTimePickerNative }
 import { showError } from '@nextcloud/dialogs'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import CloudOffOutline from 'vue-material-design-icons/CloudOffOutline.vue'
-import Harddisk from 'vue-material-design-icons/Harddisk.vue'
+import CloudOutline from 'vue-material-design-icons/CloudOutline.vue'
 import { v4 as uuidv4 } from 'uuid'
 import { createAlbum, updateAlbum } from '../api/albumApi.js'
 import OfflineDialog from './OfflineDialog.vue'
 import StorageDialog from './StorageDialog.vue'
-import { connectivity, onReconnect, reportOffline, reportOnline } from '../offline/connectivity.js'
+import { connectivity, onReconnect, reportOffline, reportOnline, setForcedOffline } from '../offline/connectivity.js'
 import { rememberAlbumList, knownAlbumList, localStates, syncAll, saveAlbumInfo, forgetMissingAlbums, orphanAlbums } from '../offline/offlineManager.js'
 import { notifySynced, notifyConflict } from '../offline/notify.js'
 
@@ -100,8 +108,9 @@ export default {
             "sCreate": t("souvenirs","Create"),
             "sSave": t("souvenirs","Save"),
             // Offline support (issue #22): status of the local copies by
-            // album id, the album whose offline dialog is open, the storage
-            // screen, and whether the whole server list was loaded.
+            // album id, the album whose offline dialog is open, the offline
+            // dialog of the list (work offline by choice, storage), and
+            // whether the whole server list was loaded.
             "localStates": {},
             "offlineAlbum": null,
             "showStorage": false,
@@ -110,7 +119,9 @@ export default {
             "listGeneration": 0,
             "pageRequestInFlight": false,
             "connectivity": connectivity,
-            "sStorage": t("souvenirs","Offline storage"),
+            "goingOnline": false,
+            "sForcedBanner": t("souvenirs","You are working offline: albums kept on this device can be viewed and edited. Changes are sent when you go back online."),
+            "sGoOnline": t("souvenirs","Go online"),
             "sCreateNeedsServer": t("souvenirs","Creating an album needs a connection"),
             "sOfflineBanner": t("souvenirs","Offline: albums kept on this device can be viewed and edited. Changes are sent when the connection is back."),
             "sOfflineEmptyTitle": t("souvenirs","Nothing is available offline yet"),
@@ -126,7 +137,7 @@ export default {
         NcDateTimePickerNative,
         Plus,
         CloudOffOutline,
-        Harddisk,
+        CloudOutline,
         'offline-dialog': OfflineDialog,
         'storage-dialog': StorageDialog,
     },
@@ -172,9 +183,34 @@ export default {
         "online": function() {
             return this.connectivity.online;
         },
+        "forcedOffline": function() {
+            // offline because the user chose to, not because of the network
+            return this.connectivity.forced;
+        },
+        "offlineButtonLabel": function() {
+            if (this.forcedOffline) {
+                return t("souvenirs","Offline mode and storage (working offline)");
+            }
+            return this.online
+                ? t("souvenirs","Offline mode and storage")
+                : t("souvenirs","Offline mode and storage (server unreachable)");
+        },
     },
     methods: {
+        goOnline: function() {
+            // Stop working offline by choice: once the server answers, the
+            // reconnection reloads the list and sends the pending changes.
+            var that = this;
+            this.goingOnline = true;
+            return setForcedOffline(false).catch(() => {}).then(() => {
+                that.goingOnline = false;
+            });
+        },
         refreshShares: function() {
+            if (!this.online) {
+                // asked again on reconnection
+                return;
+            }
             fetch("apiv2/share", {
                 headers: {
                     'requesttoken': OC.requestToken,
@@ -503,6 +539,15 @@ function parseAlbumDate(s) {
     z-index: 100;
     border-radius: 50% !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.storage-fab--offline {
+    border-color: var(--color-warning, #e9a500) !important;
+}
+
+.offline-banner__action {
+    flex: 0 0 auto;
+    margin-left: auto;
 }
 
 .offline-banner {

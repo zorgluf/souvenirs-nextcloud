@@ -9,7 +9,7 @@ import { generateUrl } from '@nextcloud/router'
 import * as albumApi from '../api/albumApi.js'
 import * as mediaCache from './mediaCache.js'
 import { SHELL_CACHE, normalizePath } from './mediaKeys.js'
-import { connectivity, reportOffline, reportOnline, refreshToken } from './connectivity.js'
+import { connectivity, reportOffline, reportOnline, refreshToken, setForcedOffline, syncForcedOffline } from './connectivity.js'
 import { hasLocalChanges, hasConflicts, syncStatus } from './albumSync.js'
 import { errorKind, isDeferrable } from './remote.js'
 import { bodyOf, syncRecord, refreshOfflineMedia, isActiveAlbum, trackBackgroundSync } from './syncService.js'
@@ -27,13 +27,19 @@ function currentUser() {
 
 /**
  * Drop everything kept on this device: local copies, their unsent changes,
- * offline media and the app shell.
+ * offline media and the app shell - and with them the choice to work
+ * offline, which needs them (there would be nothing left to start from).
  */
 export async function wipeEverything(store = getStore()) {
     await store.clear()
     await mediaCache.clearAllMedia()
     if (globalThis.caches) {
         await globalThis.caches.delete(SHELL_CACHE)
+    }
+    if (connectivity.forced) {
+        // not waited for: the server is asked again in the background, and
+        // a logout must not hang on its answer
+        setForcedOffline(false).catch(() => {})
     }
 }
 
@@ -117,6 +123,11 @@ async function registerServiceWorker() {
         return
     }
     const firstTime = container.controller == null
+    if (connectivity.forced && !firstTime) {
+        // working offline by choice: registering again would ask the server
+        // for a newer worker
+        return
+    }
     await container.register(generateUrl('/apps/souvenirs/service-worker.js'), {
         scope: generateUrl('/apps/souvenirs/'),
     })
@@ -161,6 +172,8 @@ export async function startOffline() {
         // works online, and offline for as long as the page stays open
         console.warn('souvenirs: service worker not registered', error)
     }
+    // the worker and the page each keep the "work offline" choice
+    await syncForcedOffline().catch(() => false)
 }
 
 // ----- album list -----

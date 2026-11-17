@@ -11,6 +11,11 @@
  *   device that are not uploaded yet.
  * Album data (the API) is never served from here: the page keeps it in
  * IndexedDB and decides by itself.
+ *
+ * When the user chose to work offline (`env.forced`, see connectivity.js)
+ * it is the other way round: nothing leaves the device. The shell and the
+ * media come from what is kept here, and every other request fails the way
+ * it does without a network - so the page behaves exactly as when offline.
  */
 
 import { MEDIA_CACHE, PENDING_CACHE, SHELL_CACHE, mediaKey, parseMediaRequest, parseRange } from '../offline/mediaKeys.js'
@@ -29,6 +34,41 @@ export function shellPageKey(env) {
 
 function shellUsageKey(env) {
     return env.origin + env.appPath + '__shell-usage__'
+}
+
+/** Cache key of the "work offline" choice: present while it is on. */
+function forcedKey(env) {
+    return env.origin + env.appPath + '__forced-offline__'
+}
+
+/**
+ * Whether the user chose to work offline, as last told by the page: the
+ * worker is stopped and restarted by the browser, so it is kept in a cache.
+ *
+ * @param {object} env
+ * @returns {Promise<boolean>}
+ */
+export async function readForced(env) {
+    try {
+        return (await (await env.caches.open(SHELL_CACHE)).match(forcedKey(env))) != null
+    } catch (error) {
+        return false
+    }
+}
+
+/**
+ * Keep the "work offline" choice for the next start of the worker.
+ *
+ * @param {object} env
+ * @param {boolean} forced
+ */
+export async function writeForced(env, forced) {
+    const cache = await env.caches.open(SHELL_CACHE)
+    if (forced) {
+        await putQuietly(cache, forcedKey(env), new Response('1', { headers: { 'Content-Type': 'text/plain' } }))
+    } else {
+        await cache.delete(forcedKey(env))
+    }
 }
 
 /**
@@ -96,7 +136,9 @@ function noShellResponse() {
 
 /**
  * A page of the app: from the server, which also refreshes the shell page;
- * from the shell when the server cannot be reached.
+ * from the shell when the server cannot be reached - or first of all when
+ * working offline by choice (the server is only asked for a shell that is
+ * missing: the app must be able to start, to be switched back online).
  *
  * @param {Request} request
  * @param {object} env
@@ -104,6 +146,12 @@ function noShellResponse() {
  */
 export async function handlePage(request, env) {
     const cache = await env.caches.open(SHELL_CACHE)
+    if (env.forced) {
+        const shell = await cache.match(shellPageKey(env))
+        if (shell) {
+            return shell
+        }
+    }
     try {
         const response = await env.fetch(request)
         // not the login page a lost session redirects to, nor an error page
@@ -119,7 +167,9 @@ export async function handlePage(request, env) {
 /**
  * A script, style, font or icon. Versioned URLs are immutable: served from
  * the shell when there, without a round trip. The others come from the
- * server whenever it answers.
+ * server whenever it answers - unless working offline by choice: whatever
+ * copy the shell holds is served then, and the server is only asked for a
+ * file that is missing.
  *
  * @param {Request} request
  * @param {object} env
@@ -130,7 +180,12 @@ export async function handleShellResource(request, env, used = () => {}) {
     const cache = await env.caches.open(SHELL_CACHE)
     const url = new URL(request.url)
     used(request.url)
-    if (isVersioned(url)) {
+    if (env.forced) {
+        const cached = (await cache.match(request)) || (await cache.match(request, { ignoreSearch: true }))
+        if (cached) {
+            return cached
+        }
+    } else if (isVersioned(url)) {
         const cached = await cache.match(request)
         if (cached) {
             return cached
@@ -183,7 +238,8 @@ export async function respondWithStored(stored, request) {
 
 /**
  * A medium of an album. In order: the bytes waiting for their upload (the
- * server does not have them), the server, the offline copy.
+ * server does not have them), the server, the offline copy. The server is
+ * left out when working offline by choice.
  *
  * @param {Request} request
  * @param {{path: string, file: string}} medium - see parseMediaRequest
@@ -197,12 +253,18 @@ export async function handleMedia(request, medium, env) {
         return respondWithStored(pending, request)
     }
     const offlineCopy = async () => (await env.caches.open(MEDIA_CACHE)).match(key)
+    const copyOrNothing = async () => {
+        const stored = await offlineCopy()
+        return stored ? respondWithStored(stored, request) : new Response(null, { status: 503, statusText: 'Offline' })
+    }
+    if (env.forced) {
+        return copyOrNothing()
+    }
     let response
     try {
         response = await env.fetch(request)
     } catch (error) {
-        const stored = await offlineCopy()
-        return stored ? respondWithStored(stored, request) : new Response(null, { status: 503, statusText: 'Offline' })
+        return copyOrNothing()
     }
     // an error, or the login page of a lost session: the copy is better
     if (!response.ok || response.redirected) {
@@ -224,13 +286,17 @@ export async function handleMedia(request, medium, env) {
  * @returns {Promise<Response>|null}
  */
 export function route(request, env, used) {
-    if (request.method !== 'GET') {
-        return null
-    }
     const url = new URL(request.url)
-    if (url.origin !== env.origin) {
-        return null
+    const response = request.method === 'GET' && url.origin === env.origin ? routeOwn(request, url, env, used) : null
+    if (response != null || !env.forced || !isBlockedWhenForced(request, url, env)) {
+        return response
     }
+    // what a request gets without a network: a rejected fetch()
+    return Promise.resolve(Response.error())
+}
+
+/** The requests the worker answers itself: same-origin GETs. */
+function routeOwn(request, url, env, used) {
     const medium = parseMediaRequest(url, env.appPath)
     if (medium != null) {
         return handleMedia(request, medium, env)
@@ -242,6 +308,30 @@ export function route(request, env, used) {
         return handleShellResource(request, env, used)
     }
     return null
+}
+
+/**
+ * Whether a request the worker does not answer itself must fail while the
+ * user works offline by choice: all of them - the API, uploads, Nextcloud's
+ * own background requests, other sites - except
+ * - navigations: leaving the app for another page is the user's decision;
+ * - public shares, which are always read from the server (the choice is
+ *   about the user's own albums, and a share page has no way to show it);
+ * - what is not a network request at all (data:, blob:, extensions).
+ *
+ * @param {{mode: string}} request
+ * @param {URL} url
+ * @param {object} env
+ * @returns {boolean}
+ */
+export function isBlockedWhenForced(request, url, env) {
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return false
+    }
+    if (request.mode === 'navigate') {
+        return false
+    }
+    return !(url.origin === env.origin && url.pathname.startsWith(env.appPath + 'public/'))
 }
 
 /**
@@ -304,7 +394,7 @@ export async function recordShellUse(urls, env, now = Date.now()) {
     for (const url of urls) {
         usage[url] = now
     }
-    const reserved = [shellPageKey(env), shellUsageKey(env)]
+    const reserved = [shellPageKey(env), shellUsageKey(env), forcedKey(env)]
     for (const request of await cache.keys()) {
         if (reserved.includes(request.url)) {
             continue

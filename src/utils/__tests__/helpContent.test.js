@@ -49,7 +49,7 @@ describe('help content: shortcuts', () => {
 
     it('explains offline work topic by topic', () => {
         const topics = getOfflineTopics()
-        expect(topics.map(topic => topic.id)).toEqual(['copy', 'media', 'edit', 'sync', 'conflict', 'device'])
+        expect(topics.map(topic => topic.id)).toEqual(['copy', 'media', 'choice', 'edit', 'sync', 'conflict', 'device'])
         for (const topic of topics) {
             expect(topic.title).not.toBe('')
             expect(topic.text).not.toBe('')

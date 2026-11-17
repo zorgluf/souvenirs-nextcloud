@@ -541,6 +541,7 @@ describe('album offline banner', () => {
             unavailable: false,
             loading: false,
             online: false,
+            forcedOffline: false,
             sync: { authExpired: false, gone: false },
             offlineNoticeVisible: false,
             offlineNoticeTimer: null,
@@ -566,6 +567,15 @@ describe('album offline banner', () => {
         expect(ctx.banner().id).toBe('offline')
         vi.advanceTimersByTime(2000)
         expect(ctx.banner()).toBe(null)
+    })
+
+    it('says so when offline is the user\'s choice, and where to go back online', () => {
+        const ctx = bannerContext()
+        ctx.watch()
+        expect(ctx.banner().text).toContain('when the connection is back')
+        ctx.forcedOffline = true
+        expect(ctx.banner().text).toContain('Working offline')
+        expect(ctx.banner().text).toContain('offline button of the album list')
     })
 
     it('shows it again each time the connection is lost', () => {

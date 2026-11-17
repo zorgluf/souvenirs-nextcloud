@@ -92,7 +92,12 @@ export function getOfflineTopics() {
         {
             id: 'media',
             title: t('souvenirs', 'Photos and videos'),
-            text: t('souvenirs', 'Media are kept on the device only for the albums you choose, with the offline button of an album in the album list. The size of the download is shown first. Other albums show a placeholder instead of their media while offline. The storage button of the album list shows the space used and removes copies.'),
+            text: t('souvenirs', 'Media are kept on the device only for the albums you choose, with the offline button of an album in the album list. The size of the download is shown first. Other albums show a placeholder instead of their media while offline. The offline button of the album list shows the space used and removes copies.'),
+        },
+        {
+            id: 'choice',
+            title: t('souvenirs', 'Working offline by choice'),
+            text: t('souvenirs', 'On a slow or paid connection, switch on "Work offline" with the offline button of the album list. Souvenirs then uses no data at all: only the albums kept on this device can be viewed and edited, and your changes wait there. Switch it off, or use "Go online" in the album list, to send them.'),
         },
         {
             id: 'edit',
