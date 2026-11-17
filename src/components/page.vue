@@ -19,7 +19,8 @@
                 v-on:remove-element="onRemoveElement" v-on:resize-element="onResizeElement"
                 v-on:pan-zoom-element="onPanZoomElement"
                 v-bind:s-page-id="sId" v-on:element-drop="onElementDrop"
-                v-bind:element-margin="elementMargin">
+                v-bind:element-margin="elementMargin"
+                v-bind:pending-upload="isPendingUpload(element)" v-bind:online="online">
 	</selement>
         <div v-if="editMode" class="page-insert page-insert--before" v-on:click="onAddPageBefore" :title="sAddPage">
             <button class="page-insert__btn"><Plus :size="20" /></button>
@@ -104,6 +105,10 @@ export default {
       "isLast": Boolean,
       // Id of the element selected in edit mode (issue #56), null if none.
       "selectedElementId": String,
+      // Assets added on this device and not uploaded yet (issue #22), and
+      // whether the server is reachable.
+      "pendingAssets": { type: Array, default: () => [] },
+      "online": { type: Boolean, default: true },
     },
     data: function() {
         return {
@@ -161,6 +166,12 @@ export default {
         MusicNote,
     },
     methods: {
+      isPendingUpload: function(element) {
+        if (this.pendingAssets.length === 0) {
+          return false;
+        }
+        return ['image', 'video', 'audio'].some(field => element[field] && this.pendingAssets.includes(element[field]));
+      },
       openImgFull: function(imageUrl,isPhotosphere) {
         this.$emit("imagefull",imageUrl,isPhotosphere);
       },

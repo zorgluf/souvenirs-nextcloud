@@ -89,6 +89,20 @@
             </ul>
         </section>
 
+        <section v-else-if="current === 'offline'" class="help-section help-section--offline">
+            <h3>{{ sOfflineTitle }}</h3>
+            <p>{{ sOfflineIntro }}</p>
+            <dl class="help-terms">
+                <div v-for="topic in offlineTopics" :key="topic.id" class="help-term">
+                    <dt>
+                        <component :is="topic.icon" :size="20" />
+                        <span>{{ topic.title }}</span>
+                    </dt>
+                    <dd>{{ topic.text }}</dd>
+                </div>
+            </dl>
+        </section>
+
         <section v-else-if="current === 'shortcuts'" class="help-section help-section--shortcuts">
             <h3>{{ sShortcutsTitle }}</h3>
             <p>{{ sShortcutsIntro }}</p>
@@ -146,7 +160,12 @@ import MusicNoteOutline from 'vue-material-design-icons/MusicNoteOutline.vue'
 import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Brush from 'vue-material-design-icons/Brush.vue'
 import ViewDashboardVariantOutline from 'vue-material-design-icons/ViewDashboardVariantOutline.vue'
-import { SECTION_IDS, getMediaKinds, getShortcutGroups } from '../utils/helpContent.js'
+import CloudOffOutline from 'vue-material-design-icons/CloudOffOutline.vue'
+import CloudDownloadOutline from 'vue-material-design-icons/CloudDownloadOutline.vue'
+import CloudSyncOutline from 'vue-material-design-icons/CloudSyncOutline.vue'
+import AlertCircleOutline from 'vue-material-design-icons/AlertCircleOutline.vue'
+import CellphoneArrowDown from 'vue-material-design-icons/CellphoneArrowDown.vue'
+import { getSectionIds, getOfflineTopics, getMediaKinds, getShortcutGroups } from '../utils/helpContent.js'
 
 // Icon of each media kind of helpContent.getMediaKinds. A module constant,
 // not component state: components must not be made reactive.
@@ -157,6 +176,16 @@ const MEDIA_ICONS = {
     audio: MusicNoteOutline,
     text: FormatText,
     paint: Brush,
+}
+
+// Icon of each topic of helpContent.getOfflineTopics (issue #22).
+const OFFLINE_ICONS = {
+    copy: BookOpenPageVariantOutline,
+    media: CloudDownloadOutline,
+    edit: PencilOutline,
+    sync: CloudSyncOutline,
+    conflict: AlertCircleOutline,
+    device: CellphoneArrowDown,
 }
 
 export default {
@@ -199,7 +228,8 @@ export default {
     },
     data: function() {
         return {
-            current: SECTION_IDS.includes(this.initialSection) ? this.initialSection : SECTION_IDS[0],
+            current: getSectionIds({ canEdit: this.canEdit }).includes(this.initialSection)
+                ? this.initialSection : getSectionIds({ canEdit: this.canEdit })[0],
             sTitle: t('souvenirs', 'Souvenirs guide'),
             sSections: t('souvenirs', 'Guide sections'),
             sOr: t('souvenirs', 'or'),
@@ -209,6 +239,8 @@ export default {
             sOwnerOnly: t('souvenirs', 'Editing is reserved to the owner of the album, from their own Nextcloud.'),
             sMediaTitle: t('souvenirs', 'What a page can hold'),
             sMediaIntro: t('souvenirs', 'In edit mode, the + button of a page adds media picked from your Nextcloud files or uploaded from this device. Several files at once each get their own page.'),
+            sOfflineTitle: t('souvenirs', 'Working without a connection'),
+            sOfflineIntro: t('souvenirs', 'Albums can be viewed and edited offline. Changes are kept on this device and sent to the server when the connection is back.'),
             sShortcutsTitle: t('souvenirs', 'Keyboard and gestures'),
             sShortcutsIntro: t('souvenirs', 'Shortcuts are ignored while you type in a text or a form field.'),
             sProject: t('souvenirs', 'Project page'),
@@ -224,9 +256,13 @@ export default {
                 structure: { title: t('souvenirs', 'Structure'), icon: BookOpenPageVariantOutline },
                 modes: { title: t('souvenirs', 'Modes'), icon: EyeOutline },
                 media: { title: t('souvenirs', 'Media'), icon: ImageMultipleOutline },
+                offline: { title: t('souvenirs', 'Offline'), icon: CloudOffOutline },
                 shortcuts: { title: t('souvenirs', 'Shortcuts'), icon: KeyboardOutline },
             }
-            return SECTION_IDS.map(id => ({ id, ...titles[id] }))
+            return getSectionIds({ canEdit: this.canEdit }).map(id => ({ id, ...titles[id] }))
+        },
+        offlineTopics: function() {
+            return getOfflineTopics().map(topic => ({ ...topic, icon: OFFLINE_ICONS[topic.id] }))
         },
         terms: function() {
             return [

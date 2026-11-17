@@ -31,13 +31,31 @@ afterEach(() => {
 })
 
 describe('HelpDialog', () => {
-    it('opens on the structure section with four sections to pick from', async () => {
+    it('opens on the structure section with five sections to pick from', async () => {
         mountDialog()
         await wrapper.vm.$nextTick()
-        expect(qa('.help-nav__item')).toHaveLength(4)
+        expect(qa('.help-nav__item')).toHaveLength(5)
         expect(q('.help-nav__item--active').textContent).toContain('Structure')
         expect(q('.help-section--structure')).not.toBeNull()
         expect(q('.help-section--shortcuts')).toBeNull()
+    })
+
+    it('explains offline work to the owner (issue #22)', async () => {
+        mountDialog({ initialSection: 'offline' })
+        await wrapper.vm.$nextTick()
+        expect(q('.help-section--offline')).not.toBeNull()
+        expect(q('.help-nav__item--active').textContent).toContain('Offline')
+        expect(qa('.help-section--offline .help-term')).toHaveLength(7)
+        expect(q('.help-section--offline').textContent).toContain('Conflicts')
+    })
+
+    it('leaves offline work out of the public view', async () => {
+        mountDialog({ canEdit: false, initialSection: 'offline' })
+        await wrapper.vm.$nextTick()
+        expect(qa('.help-nav__item')).toHaveLength(4)
+        expect(q('.help-section--offline')).toBeNull()
+        // unknown there: falls back to the first section
+        expect(q('.help-section--structure')).not.toBeNull()
     })
 
     it('opens on the requested section', async () => {
@@ -94,7 +112,8 @@ describe('HelpDialog', () => {
         await wrapper.vm.$nextTick()
         expect(q('.help-mode--edit')).not.toBeNull()
         expect(q('.help-note')).toBeNull()
-        qa('.help-nav__item')[3].click()
+        // the shortcuts: last section, after the owner-only offline one
+        qa('.help-nav__item')[4].click()
         await wrapper.vm.$nextTick()
         expect(q('.help-group--editing')).not.toBeNull()
     })

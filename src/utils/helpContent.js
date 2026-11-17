@@ -62,6 +62,67 @@ export function formatLabels(mimes) {
 export const SECTION_IDS = ['structure', 'modes', 'media', 'shortcuts']
 
 /**
+ * Ids of the sections shown to a reader. Working offline (issue #22) only
+ * concerns the owner of the albums: a shared link is always read online.
+ *
+ * @param {{canEdit: boolean}} options
+ * @returns {Array<string>}
+ */
+export function getSectionIds({ canEdit }) {
+    if (!canEdit) {
+        return SECTION_IDS
+    }
+    const ids = SECTION_IDS.slice()
+    ids.splice(ids.indexOf('shortcuts'), 0, 'offline')
+    return ids
+}
+
+/**
+ * What the "Offline" section explains, one entry per topic.
+ *
+ * @returns {Array<{id: string, title: string, text: string}>}
+ */
+export function getOfflineTopics() {
+    return [
+        {
+            id: 'copy',
+            title: t('souvenirs', 'Albums you have opened'),
+            text: t('souvenirs', 'Each album you open is remembered on this device: its pages and texts, a few kilobytes. From then on it can be opened and edited without a connection.'),
+        },
+        {
+            id: 'media',
+            title: t('souvenirs', 'Photos and videos'),
+            text: t('souvenirs', 'Media are kept on the device only for the albums you choose, with the offline button of an album in the album list. The size of the download is shown first. Other albums show a placeholder instead of their media while offline. The offline button of the album list shows the space used and removes copies.'),
+        },
+        {
+            id: 'choice',
+            title: t('souvenirs', 'Working offline by choice'),
+            text: t('souvenirs', 'On a slow or paid connection, switch on "Work offline" with the offline button of the album list. Souvenirs then uses no data at all: only the albums kept on this device can be viewed and edited, and your changes wait there. Switch it off, or use "Go online" in the album list, to send them.'),
+        },
+        {
+            id: 'edit',
+            title: t('souvenirs', 'Editing without a connection'),
+            text: t('souvenirs', 'Edit as usual. Media can only be added from this device, since your Nextcloud files cannot be browsed, and carry a small cloud until they are uploaded. Creating, deleting and sharing albums need a connection.'),
+        },
+        {
+            id: 'sync',
+            title: t('souvenirs', 'Synchronization'),
+            text: t('souvenirs', 'As soon as the server can be reached again, your changes are sent and those made elsewhere are fetched. The icon next to the menu, and the offline button of each album in the list, tell whether everything is synchronized, waiting to be sent, or in conflict.'),
+        },
+        {
+            id: 'conflict',
+            title: t('souvenirs', 'Conflicts'),
+            text: t('souvenirs', 'When the same part of an album - its name and date, its list of pages, or the content of a page - was changed both on this device and elsewhere, nothing is overwritten. The album becomes read-only and asks you which version to keep, part by part.'),
+        },
+        {
+            id: 'device',
+            title: t('souvenirs', 'On this device'),
+            text: t('souvenirs', 'Install Souvenirs from the menu of your browser (Install, or Add to Home Screen) to start it like an app and to protect the offline copies from being cleared by the browser. Logging out clears them from this device, along with any change not sent yet: let the synchronization finish first.'),
+        },
+    ]
+}
+
+/**
  * The media kinds an album can hold, with their accepted formats.
  *
  * @param {{canEdit: boolean}} options

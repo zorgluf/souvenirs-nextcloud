@@ -63,6 +63,15 @@
         v-on:pointerup="onImagePointerUp" v-on:pointercancel="onImagePointerCancel"
         v-on:wheel="onImageWheel" />
         <img v-bind:class="['paint-element', isImgCenterCrop ? 'centercrop' : '', isImgFill ? 'fill' : '' ]" v-if="sImage != '' && sClass.endsWith('PaintElement')" v-bind:src="sImageSrc" v-bind:draggable="!editMode"/>
+        <!-- The medium could not be loaded (issue #22): offline and not kept
+             on this device, or gone from the server. -->
+        <div v-if="imageFailed" class="s-element-unavailable" :title="unavailableTitle" role="img" :aria-label="unavailableTitle">
+            <CloudOffOutline :size="48" />
+        </div>
+        <!-- Added on this device, not uploaded to the server yet (issue #22). -->
+        <div v-if="pendingUpload" class="s-element-pending" :title="sPendingUpload" role="img" :aria-label="sPendingUpload">
+            <CloudUploadOutline :size="18" />
+        </div>
         <div v-if="sMime == 'application/vnd.google.panorama360+jpg'" class="image-element-pano-icon"/>
         <div v-if="sVideo != null" class="image-element-video-icon"/>
         <!-- In edit mode the tile takes pointer-events:all (drag and drop), which
@@ -95,6 +104,8 @@ import EditableText from './EditableText.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import CursorMove from 'vue-material-design-icons/CursorMove.vue'
 import FitToScreen from 'vue-material-design-icons/FitToScreen.vue'
+import CloudOffOutline from 'vue-material-design-icons/CloudOffOutline.vue'
+import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline.vue'
 import { setElementDragData, isElementDrag, getElementDragData } from '../utils/elementDrag.js'
 import { initialPanZoom, panBy, zoomAt, roundPanZoom, containPanZoom } from '../utils/imagePanZoom.js'
 
@@ -136,12 +147,20 @@ export default {
       // pan & zoom gestures; unselected tiles let a touch drag scroll the album.
       "isSelected": Boolean,
       "elementMargin": Number,
+      // The element's media are still waiting for their upload (issue #22).
+      "pendingUpload": Boolean,
+      // Whether the server is reachable: a medium that failed to load is
+      // tried again when it comes back.
+      "online": { type: Boolean, default: true },
     },
     data: function() {
         return {
             "sImageSrc": "",
             "videoUrlSrc": null,
             "loadingImage": null,
+            // The image could not be loaded (see the placeholder).
+            "imageFailed": false,
+            "sPendingUpload": t("souvenirs","Waiting to be uploaded"),
             "imageStyle": {},
             "isVideoLoading": false,
             "isDragging": false,
@@ -174,8 +193,15 @@ export default {
         Delete,
         CursorMove,
         FitToScreen,
+        CloudOffOutline,
+        CloudUploadOutline,
     },
     watch: {
+        "online": function(newOnline) {
+            if (newOnline && this.imageFailed) {
+                this.loadImage();
+            }
+        },
         "geometryKey": function() {
             // The page can be re-laid-out (e.g. after adding/removing an image),
             // which resizes this element's box. A zoom/offset cover-fit is computed
@@ -312,6 +338,10 @@ export default {
             return this.isVideoElement ? t("souvenirs","Fit whole video")
                 : t("souvenirs","Fit whole image");
         },
+        'unavailableTitle': function() {
+            return this.online ? t("souvenirs","This media could not be loaded")
+                : t("souvenirs","Online only: this media is not kept on this device");
+        },
         'isVideoElement': function() {
             return this.sClass != null && this.sClass.endsWith('VideoElement');
         },
@@ -397,15 +427,21 @@ export default {
     methods: {
         loadImage: function() {
             if (this.sImage != '') {
+                this.imageFailed = false;
                 this.loadingImage = new Image();
                 this.loadingImage.onload = this.onLoadedImage;
+                this.loadingImage.onerror = this.onImageError;
                 this.loadingImage.src = this.imageUrl();
             }
             if ((this.sVideo != '') && (this.sVideo != undefined)) {
                 this.videoUrlSrc = this.videoUrl;
             }
         },
+        onImageError: function() {
+            this.imageFailed = true;
+        },
         onLoadedImage: function() {
+            this.imageFailed = false;
             this.sImageSrc = this.loadingImage.src;
             this.imgSize = { width: this.loadingImage.width, height: this.loadingImage.height };
             this.refreshImageStyle();
@@ -1124,6 +1160,34 @@ center {
     left: 10px;
     top: 10px;
     opacity: 50%;
+}
+
+.s-element-unavailable {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-maxcontrast, #767676);
+    background-color: var(--color-background-dark, #ededed);
+    pointer-events: none;
+}
+
+.s-element-pending {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.55);
+    /* above the image, below the edit handles (8) */
+    z-index: 7;
+    pointer-events: none;
 }
 
 .image-element-video-icon {
