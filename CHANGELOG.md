@@ -1,3 +1,20 @@
+## 2.7.0 - 2026-11-17
+### Added
+- Offline edition ([#22](https://github.com/zorgluf/souvenirs-nextcloud/issues/22), [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)): every album opened once is remembered by the browser and can be viewed and edited without the server; changes are sent when it is reachable again (when the album is opened, on reconnection and in the background from the album list)
+- Conflicts are never resolved silently: when the same part of an album (album info, page structure, content of a page) was changed on the device and elsewhere, the album is read-only until you choose which version to keep, part by part or for everything [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- Offline copies of the media, album by album: the offline button of an album in the list keeps its photos, videos and sounds on the device (estimated size shown before the download, progress, cancel) and shows its sync status [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- "Offline" dialog in the album list: a switch to work offline by choice (slow or paid connection: no request leaves the device until it is switched off) and the storage used by the offline copies [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- The app starts without a connection (service worker, needs HTTPS) and can be installed from the browser menu [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- "Offline" section in the in-app user guide [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+
+### Changed
+- Creating, deleting and sharing albums, browsing Nextcloud files and the ZIP download need the server and are disabled while offline [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- The data kept on the device is cleared on logout and when another account opens the app, after a confirmation if some changes were not sent yet [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+
+### Fixed
+- Album list unusable on Nextcloud 35, which no longer provides the `moment` library: album and share expiry dates are now formatted by the browser [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+- Reloading the page of an open album returned a 404 error [#62](https://github.com/zorgluf/souvenirs-nextcloud/pull/62)
+
 ## 2.6.1 - 2026-11-08
 ### Added
 - In-app user guide, from the "Help (?)" entry of the album menu or the "?" key: how an album is built, the viewing / editing / slideshow / fullscreen modes, the supported media and the keyboard shortcuts ([#47](https://github.com/zorgluf/souvenirs-nextcloud/issues/47), [#61](https://github.com/zorgluf/souvenirs-nextcloud/pull/61))
