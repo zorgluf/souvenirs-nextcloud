@@ -6,9 +6,9 @@ OC.L10N.register(
     "Upload" : "Llwytho i fyny",
     "Cancel" : "Cancel",
     "Choose" : "Dewisa",
+    "Download" : "Llwytho i lawr",
     "Confirm" : "Cadarnhau",
     "Save" : "Save",
-    "Download" : "Llwytho i lawr",
     "Photos" : "Lluniau",
     "Videos" : "Fideos",
     "Audio" : "Sain"

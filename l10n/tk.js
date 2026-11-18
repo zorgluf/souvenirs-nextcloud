@@ -6,9 +6,11 @@ OC.L10N.register(
     "Upload" : "Ýüklemek",
     "Cancel" : "Cancel",
     "Choose" : "saýlamak",
+    "Download" : "Göçürip almak",
+    "Close" : "Ýap",
     "Create" : "Dörediň",
     "Save" : "Save",
-    "Download" : "Göçürip almak",
+    "Log in" : "Giriň",
     "Remove" : "Aýyrmak",
     "Photos" : "Suratlar",
     "Videos" : "Wideo"

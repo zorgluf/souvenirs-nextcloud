@@ -5,9 +5,10 @@
     "Upload" : "Luchdaich suas",
     "Cancel" : "Cancel",
     "Choose" : "Tagh",
+    "Download" : "Luchdaich a-nuas",
+    "Close" : "Dùin",
     "Create" : "Cruthaich",
     "Save" : "Save",
-    "Download" : "Luchdaich a-nuas",
     "Remove" : "Thoir air falbh",
     "Videos" : "Videothan"
 },"pluralForm" :"nplurals=4; plural=(n==1 || n==11) ? 0 : (n==2 || n==12) ? 1 : (n > 2 && n < 20) ? 2 : 3;"

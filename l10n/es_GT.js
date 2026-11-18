@@ -8,12 +8,14 @@ OC.L10N.register(
     "Upload" : "Cargar",
     "Cancel" : "Cancel",
     "Choose" : "Seleccionar",
+    "Download" : "Descargar",
     "Confirm" : "Confirmar",
     "Save" : "Save",
-    "Download" : "Descargar",
+    "Server" : "Servidor",
     "Remove image" : "Eliminar imagen",
     "Photos" : "Fotos",
     "Videos" : "Videos",
+    "Audio" : "Audio",
     "Text" : "Texto"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

@@ -7,9 +7,10 @@ OC.L10N.register(
     "Upload" : "Luchdaich suas",
     "Cancel" : "Cancel",
     "Choose" : "Tagh",
+    "Download" : "Luchdaich a-nuas",
+    "Close" : "Dùin",
     "Create" : "Cruthaich",
     "Save" : "Save",
-    "Download" : "Luchdaich a-nuas",
     "Remove" : "Thoir air falbh",
     "Videos" : "Videothan"
 },

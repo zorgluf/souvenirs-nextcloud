@@ -6,9 +6,11 @@ OC.L10N.register(
     "All files" : "Tote files",
     "Upload" : "Incargar",
     "Cancel" : "Cancel",
+    "Download" : "Discargar",
+    "Close" : "Clauder",
     "Confirm" : "Confirmar",
     "Save" : "Save",
-    "Download" : "Discargar",
+    "Server" : "Servitor",
     "Remove image" : "Remover imagine",
     "Audio" : "Audio"
 },
