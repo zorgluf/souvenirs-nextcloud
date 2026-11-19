@@ -34,6 +34,7 @@ OC.L10N.register(
     "Confirm" : "確認",
     "The previous drawing is missing on the server, starting with a blank page." : "伺服器上的先前繪圖遺失，將以空白頁開始。",
     "Could not load the existing drawing." : "無法載入現有繪圖。",
+    "Enable" : "啟用",
     "Loading album list…" : "正在加載相簿清單 ...",
     "No album available. You will need to upload them from the Android app Souvenirs (https://github.com/zorgluf/souvenirs-android)." : "沒有相簿可用。您需要從 Andriod 應用程式 Souvenirs (https://github.com/zorgluf/souvenirs-android) 上傳它們。",
     "New album" : "新相簿",

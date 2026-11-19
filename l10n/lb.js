@@ -11,10 +11,13 @@ OC.L10N.register(
     "Download" : "Eroflueden",
     "Close" : "Zoumaachen",
     "Confirm" : "Konfirméieren",
+    "Enable" : "Aktivéieren",
     "Date" : "Datum",
     "Create" : "Erstellen",
     "Save" : "Save",
     "Server" : "Server",
+    "Apply" : "Uwenden",
+    "Log in" : "Umellen",
     "Remove" : "Ewechhuelen",
     "Audio" : "Toun",
     "Text" : "Text"

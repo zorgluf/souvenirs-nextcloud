@@ -11,6 +11,8 @@ OC.L10N.register(
     "Confirm" : "Confirmar",
     "Save" : "Save",
     "Server" : "Servitor",
+    "Apply" : "Applicar",
+    "Log in" : "Aperir session",
     "Remove image" : "Remover imagine",
     "Audio" : "Audio"
 },

@@ -7,8 +7,10 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "Choose" : "Dewisa",
     "Download" : "Llwytho i lawr",
+    "Close" : "Cau",
     "Confirm" : "Cadarnhau",
     "Save" : "Save",
+    "Log in" : "Mewngofnodi",
     "Photos" : "Lluniau",
     "Videos" : "Fideos",
     "Audio" : "Sain"

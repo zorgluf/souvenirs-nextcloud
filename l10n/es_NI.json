@@ -6,11 +6,16 @@
     "Upload" : "Cargar",
     "Cancel" : "Cancel",
     "Choose" : "Seleccionar",
+    "Available offline" : "Disponible sin conexión",
     "Download" : "Descargar",
+    "Close" : "Cerrar",
     "Confirm" : "Confirmar",
     "Save" : "Save",
     "Server" : "Servidor",
+    "Apply" : "Aplicar",
+    "Log in" : "Ingresar",
     "Remove image" : "Eliminar imagen",
+    "Synchronization" : "Sincronización",
     "Videos" : "Videos",
     "Text" : "Texto"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"

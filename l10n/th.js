@@ -16,6 +16,7 @@ OC.L10N.register(
     "Create" : "สร้าง",
     "Save" : "Save",
     "Server" : "เซิร์ฟเวอร์",
+    "Apply" : "นำไปใช้",
     "Log in" : "เข้าสู่ระบบ",
     "Remove" : "ลบออก",
     "Remove image" : "ลบรูปภาพ",

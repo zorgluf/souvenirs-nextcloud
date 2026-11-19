@@ -11,6 +11,7 @@ OC.L10N.register(
     "Close" : "Dùin",
     "Create" : "Cruthaich",
     "Save" : "Save",
+    "Log in" : "Clàraich a-steach",
     "Remove" : "Thoir air falbh",
     "Videos" : "Videothan"
 },

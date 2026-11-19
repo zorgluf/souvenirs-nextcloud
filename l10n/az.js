@@ -1,0 +1,19 @@
+OC.L10N.register(
+    "souvenirs",
+    {
+    "Android app" : "Android proqramı",
+    "Slideshow" : "Slayd şou",
+    "All files" : "Bütün fayllar",
+    "Upload" : "Serverə yüklə",
+    "Cancel" : "Cancel",
+    "Choose" : "Seç",
+    "Download" : "Yüklə",
+    "Close" : "Bağla",
+    "Confirm" : "Təsdiq edin",
+    "Save" : "Save",
+    "Slideshow speed" : "Slayd şounun sürəti",
+    "Server" : "Server",
+    "Log in" : "Giriş",
+    "Remove image" : "Şəkili sil"
+},
+"nplurals=2; plural=(n != 1);");
