@@ -185,6 +185,8 @@ export function getMediaKinds({ canEdit }) {
  */
 export function getShortcutGroups({ canEdit, isTouchDevice }) {
     const groups = []
+    // TRANSLATORS Touch gesture: two-finger pinch to zoom, shown in the gesture column of the help guide
+    const pinchGesture = t('souvenirs', 'Pinch')
 
     groups.push({
         id: 'navigation',
@@ -213,7 +215,7 @@ export function getShortcutGroups({ canEdit, isTouchDevice }) {
         title: t('souvenirs', '360° panoramas'),
         items: [
             { id: 'pano-look', gesture: t('souvenirs', 'Drag'), label: t('souvenirs', 'Look around') },
-            { id: 'pano-zoom', keys: [['Ctrl', t('souvenirs', 'wheel')]], gesture: t('souvenirs', 'Pinch'), label: t('souvenirs', 'Zoom in the full-size viewer') },
+            { id: 'pano-zoom', keys: [['Ctrl', t('souvenirs', 'wheel')]], gesture: pinchGesture, label: t('souvenirs', 'Zoom in the full-size viewer') },
         ],
     })
 
@@ -228,7 +230,7 @@ export function getShortcutGroups({ canEdit, isTouchDevice }) {
                 { id: 'edge', gesture: t('souvenirs', 'Hold a dragged tile near the edge'), label: t('souvenirs', 'Turn the page while dragging') },
                 { id: 'resize', gesture: t('souvenirs', 'Drag a corner'), label: t('souvenirs', 'Resize the tile') },
                 { id: 'pan', gesture: t('souvenirs', 'Drag inside a selected photo'), label: t('souvenirs', 'Reframe the photo in its tile') },
-                { id: 'zoom', keys: [[t('souvenirs', 'wheel')]], gesture: t('souvenirs', 'Pinch'), label: t('souvenirs', 'Zoom the photo in its tile') },
+                { id: 'zoom', keys: [[t('souvenirs', 'wheel')]], gesture: pinchGesture, label: t('souvenirs', 'Zoom the photo in its tile') },
             ],
         })
         groups.push({
