@@ -94,3 +94,22 @@ describe('album onKeydown', () => {
         expect(ctx.diaporama).not.toHaveBeenCalled()
     })
 })
+
+describe('album onKeydown with a fullscreen viewer open', () => {
+    it('Escape closes the viewer', () => {
+        const ctx = { ...makeContext(), imageFullOn: true, closeImgFull: vi.fn() }
+        const e = keyEvent('Escape')
+        onKeydown.call(ctx, e)
+        expect(ctx.closeImgFull).toHaveBeenCalled()
+        expect(e.preventDefault).toHaveBeenCalled()
+    })
+
+    it('page shortcuts are off behind the viewer', () => {
+        const ctx = { ...makeContext(), videoFullOn: true, closeImgFull: vi.fn() }
+        onKeydown.call(ctx, keyEvent('ArrowRight'))
+        onKeydown.call(ctx, keyEvent(' '))
+        expect(ctx.showNext).not.toHaveBeenCalled()
+        expect(ctx.diaporama).not.toHaveBeenCalled()
+        expect(ctx.closeImgFull).not.toHaveBeenCalled()
+    })
+})

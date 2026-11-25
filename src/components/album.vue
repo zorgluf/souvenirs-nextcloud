@@ -179,6 +179,7 @@ import AlertCircleOutline from 'vue-material-design-icons/AlertCircleOutline.vue
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import PencilOff from 'vue-material-design-icons/PencilOff.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import { createOverlayHistory } from '../utils/overlayHistory.js'
 
 // The write API used when the album has no local copy to go through (public
 // view, unit tests): the server, directly.
@@ -307,6 +308,9 @@ export default {
         this.cleanTimer = null;
         this.lastSaveErrorAt = 0;
         window.addEventListener("beforeunload", this.onBeforeUnload);
+        // "back" closes the fullscreen image/video instead of leaving the
+        // album (issue #63: no other way out of a photosphere on a phone).
+        this.overlayHistory = createOverlayHistory(function() { that.hideOverlays(); });
         // Offline support (issue #22), authenticated view only: the album's
         // local copy, and a sync each time the server becomes reachable again.
         this.session = null;
@@ -324,6 +328,7 @@ export default {
         // now instead of dropping them with the component.
         window.removeEventListener("beforeunload", this.onBeforeUnload);
         document.removeEventListener("visibilitychange", this.onVisibilityChange);
+        this.overlayHistory.destroy();
         if (this.stopReconnectWatch) {
             this.stopReconnectWatch();
         }
@@ -571,15 +576,25 @@ export default {
             this.imageFullUrl = imageUrl;
             this.imageFullIsPhotosphere = isPhotosphere;
             this.imageFullOn = true;
+            this.overlayHistory.open();
         },
         openVideoFull: function(videoUrl) {
             this.videoFullUrl = videoUrl;
             this.videoFullOn = true;
+            this.overlayHistory.open();
         },
+        // Closed from the app (close button, tap, Escape): also drop the
+        // history entry pushed on open.
         closeImgFull: function() {
-            this.imageFullOn = false;
+            this.hideOverlays();
+            this.overlayHistory.close();
         },
         closeVideoFull: function() {
+            this.hideOverlays();
+            this.overlayHistory.close();
+        },
+        hideOverlays: function() {
+            this.imageFullOn = false;
             this.videoFullOn = false;
         },
         fullscreen: function() {
@@ -871,6 +886,14 @@ export default {
             // caption or a form field (e.g. the slideshow speed input).
             var el = event.target;
             if (el && (el.isContentEditable || el.tagName === "INPUT" || el.tagName === "TEXTAREA")) {
+                return;
+            }
+            if (this.imageFullOn || this.videoFullOn) {
+                // the fullscreen viewer is on top: only Escape, to close it
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    this.closeImgFull();
+                }
                 return;
             }
             switch (event.key) {

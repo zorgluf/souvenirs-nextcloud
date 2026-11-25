@@ -18,11 +18,14 @@ export default {
     },
     mounted: function() {
         if (this.isPhotosphere) {
-            new Viewer({
+            // Plain property, not data(): no reactive proxy around the viewer.
+            this.viewer = new Viewer({
                 panorama: this.imageUrl,
                 container: 'image_full',
                 loadingImg: imagePath('souvenirs','loading.gif'),
-                touchmoveTwoFingers: true,
+                // Fullscreen: there is no page behind to scroll, so one
+                // finger rotates the sphere.
+                touchmoveTwoFingers: false,
                 mousewheelCtrlKey: true,
                 navbar: [
                    "zoom",
@@ -32,6 +35,8 @@ export default {
                        content: '<svg version="1.1" viewBox="0 0 20.699 21.479" xmlns="http://www.w3.org/2000/svg"><g transform="translate(1.632 1.6339)" label="Layer 1"><path d="m-2.5783e-4 -0.0014681 17.436 18.214" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="4"/><path d="m-2.5783e-4 18.212 17.436-18.214" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="4"/><title>Layer 1</title></g></svg>',
                        title: 'Close',
                        className: 'custom-button',
+                       // the only way out on a phone: never folded in the "⋮" menu
+                       collapsable: false,
                        onClick: () => {
                            this.closeImgFull();
                        },
@@ -43,6 +48,13 @@ export default {
                     }),
                 ],
             });
+        }
+    },
+    beforeUnmount: function() {
+        // free the WebGL context (browsers only allow a few per page)
+        if (this.viewer) {
+            this.viewer.destroy();
+            this.viewer = null;
         }
     },
     data: function() {
@@ -60,7 +72,11 @@ export default {
 <style scoped>
 
 .image-full { 
+    /* 100vh is taller than the visible area on mobile browsers while their
+       toolbars show, which hid the viewer's bottom navbar and its close
+       button (issue #63): dvh follows the visible viewport. */
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
     position: fixed;
     z-index: 100;
