@@ -36,6 +36,7 @@ OC.L10N.register(
     "Synchronized" : "Szinkronizált",
     "Log in" : "Bejelentkezés",
     "Remove" : "Eltávolítás",
+    "Add media" : "Média hozzáadása",
     "Change layout" : "Elrendezés módosítása",
     "Remove image" : "Kép eltávolítása",
     "Photos and videos" : "Fényképek és videók",
